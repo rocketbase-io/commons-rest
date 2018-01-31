@@ -66,7 +66,7 @@ SOFTWARE.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <spring-boot.version>1.5.9.RELEASE</spring-boot.version>
+        <spring-boot.version>1.5.10.RELEASE</spring-boot.version>
     </properties>
 
     <dependencyManagement>
@@ -87,6 +87,7 @@ SOFTWARE.
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
         </dependency>
+        <!-- jackson -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
@@ -95,6 +96,12 @@ SOFTWARE.
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
+        <!-- used to render java.time correctly -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+        </dependency>
+        <!-- jackson end -->
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
@@ -108,6 +115,10 @@ SOFTWARE.
             <artifactId>servlet-api</artifactId>
             <version>2.5</version>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
         </dependency>
     </dependencies>
 

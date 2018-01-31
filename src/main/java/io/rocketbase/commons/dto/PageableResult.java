@@ -1,7 +1,6 @@
 package io.rocketbase.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.sun.istack.internal.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +27,7 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
 
     private List<E> content;
 
-    public static <E> PageableResult<E> contentPage(@NotNull List<E> content, @NotNull Page page) {
+    public static <E> PageableResult<E> contentPage(List<E> content, Page page) {
         return PageableResult.<E>builder()
                 .content(content)
                 .totalPages(page.getTotalPages())
@@ -38,7 +37,7 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
                 .build();
     }
 
-    public static <E> PageableResult<E> page(@NotNull Page<E> page) {
+    public static <E> PageableResult<E> page(Page<E> page) {
         return PageableResult.<E>builder()
                 .content(page.getContent())
                 .totalPages(page.getTotalPages())

@@ -7,9 +7,7 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
@@ -99,14 +97,6 @@ public abstract class BaseCrudRestResource<ResponseData, EditData> extends BaseR
     protected HttpEntity<EditData> createHttpEntity(EditData editData) {
         HttpEntity<EditData> entity = new HttpEntity<>(editData, createHeaderWithLanguage());
         return entity;
-    }
-
-    protected HttpHeaders createHeaderWithLanguage() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.ACCEPT_LANGUAGE,
-                LocaleContextHolder.getLocale()
-                        .getLanguage());
-        return headers;
     }
 
     protected abstract String getBaseApiUrl();
