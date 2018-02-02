@@ -16,7 +16,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import java.io.IOException;
 
 @RequiredArgsConstructor
-public abstract class BaseRestResource {
+public abstract class AbstractRestResource {
 
     protected final ObjectMapper objectMapper;
 
@@ -47,7 +47,6 @@ public abstract class BaseRestResource {
                         .getLanguage());
         return headers;
     }
-
 
     private void handleErrorStatus(ResponseEntity<String> response) throws IOException {
         if (response.getStatusCode()
