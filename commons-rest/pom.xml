@@ -61,13 +61,8 @@ SOFTWARE.
             <id>melistik</id>
             <email>marten@rocketbase.io</email>
             <organization>rocketbase.io software productions GmbH</organization>
-            <timezone>+1</timezone>
-            <roles>
-                <role>Java Developer</role>
-            </roles>
         </developer>
     </developers>
-
 
     <distributionManagement>
         <snapshotRepository>

@@ -8,11 +8,25 @@
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Marten Prieß</name>
+            <id>melistik</id>
+            <email>marten@rocketbase.io</email>
+            <organization>rocketbase.io software productions GmbH</organization>
+        </developer>
+    </developers>
 
     <modules>
         <module>commons-rest</module>
         <module>commons-rest-sample</module>
     </modules>
-
 
 </project>
