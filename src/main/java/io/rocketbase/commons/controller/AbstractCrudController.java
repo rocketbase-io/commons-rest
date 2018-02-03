@@ -57,6 +57,7 @@ public abstract class AbstractCrudController<Entity, Data, Edit, ID extends Seri
     public Data update(@PathVariable ID id, @RequestBody @NotNull @Validated Edit editData) {
         Entity entity = getEntity(id);
         converter.updateEntityFromEdit(editData, entity);
+        repository.save(entity);
         return converter.fromEntity(entity);
     }
 

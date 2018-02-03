@@ -11,18 +11,18 @@ import java.util.Map;
 @Builder
 public class ErrorResponse {
 
-    private int errorCode;
-    private String errorMessage;
+    private int status;
+    private String message;
 
     @Singular
     private Map<String, String> fields;
 
-    public ErrorResponse(int errorCode, String errorMessage) {
-        this.errorCode = errorCode;
-        this.errorMessage = errorMessage;
+    public ErrorResponse(int status, String message) {
+        this.status = status;
+        this.message = message;
     }
 
     public ErrorResponse(String errorMessage) {
-        this.errorMessage = errorMessage;
+        this.message = message;
     }
 }

@@ -2,6 +2,8 @@ package io.rocketbase.commons.controller;
 
 import io.rocketbase.commons.converter.EntityDataEditConverter;
 import io.rocketbase.commons.dto.PageableResult;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,7 +30,10 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @RequiredArgsConstructor
 public abstract class AbstractCrudChildController<Entity, Data, Edit, ID extends Serializable, Converter extends EntityDataEditConverter<Entity, Data, Edit>> implements BaseController {
 
+    @Getter(AccessLevel.PROTECTED)
     private final PagingAndSortingRepository<Entity, ID> repository;
+
+    @Getter(AccessLevel.PROTECTED)
     private final EntityDataEditConverter<Entity, Data, Edit> converter;
 
     @RequestMapping(method = RequestMethod.GET)
@@ -57,6 +62,7 @@ public abstract class AbstractCrudChildController<Entity, Data, Edit, ID extends
     public Data update(@PathVariable("parentId") ID parentId, @PathVariable ID id, @RequestBody @NotNull @Validated Edit editData) {
         Entity entity = getEntity(parentId, id);
         converter.updateEntityFromEdit(editData, entity);
+        repository.save(entity);
         return converter.fromEntity(entity);
     }
 
@@ -66,9 +72,9 @@ public abstract class AbstractCrudChildController<Entity, Data, Edit, ID extends
         repository.delete(entity);
     }
 
-    abstract Entity getEntity(ID parentId, ID id);
+    protected abstract Entity getEntity(ID parentId, ID id);
 
-    abstract Page<Entity> findAllByParentId(ID parentId, PageRequest pageRequest);
+    protected abstract Page<Entity> findAllByParentId(ID parentId, PageRequest pageRequest);
 
-    abstract Entity newEntity(ID parentId, Edit editData);
+    protected abstract Entity newEntity(ID parentId, Edit editData);
 }

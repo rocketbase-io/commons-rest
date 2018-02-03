@@ -9,7 +9,7 @@ public class BadRequestException extends RuntimeException {
     private final ErrorResponse errorResponse;
 
     public BadRequestException(ErrorResponse errorResponse) {
-        super(errorResponse.getErrorMessage());
+        super(errorResponse.getMessage());
         this.errorResponse = errorResponse;
     }
 }

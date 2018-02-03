@@ -15,7 +15,7 @@ public class NotFoundException extends RuntimeException {
     }
 
     public NotFoundException(ErrorResponse errorResponse) {
-        super(errorResponse.getErrorMessage());
+        super(errorResponse.getMessage());
         this.errorResponse = errorResponse;
     }
 }
