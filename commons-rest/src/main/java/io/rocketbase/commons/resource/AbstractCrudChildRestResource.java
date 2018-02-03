@@ -11,29 +11,29 @@ import java.io.Serializable;
 
 
 @Slf4j
-public abstract class AbstractCrudChildRestResource<ResponseData, EditData, ID extends Serializable> extends AbstractBaseCrudRestResource<ResponseData, EditData> {
+public abstract class AbstractCrudChildRestResource<Data, Edit, ID extends Serializable> extends AbstractBaseCrudRestResource<Data, Edit> {
 
     @Autowired
     public AbstractCrudChildRestResource(RestTemplate restTemplate, ObjectMapper objectMapper) {
         super(restTemplate, objectMapper);
     }
 
-    public PageableResult<ResponseData> find(ID parentId, int page, int pagesize) {
+    public PageableResult<Data> find(ID parentId, int page, int pagesize) {
         return find(getParentPathWithIdAndChildPath(parentId)
                 .queryParam("page", page)
                 .queryParam("pageSize", pagesize));
     }
 
-    public ResponseData getById(ID parentId, ID id) {
+    public Data getById(ID parentId, ID id) {
         return getById(getParentPathWithIdAndChildPath(parentId).path(String.valueOf(id)));
     }
 
-    public ResponseData create(ID parentId, EditData editData) {
-        return create(getParentPathWithIdAndChildPath(parentId), editData);
+    public Data create(ID parentId, Edit edit) {
+        return create(getParentPathWithIdAndChildPath(parentId), edit);
     }
 
-    public ResponseData update(ID parentId, ID id, EditData editData) {
-        return update(getParentPathWithIdAndChildPath(parentId).path(String.valueOf(id)), editData);
+    public Data update(ID parentId, ID id, Edit edit) {
+        return update(getParentPathWithIdAndChildPath(parentId).path(String.valueOf(id)), edit);
     }
 
     public void delete(ID parentId, ID id) {

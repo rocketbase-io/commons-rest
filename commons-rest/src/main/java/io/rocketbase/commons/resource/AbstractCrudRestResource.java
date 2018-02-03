@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 
 @Slf4j
-public abstract class AbstractCrudRestResource<ResponseData, EditData, ID extends Serializable> extends AbstractBaseCrudRestResource<ResponseData, EditData> {
+public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializable> extends AbstractBaseCrudRestResource<Data, Edit> {
 
 
     @Autowired
@@ -19,24 +19,24 @@ public abstract class AbstractCrudRestResource<ResponseData, EditData, ID extend
         super(restTemplate, objectMapper);
     }
 
-    public PageableResult<ResponseData> find(int page, int pagesize) {
+    public PageableResult<Data> find(int page, int pagesize) {
         return find(UriComponentsBuilder.fromUriString(getBaseApiUrl())
                 .queryParam("page", page)
                 .queryParam("pageSize", pagesize));
     }
 
-    public ResponseData getById(ID id) {
+    public Data getById(ID id) {
         return getById(UriComponentsBuilder.fromUriString(
                 getBaseApiUrl() + "/" + String.valueOf(id)));
     }
 
-    public ResponseData create(EditData editData) {
+    public Data create(Edit edit) {
         return create(UriComponentsBuilder.fromUriString(
-                getBaseApiUrl()), editData);
+                getBaseApiUrl()), edit);
     }
 
-    public ResponseData update(ID id, EditData editData) {
-        return update(UriComponentsBuilder.fromUriString(getBaseApiUrl()).path(String.valueOf(id)), editData);
+    public Data update(ID id, Edit edit) {
+        return update(UriComponentsBuilder.fromUriString(getBaseApiUrl()).path(String.valueOf(id)), edit);
     }
 
     public void delete(ID id) {
