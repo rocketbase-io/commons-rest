@@ -18,7 +18,7 @@ then
 
     source ../.travis/gpg.sh
 
-    mvn clean deploy --settings ../.travis/settings.xml -DskipTests=true -B -U -Prelease
+    mvn --settings ../.travis/settings.xml clean deploy -DskipTests=true -B -U -Prelease
 
     if [ ! -z "$TRAVIS" ]; then
         shred -v ~/.gnupg/*
