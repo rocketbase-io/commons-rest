@@ -12,7 +12,7 @@ then
     mvn --settings ../.travis/settings.xml org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=$TRAVIS_TAG -Prelease
 
     # perform deploy to sonatype
-    mvn --settings ../.travis/settings.xml clean deploy -DskipTests=true -B -U -Prelease
+    mvn --settings ../.travis/settings.xml -Dsettings.security=../.travis/settings-security.xml clean deploy -DskipTests=true -B -U -Prelease
 
 else
     echo "not on a tag -> keep snapshot version in pom.xml"
