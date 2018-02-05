@@ -34,7 +34,7 @@
     <dependencies>
         <dependency>
             <groupId>io.rocketbase.commons</groupId>
-            <artifactId>commons-rest</artifactId>
+            <artifactId>commons-rest-server</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
 

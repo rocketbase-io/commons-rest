@@ -30,6 +30,7 @@ SOFTWARE.
     <groupId>io.rocketbase.commons</groupId>
     <artifactId>commons-rest</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
 
     <modelVersion>4.0.0</modelVersion>
     <name>rocketbase.io commons REST</name>
@@ -83,6 +84,11 @@ SOFTWARE.
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
     </properties>
 
+    <modules>
+        <module>commons-rest-api</module>
+        <module>commons-rest-server</module>
+    </modules>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -95,47 +101,6 @@ SOFTWARE.
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-        <!-- jackson -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-        <!-- used to render java.time correctly -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.datatype</groupId>
-            <artifactId>jackson-datatype-jsr310</artifactId>
-        </dependency>
-        <!-- jackson end -->
-        <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-commons</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webmvc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <groupId>javax.validation</groupId>
-            <artifactId>validation-api</artifactId>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>

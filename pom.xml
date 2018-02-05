@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.rocketbase.commons</groupId>
-    <artifactId>rocketbase-commons-rest-parent</artifactId>
+    <artifactId>commons-rest-root</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
