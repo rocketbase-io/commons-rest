@@ -16,7 +16,8 @@ then
         rm -rf ~/.gnupg
     fi
 
-    source ../.travis/gpg.sh
+    # generation of gpg dynamical
+    # source ../.travis/gpg.sh
 
     mvn --settings ../.travis/settings.xml clean deploy -DskipTests=true -B -U -Prelease
 
