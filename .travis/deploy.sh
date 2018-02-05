@@ -11,17 +11,9 @@ then
     echo "on a tag -> set pom.xml <version> to $TRAVIS_TAG"
     mvn --settings ../.travis/settings.xml org.codehaus.mojo:versions-maven-plugin:2.5:set -DnewVersion=$TRAVIS_TAG -Prelease
 
-    if [ ! -z "$TRAVIS" -a -f "$HOME/.gnupg" ]; then
-        shred -v ~/.gnupg/*
-        rm -rf ~/.gnupg
-    fi
-
+    # perform deploy to sonatype
     mvn --settings ../.travis/settings.xml clean deploy -DskipTests=true -B -U -Prelease
 
-    if [ ! -z "$TRAVIS" ]; then
-        shred -v ~/.gnupg/*
-        rm -rf ~/.gnupg
-    fi
 else
     echo "not on a tag -> keep snapshot version in pom.xml"
 fi
