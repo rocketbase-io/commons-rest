@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
@@ -15,8 +14,8 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
 
 
     @Autowired
-    public AbstractCrudRestResource(RestTemplate restTemplate, ObjectMapper objectMapper) {
-        super(restTemplate, objectMapper);
+    public AbstractCrudRestResource(ObjectMapper objectMapper) {
+        super(objectMapper);
     }
 
     public PageableResult<Data> find(int page, int pagesize) {

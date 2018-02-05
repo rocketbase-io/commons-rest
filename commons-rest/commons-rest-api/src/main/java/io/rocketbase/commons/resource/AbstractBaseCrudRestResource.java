@@ -16,24 +16,28 @@ import java.lang.reflect.ParameterizedType;
 
 public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractRestResource {
 
-    protected RestTemplate restTemplate;
-
     @Getter
     protected Class<Data> responseClass;
+    private RestTemplate restTemplate;
 
     @Autowired
-    public AbstractBaseCrudRestResource(RestTemplate restTemplate, ObjectMapper objectMapper) {
+    public AbstractBaseCrudRestResource(ObjectMapper objectMapper) {
         super(objectMapper);
-        restTemplate.setErrorHandler(new NoopResponseErrorHandler());
-        this.restTemplate = restTemplate;
         responseClass = (Class<Data>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
+    protected RestTemplate getRestTemplate() {
+        if (restTemplate == null) {
+            restTemplate = new RestTemplate();
+            restTemplate.setErrorHandler(new NoopResponseErrorHandler());
+        }
+        return restTemplate;
+    }
 
     @SneakyThrows
     protected PageableResult<Data> find(UriComponentsBuilder uriBuilder) {
-        ResponseEntity<String> response = restTemplate.exchange(uriBuilder.toUriString(),
+        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.GET,
                 new HttpEntity<>(createHeaderWithLanguage()),
                 String.class);
@@ -42,7 +46,7 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
 
     @SneakyThrows
     protected Data getById(UriComponentsBuilder uriBuilder) {
-        ResponseEntity<String> response = restTemplate.exchange(uriBuilder.toUriString(),
+        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.GET,
                 new HttpEntity<>(createHeaderWithLanguage()),
                 String.class);
@@ -51,7 +55,7 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
 
     @SneakyThrows
     protected Data create(UriComponentsBuilder uriBuilder, Edit edit) {
-        ResponseEntity<String> response = restTemplate.exchange(uriBuilder.toUriString(),
+        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.POST,
                 createHttpEntity(edit),
                 String.class);
@@ -68,7 +72,7 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
     }
 
     protected void delete(UriComponentsBuilder uriBuilder) {
-        ResponseEntity<Void> response = restTemplate.exchange(uriBuilder.toUriString(),
+        ResponseEntity<Void> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.DELETE,
                 null, Void.class);
     }
