@@ -16,9 +16,6 @@ then
         rm -rf ~/.gnupg
     fi
 
-    # generation of gpg dynamical
-    # source ../.travis/gpg.sh
-
     mvn --settings ../.travis/settings.xml clean deploy -DskipTests=true -B -U -Prelease
 
     if [ ! -z "$TRAVIS" ]; then
