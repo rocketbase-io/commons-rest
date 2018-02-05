@@ -1,16 +1,16 @@
 language: java
-
 jdk:
-  - oraclejdk8
-
+- oraclejdk8
 script: mvn --settings .travis/settings.xml clean verify
-
 deploy:
-  -
-    provider: script
-    script: .travis/deploy.sh
-    skip_cleanup: true
-    on:
-      repo: rocketbase-io/commons-rest
-      tags: true
-      jdk: oraclejdk8
+- provider: script
+  script: ".travis/deploy.sh"
+  skip_cleanup: true
+  on:
+    repo: rocketbase-io/commons-rest
+    tags: true
+    jdk: oraclejdk8
+env:
+  global:
+  - secure: eH9J94CRti7VL+qH1ez1i74bdxrSDwYwxrPU/m/GB/X+RnJC2Ca7QHDmFRgz3snwVT1aoGHWHLOG8/M/BtRvLCtn0usAcSHKt1RzWH6Js0ZaVTkSnG2xatJDmuU2MS0G0cMV9m47q6bp9El3zaE7U34doBUaPZb1UK+2130m61PIWdAm/5tAswC//Bdfmu0bziqr01eXGcsgYYzUh0fen/Urhs4V3cGJR18zPRGhDpokkgqPF2fhLTK+3xx3IE7uc06aoAp0/zBarExilShFq2xUp/zrIUJM5FE1HLDz+3k7aCyAAEMCbi2tzaE+8p/7Z8NvV1MP6Sf3I9M21PZGa5hv1Sz/w+idhJ6Ef1vSAvuKnamMprPZL99q4AN3mvKDfJ3GvMEI9+QLO0mkIdNnMIx7hVa/HGCXz22i+QUC/98kJKjriumKSeKuIaGhool8uGWLFDRcvNA6QPcxZuVGCV9fsu/bNMgwy/Fo8hnVeGZlf2b1q5AXwwf4Pp97Z2oFCWmlR4g6yr7ILimZ09+NcCEulB+KTGd9+JSbgJ4/JrOrlgzYSsqDT1KpaiEewUg8lvRKnxZswz4dxPvhVUlKuGBxNF70asEsV8vbM+Nbc6QPDAvW/J2V41tyMd/9znhrjUkwFIr11aZevjnXK8v8U4VbU/qfFx41UPEFNsaFMyU=
+  - secure: ULOVzkB64DNYWkKskqL3qvtOZ6ap21+MwgIsVXPfSoLVlrTS5RLR0vUDydnm4d/W3T0UH7pZ0MgrYmL8CxFbFh5Rq+BKfOfaiHGtzltWfP/4suE1teKCCbUL5nz93ZVxItbX2b+o/Li/GDxxW2k3fjXOwQXoPlJk44eiw4wMIATyxZdeqKNnTKgBoi3zrm+elBWSuEGh2tR1TmfP7K0utV9YU97UpiU6Cxbmm02HcePa6+Hph3Fy1V9ASwdJYimhasXqhsBO6u+LuQnvXLcYb25CupRkTdaptPyVNDavqe8vwn761ka9VlePXlwFPDEWzLCyuuGoDDdVNWN2Ckjf5TZSKwqrP6+9/6dBKthb9rKiM1DcPeNPnpZLFO7P8h2MWZmdHBpIVHm8ui0QULZfVdnHUdkiIOpZVJtKa69H108ExTPLZE+miJbE2eVmsrFRKtS+Dzv1Ny/kseXZ7QXKmYyv05Sc9UPwBgUvEakK8rihsjbnW0wtDCWjnQg3RSq/5aPeRe/DFm2GcLQXCKNIefuSkqaeStbYkRUh8i+iZGwsWDg5fu3idKwvSUwRNfcQWb1G7NtfW6P2lHoXPZ57Sy9tl89R6bWpcZGgzkz6xiYQORxkUqpUmD7m1oFL4eyaiDn5+cqqF3fbZyGZ+1SzlcsaouRA0S4g8Mixk3LO+kk=
