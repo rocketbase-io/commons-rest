@@ -7,7 +7,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface EmployeeRepository extends MongoRepository<Employee, String> {
 
-
     Employee findOneByCompanyIdAndId(String companyId, String id);
 
     Page<Employee> findAllByCompanyId(String companyId, Pageable pageRequest);
