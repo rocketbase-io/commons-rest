@@ -1,6 +1,5 @@
 package io.rocketbase.sample.dto.edit;
 
-import io.codearte.jfairy.producer.person.Person;
 import lombok.Data;
 import org.hibernate.validator.constraints.Email;
 
@@ -20,7 +19,7 @@ public class EmployeeEdit implements Serializable {
     private LocalDate dateOfBirth;
 
     @NotNull
-    private Person.Sex sex;
+    private boolean female;
 
     @NotNull
     @Email

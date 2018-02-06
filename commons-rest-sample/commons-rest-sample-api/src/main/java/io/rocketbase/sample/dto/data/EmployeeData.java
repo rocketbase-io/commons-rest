@@ -1,6 +1,5 @@
 package io.rocketbase.sample.dto.data;
 
-import io.codearte.jfairy.producer.person.Person;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,7 +16,7 @@ public class EmployeeData implements Serializable {
 
     private LocalDate dateOfBirth;
 
-    private Person.Sex sex;
+    private boolean female;
 
     private String email;
 

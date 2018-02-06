@@ -1,6 +1,7 @@
 package io.rocketbase.sample.initializer;
 
 import io.codearte.jfairy.Fairy;
+import io.codearte.jfairy.producer.person.Person;
 import io.rocketbase.sample.model.Company;
 import io.rocketbase.sample.model.Employee;
 import io.rocketbase.sample.repository.CompanyRepository;
@@ -53,7 +54,7 @@ public class DataInitializer {
                         .firstName(person.getFirstName())
                         .lastName(person.getLastName())
                         .dateOfBirth(LocalDate.of(dateOfBirth.getYear(), dateOfBirth.getMonthOfYear(), dateOfBirth.getDayOfMonth()))
-                        .sex(person.getSex())
+                        .female(person.getSex().equals(Person.Sex.FEMALE))
                         .email(person.getEmail())
                         .company(companyList.get(ThreadLocalRandom.current().nextInt(0, companyList.size())))
                         .build());

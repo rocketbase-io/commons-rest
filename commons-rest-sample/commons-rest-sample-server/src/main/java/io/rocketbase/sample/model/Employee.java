@@ -1,6 +1,5 @@
 package io.rocketbase.sample.model;
 
-import io.codearte.jfairy.producer.person.Person.Sex;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,7 +27,7 @@ public class Employee implements Serializable {
 
     private LocalDate dateOfBirth;
 
-    private Sex sex;
+    private boolean female;
 
     private String email;
 

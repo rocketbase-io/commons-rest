@@ -6,21 +6,25 @@
     <groupId>io.rocketbase.sample</groupId>
     <artifactId>commons-rest-sample</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>1.5.10.RELEASE</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+
+        <!-- dep versions -->
+        <spring-boot.version>1.5.10.RELEASE</spring-boot.version>
         <mapstruct.version>1.2.0.Final</mapstruct.version>
     </properties>
+
+    <modules>
+        <module>commons-rest-sample-api</module>
+        <module>commons-rest-sample-server</module>
+    </modules>
 
     <developers>
         <developer>
@@ -31,70 +35,43 @@
         </developer>
     </developers>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <!-- Import dependency management from Spring Boot -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
     <dependencies>
-        <dependency>
-            <groupId>io.rocketbase.commons</groupId>
-            <artifactId>commons-rest-server</artifactId>
-            <version>0.0.2-SNAPSHOT</version>
-        </dependency>
-
-        <!-- web with undertow -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-        </dependency>
-        <!-- web end -->
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
         </dependency>
-
-        <!-- mapstruct -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-jdk8</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <!-- mapstruct end -->
-
-        <!-- demo-data-generator -->
-        <dependency>
-            <groupId>io.codearte.jfairy</groupId>
-            <artifactId>jfairy</artifactId>
-            <version>0.5.9</version>
-        </dependency>
-
     </dependencies>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 
 
