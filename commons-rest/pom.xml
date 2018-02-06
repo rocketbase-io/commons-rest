@@ -26,13 +26,14 @@ SOFTWARE.
         xmlns="http://maven.apache.org/POM/4.0.0"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.rocketbase.commons</groupId>
     <artifactId>commons-rest</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <modelVersion>4.0.0</modelVersion>
+    <name>rocketbase.io commons REST</name>
     <description>holds commons classes and services used to develop REST applications with spring mvc</description>
     <url>https://github.com/rocketbase-io/commons-rest/</url>
     <inceptionYear>2018</inceptionYear>
