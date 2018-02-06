@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +18,11 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
 
     @Getter
     protected Class<Data> responseClass;
+
+    @Setter
     private RestTemplate restTemplate;
 
-    @Autowired
+    @SuppressWarnings("unchecked")
     public AbstractBaseCrudRestResource(ObjectMapper objectMapper) {
         super(objectMapper);
         responseClass = (Class<Data>) ((ParameterizedType) getClass()
