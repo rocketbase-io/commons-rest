@@ -1,6 +1,8 @@
 package io.rocketbase.sample.resource;
 
+import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.dto.PageableResult;
+import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.sample.dto.data.CompanyData;
 import io.rocketbase.sample.dto.edit.CompanyEdit;
 import io.rocketbase.sample.model.Company;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.AssertionErrors;
 
 import javax.annotation.Resource;
 
@@ -57,6 +60,17 @@ public class CompanyResourceTest {
     }
 
     @Test
+    public void shouldNotGetUnknownCompany() throws Exception {
+        // given
+
+        // when
+        CompanyData data = companyResource.getById("notexisting");
+
+        // then
+        assertThat(data, nullValue());
+    }
+
+    @Test
     public void shouldFindAllCompanys() throws Exception {
         // given
         Company Company = companyRepository.save(createDefaultCompany());
@@ -94,6 +108,29 @@ public class CompanyResourceTest {
 
         Company Company = companyRepository.findOne(companyData.getId());
         assertCompanySame(Company, companyData);
+    }
+
+    @Test
+    public void shouldNotCreateInvalidCompany() throws Exception {
+        // given
+        CompanyEdit companyEdit = CompanyEdit.builder()
+                .name("testcompany")
+                .url("https://company.org")
+                .build();
+
+        // when
+        try {
+            CompanyData companyData = companyResource.create(companyEdit);
+
+            // then
+            AssertionErrors.fail("should not create invalid company");
+        }
+        catch (BadRequestException ex) {
+            ErrorResponse errorResponse = ex.getErrorResponse();
+            assertThat(errorResponse, notNullValue());
+            assertThat(errorResponse.getFields(), hasEntry(is("email"), not(isEmptyString())));
+        }
+
     }
 
     @Test
