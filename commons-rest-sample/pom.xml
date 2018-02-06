@@ -19,6 +19,7 @@
         <!-- dep versions -->
         <spring-boot.version>1.5.10.RELEASE</spring-boot.version>
         <mapstruct.version>1.2.0.Final</mapstruct.version>
+        <commons-rest.version>0.0.2-SNAPSHOT</commons-rest.version>
     </properties>
 
     <modules>

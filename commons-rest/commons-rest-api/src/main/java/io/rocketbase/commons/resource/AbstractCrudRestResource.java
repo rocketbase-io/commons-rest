@@ -25,8 +25,7 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
     }
 
     public Data getById(ID id) {
-        return getById(UriComponentsBuilder.fromUriString(
-                getBaseApiUrl() + "/" + String.valueOf(id)));
+        return getById(buildPathWithId(id));
     }
 
     public Data create(Edit edit) {
@@ -35,16 +34,23 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
     }
 
     public Data update(ID id, Edit edit) {
-        return update(UriComponentsBuilder.fromUriString(getBaseApiUrl()).path(String.valueOf(id)), edit);
+        return update(buildPathWithId(id), edit);
     }
 
     public void delete(ID id) {
-        delete(UriComponentsBuilder.fromUriString(getBaseApiUrl()).path(String.valueOf(id)));
+        delete(buildPathWithId(id));
     }
 
     /**
      * @return full qualified url to the entity base url
      */
     protected abstract String getBaseApiUrl();
+
+    private UriComponentsBuilder buildPathWithId(ID id) {
+        String baseApiUrl = getBaseApiUrl();
+        String idString = String.valueOf(id);
+        return UriComponentsBuilder.fromUriString(baseApiUrl.endsWith("/") ? baseApiUrl + idString :
+                baseApiUrl + "/" + idString);
+    }
 
 }
