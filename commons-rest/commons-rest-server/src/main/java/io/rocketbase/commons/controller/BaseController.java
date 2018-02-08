@@ -17,6 +17,7 @@ import java.util.List;
 public interface BaseController {
 
     int DEFAULT_PAGE_SIZE = 25;
+    int DEFAULT_MIN_PAGE_SIZE = 1;
     int DEFAULT_MAX_PAGE_SIZE = 200;
 
     List<DateTimeFormatter> DEFAULT_DATE_FORMATTERS = Arrays.asList(DateTimeFormatter.ISO_LOCAL_DATE,
@@ -26,18 +27,22 @@ public interface BaseController {
     default PageRequest parsePageRequest(MultiValueMap<String, String> params) {
         Integer pageSize = parseInteger(params, "pageSize", getPageSize());
         pageSize = Math.min(pageSize, getMaxPageSize());
-        return new PageRequest(parseInteger(params, "page", 0), pageSize);
+        Integer page = parseInteger(params, "page", 0);
+        return new PageRequest(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE));
     }
 
     default Integer parseInteger(MultiValueMap<String, String> params, String key, Integer defaultValue) {
         Long value = parseLong(params, key, null);
-        return value != null ? value.intValue() : defaultValue;
+        if (value != null) {
+            return value.intValue();
+        }
+        return defaultValue;
     }
 
     default Long parseLong(MultiValueMap<String, String> params, String key, Long defaultValue) {
         if (params != null) {
             String value = params.getFirst(key);
-            if (value != null && value.matches("[0-9]+")) {
+            if (value != null && value.matches("-?[0-9]+")) {
                 try {
                     return Long.parseLong(value);
                 } catch (NumberFormatException f) {
@@ -50,8 +55,8 @@ public interface BaseController {
     default Boolean parseBoolean(MultiValueMap<String, String> params, String key, Boolean defaultValue) {
         if (params != null) {
             String value = params.getFirst(key);
-            if (value != null && value.matches("[true|1|yes|on]")) {
-                return true;
+            if (value != null) {
+                return value.matches("(true|1|yes|on)");
             }
         }
         return defaultValue;
