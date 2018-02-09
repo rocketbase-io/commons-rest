@@ -40,6 +40,17 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
         return result;
     }
 
+    public static <E> PageableResult<E> content(List<E> content) {
+        PageableResult result = new PageableResult();
+        result.setContent(content);
+        result.setTotalPages(1);
+        int totalElements = content != null ? content.size() : 0;
+        result.setTotalElements(totalElements);
+        result.setPage(0);
+        result.setPageSize(totalElements);
+        return result;
+    }
+
     @Override
     public Iterator<E> iterator() {
         return content.iterator();
