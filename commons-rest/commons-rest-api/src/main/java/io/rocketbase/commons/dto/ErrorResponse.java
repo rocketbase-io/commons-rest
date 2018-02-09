@@ -9,12 +9,12 @@ import java.util.Map;
 @NoArgsConstructor
 public class ErrorResponse {
 
-    private int status;
+    private Integer status;
     private String message;
 
     private Map<String, String> fields;
 
-    public ErrorResponse(int status, String message) {
+    public ErrorResponse(Integer status, String message) {
         this.status = status;
         this.message = message;
     }
