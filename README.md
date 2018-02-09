@@ -6,7 +6,7 @@
 [![Build Status](https://travis-ci.org/rocketbase-io/commons-rest.svg?branch=master)](https://travis-ci.org/rocketbase-io/commons-rest)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.rocketbase.commons/commons-rest/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.rocketbase.commons/commons-rest)
 
-Focus on tough problems and not on CRUD that the main focus of commons-rest. We @rocketbase.io develop many microservices and tried many tools and projects. All of them didn't matched our needs. By using for example [spring-data-rest](https://projects.spring.io/spring-data-rest/) you loose flexibility when you leave the basic path or by using [jHipster](http://www.jhipster.tech/) you have a full blown setup with many dependencies. Commons-rest focus on CRUD and leaves flexibility to you as developer.
+Focus on tough problems and not on CRUD that the main focus of commons-rest. We [@rocketbase.io](https://www.rocketbase.io) develop many microservices and tried many tools and projects. All of them didn't matched our needs. By using for example [spring-data-rest](https://projects.spring.io/spring-data-rest/) you loose flexibility when you leave the basic path or by using [jHipster](http://www.jhipster.tech/) you have a full blown setup with many dependencies. Commons-rest focus on CRUD and leaves flexibility to you as developer. Additionally we've crafted a yeoman [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) in order to write less code :)
 
 The implementation bases on spring-boot: mainly on **spring-mvc** and **spring-data** 
 
@@ -19,6 +19,7 @@ Conversion between each object can be automatically generated with [mapstruct](h
 * custom RunetimeExceptions and ExceptionHandler (also for BeanValidationExceptions)
 * abstract CRUD controller also for parent child situations
 * abstract CRUD resources to consume REST-Services 
+* prodivded a [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) via yeoman
 
 ## commons-rest-api
 
