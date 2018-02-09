@@ -19,7 +19,7 @@
         <!-- dep versions -->
         <spring-boot.version>1.5.10.RELEASE</spring-boot.version>
         <mapstruct.version>1.2.0.Final</mapstruct.version>
-        <commons-rest.version>0.0.3-SNAPSHOT</commons-rest.version>
+        <commons-rest.version>0.0.4-SNAPSHOT</commons-rest.version>
     </properties>
 
     <modules>
@@ -32,6 +32,12 @@
             <name>Marten Prieß</name>
             <id>melistik</id>
             <email>marten@rocketbase.io</email>
+            <organization>rocketbase.io software productions GmbH</organization>
+        </developer>
+        <developer>
+            <name>Niels Schelbach</name>
+            <id>captainnilo</id>
+            <email>niels@rocketbase.io</email>
             <organization>rocketbase.io software productions GmbH</organization>
         </developer>
     </developers>
