@@ -30,7 +30,7 @@ SOFTWARE.
 
     <groupId>io.rocketbase.commons</groupId>
     <artifactId>commons-rest</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>LATEST</version>
     <packaging>pom</packaging>
 
     <name>rocketbase.io commons REST</name>
