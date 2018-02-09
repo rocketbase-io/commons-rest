@@ -30,7 +30,7 @@ SOFTWARE.
 
     <groupId>io.rocketbase.commons</groupId>
     <artifactId>commons-rest</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>rocketbase.io commons REST</name>
@@ -158,6 +158,12 @@ SOFTWARE.
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
