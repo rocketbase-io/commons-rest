@@ -12,7 +12,7 @@ then
     mvn versions:set -DnewVersion=$TRAVIS_TAG
     mvn versions:commit
 
-    echo "version set perform deploy"
+    echo "version set now perform deploy"
     mvn --settings ../.travis/settings.xml clean deploy -DskipTests=true -B -U -Prelease
 else
     echo "not on a tag -> keep snapshot version in pom.xml"
