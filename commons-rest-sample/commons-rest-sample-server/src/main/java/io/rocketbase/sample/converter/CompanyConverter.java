@@ -24,5 +24,5 @@ public interface CompanyConverter extends EntityDataEditConverter<Company, Compa
     Company newEntity(CompanyEdit workspace);
 
     @InheritConfiguration()
-    void updateEntityFromEdit(CompanyEdit edit, @MappingTarget Company entity);
+    Company updateEntityFromEdit(CompanyEdit edit, @MappingTarget Company entity);
 }

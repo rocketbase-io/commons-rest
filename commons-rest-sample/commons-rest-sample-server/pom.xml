@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.rocketbase.sample</groupId>
         <artifactId>commons-rest-sample</artifactId>
-        <version>LATEST</version>
+        <version>LATEST-SNAPSHOT</version>
     </parent>
 
     <artifactId>commons-rest-sample-server</artifactId>

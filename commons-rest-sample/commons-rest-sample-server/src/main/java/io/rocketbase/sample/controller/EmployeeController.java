@@ -2,7 +2,7 @@ package io.rocketbase.sample.controller;
 
 import io.rocketbase.commons.controller.AbstractCrudChildController;
 import io.rocketbase.commons.exception.NotFoundException;
-import io.rocketbase.sample.converter.PersonConverter;
+import io.rocketbase.sample.converter.EmployeeConverter;
 import io.rocketbase.sample.dto.data.EmployeeData;
 import io.rocketbase.sample.dto.edit.EmployeeEdit;
 import io.rocketbase.sample.model.Company;
@@ -22,13 +22,13 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping("/api/company/{parentId}/person")
-public class EmployeeController extends AbstractCrudChildController<Employee, EmployeeData, EmployeeEdit, String, PersonConverter> {
+public class EmployeeController extends AbstractCrudChildController<Employee, EmployeeData, EmployeeEdit, String, EmployeeConverter> {
 
     @Resource
     private CompanyRepository companyRepository;
 
     @Autowired
-    public EmployeeController(EmployeeRepository repository, PersonConverter converter) {
+    public EmployeeController(EmployeeRepository repository, EmployeeConverter converter) {
         super(repository, converter);
     }
 

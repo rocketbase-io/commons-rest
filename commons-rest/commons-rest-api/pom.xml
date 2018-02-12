@@ -31,7 +31,7 @@ SOFTWARE.
     <parent>
         <groupId>io.rocketbase.commons</groupId>
         <artifactId>commons-rest</artifactId>
-        <version>LATEST</version>
+        <version>LATEST-SNAPSHOT</version>
     </parent>
 
     <artifactId>commons-rest-api</artifactId>

@@ -5,7 +5,7 @@
 
     <groupId>io.rocketbase.sample</groupId>
     <artifactId>commons-rest-sample</artifactId>
-    <version>LATEST</version>
+    <version>LATEST-SNAPSHOT</version>
     <packaging>pom</packaging>
 
 
@@ -19,7 +19,7 @@
         <!-- dep versions -->
         <spring-boot.version>1.5.10.RELEASE</spring-boot.version>
         <mapstruct.version>1.2.0.Final</mapstruct.version>
-        <commons-rest.version>LATEST</commons-rest.version>
+        <commons-rest.version>LATEST-SNAPSHOT</commons-rest.version>
     </properties>
 
     <modules>

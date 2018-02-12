@@ -9,7 +9,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(config = CentralConfig.class, uses = {CompanyConverter.class})
-public interface PersonConverter extends EntityDataEditConverter<Employee, EmployeeData, EmployeeEdit> {
+public interface EmployeeConverter extends EntityDataEditConverter<Employee, EmployeeData, EmployeeEdit> {
     @Mappings({
             @Mapping(target = "company", ignore = true)
     })
@@ -27,5 +27,5 @@ public interface PersonConverter extends EntityDataEditConverter<Employee, Emplo
     Employee newEntity(EmployeeEdit edit);
 
     @InheritConfiguration()
-    void updateEntityFromEdit(EmployeeEdit edit, @MappingTarget Employee entity);
+    Employee updateEntityFromEdit(EmployeeEdit edit, @MappingTarget Employee entity);
 }

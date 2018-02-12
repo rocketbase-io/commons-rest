@@ -5,7 +5,7 @@
 
     <groupId>io.rocketbase.commons</groupId>
     <artifactId>commons-rest-root</artifactId>
-    <version>LATEST</version>
+    <version>LATEST-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <licenses>
