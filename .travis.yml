@@ -8,7 +8,7 @@ before_install:
     - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
     - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
 ## default build
-script: mvn --settings .travis/settings.xml clean verify
+script: mvn --settings .travis/settings.xml -U clean verify
 ## release on tag
 deploy:
 - provider: script
