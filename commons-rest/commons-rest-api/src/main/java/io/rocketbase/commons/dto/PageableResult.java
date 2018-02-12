@@ -56,5 +56,9 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
         return content.iterator();
     }
 
+    public boolean hasNextPage() {
+        return page < totalPages;
+    }
+
 
 }
