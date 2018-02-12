@@ -48,6 +48,7 @@ public interface EntityDataEditConverter<Entity, Data, Edit> {
      *
      * @param edit   values to map to entity
      * @param entity existing entity
+     * @return updated entity
      */
-    void updateEntityFromEdit(Edit edit, Entity entity);
+    Entity updateEntityFromEdit(Edit edit, Entity entity);
 }
