@@ -1,14 +1,10 @@
-# how to publish to sonartype
+# how to deploy to sonartype
 
-doesn't work with travis command history to perform release locally
+the travis build will perform an deploy in case of an tag
 
 ````bash
-git tag 0.0.2
+git tag ${versionNumber}
 git push --tags
-mvn versions:set -DnewVersion=0.0.2 -Prelease
-mvn versions:commit
-mvn clean deploy -DskipTests=true -Prelease
-
-mvn versions:set -DnewVersion=0.0.3-SNAPSHOT
-mvn versions:commit
 ````
+
+the given tag-name will be used as version...
