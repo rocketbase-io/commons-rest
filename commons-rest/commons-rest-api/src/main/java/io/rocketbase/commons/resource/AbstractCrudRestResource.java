@@ -19,13 +19,13 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
     }
 
     public PageableResult<Data> find(int page, int pagesize) {
-        return find(UriComponentsBuilder.fromUriString(getBaseApiUrl())
+        return find(buildBaseUriBuilder()
                 .queryParam("page", page)
                 .queryParam("pageSize", pagesize));
     }
 
     public Data getById(ID id) {
-        return getById(buildPathWithId(id));
+        return getById(buildBaseUriBuilder().path(String.valueOf(id)));
     }
 
     public Data create(Edit edit) {
@@ -34,11 +34,11 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
     }
 
     public Data update(ID id, Edit edit) {
-        return update(buildPathWithId(id), edit);
+        return update(buildBaseUriBuilder().path(String.valueOf(id)), edit);
     }
 
     public void delete(ID id) {
-        delete(buildPathWithId(id));
+        delete(buildBaseUriBuilder().path(String.valueOf(id)));
     }
 
     /**
@@ -46,11 +46,8 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
      */
     protected abstract String getBaseApiUrl();
 
-    private UriComponentsBuilder buildPathWithId(ID id) {
-        String baseApiUrl = getBaseApiUrl();
-        String idString = String.valueOf(id);
-        return UriComponentsBuilder.fromUriString(baseApiUrl.endsWith("/") ? baseApiUrl + idString :
-                baseApiUrl + "/" + idString);
+    UriComponentsBuilder buildBaseUriBuilder() {
+        return UriComponentsBuilder.fromUriString(getBaseApiUrl() + (getBaseApiUrl().endsWith("/") ? "" : "/"));
     }
 
 }
