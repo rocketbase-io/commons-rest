@@ -21,7 +21,7 @@ import javax.annotation.Resource;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/company/{parentId}/person")
+@RequestMapping("/api/company/{parentId}/employee")
 public class EmployeeController extends AbstractCrudChildController<Employee, EmployeeData, EmployeeEdit, String, EmployeeConverter> {
 
     @Resource

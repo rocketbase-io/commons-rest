@@ -11,8 +11,8 @@ import java.io.Serializable;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class CompanyEdit implements Serializable {
 
     private String name;
