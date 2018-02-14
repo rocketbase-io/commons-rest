@@ -1,6 +1,7 @@
 package io.rocketbase.commons.controller;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
 
 import java.time.LocalDate;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -28,7 +30,27 @@ public interface BaseController {
         Integer pageSize = parseInteger(params, "pageSize", getPageSize());
         pageSize = Math.min(pageSize, getMaxPageSize());
         Integer page = parseInteger(params, "page", 0);
-        return new PageRequest(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE));
+
+        return new PageRequest(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE), parseSort(params, "sort"));
+    }
+
+    default Sort parseSort(MultiValueMap<String, String> params, String key) {
+        Sort sort = null;
+        if (params != null && params.containsKey(key)) {
+            List<Sort.Order> orders = new ArrayList<>();
+            for (String s : params.get(key)) {
+                if (s.toLowerCase().matches("[a-z0-9]+\\,(asc|desc)")) {
+                    String[] splitted = s.split("\\,");
+                    orders.add(new Sort.Order(Sort.Direction.fromString(splitted[1]), splitted[0]));
+                } else if (s.toLowerCase().matches("[a-z0-9]+")) {
+                    orders.add(new Sort.Order(s));
+                }
+            }
+            if (orders.size() > 0) {
+                sort = new Sort(orders);
+            }
+        }
+        return sort;
     }
 
     default Integer parseInteger(MultiValueMap<String, String> params, String key, Integer defaultValue) {

@@ -2,6 +2,7 @@ package io.rocketbase.commons.controller;
 
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.StreamSupport;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -51,8 +53,6 @@ public class BaseControllerTest {
     public void parsePageRequestWithNegative() {
         // given
         MultiValueMap map = new LinkedMultiValueMap<String, String>();
-        int totalCount = 111;
-        int page = 3;
         map.add("pageSize", String.valueOf(-1));
         map.add("page", String.valueOf(-1));
 
@@ -63,6 +63,41 @@ public class BaseControllerTest {
         assertThat(request, notNullValue());
         assertThat(request.getPageSize(), equalTo(BaseController.DEFAULT_MIN_PAGE_SIZE));
         assertThat(request.getPageNumber(), equalTo(0));
+    }
+
+    @Test
+    public void parsePageRequestWithSorting() {
+        // given
+        MultiValueMap map = new LinkedMultiValueMap<String, String>();
+        map.add("sort", "foo,desc");
+        map.add("sort", "bla");
+        map.add("sort", "invalid,up");
+
+        // when
+        PageRequest request = getTestController().parsePageRequest(map);
+
+        // then
+        assertThat(request, notNullValue());
+        assertThat(request.getSort(), notNullValue());
+        assertThat(request.getSort().getOrderFor("foo"), equalTo(new Sort.Order(Sort.Direction.DESC, "foo")));
+        assertThat(request.getSort().getOrderFor("bla"), equalTo(new Sort.Order("bla")));
+        assertThat(StreamSupport.stream(request.getSort().spliterator(), false).count(), equalTo(2L));
+    }
+
+    @Test
+    public void parsePageRequestWithOnlyInvalidSorting() {
+        // given
+        MultiValueMap map = new LinkedMultiValueMap<String, String>();
+        map.add("sort", "foo,ddd");
+        map.add("sort", "bla,as");
+        map.add("sort", "");
+
+        // when
+        PageRequest request = getTestController().parsePageRequest(map);
+
+        // then
+        assertThat(request, notNullValue());
+        assertThat(request.getSort(), nullValue());
     }
 
     @Test
