@@ -66,7 +66,7 @@ public class BaseControllerTest {
     }
 
     @Test
-    public void parsePageRequestWithSorting() {
+    public void parseSort() {
         // given
         MultiValueMap map = new LinkedMultiValueMap<String, String>();
         map.add("sort", "foo,desc");
@@ -74,14 +74,12 @@ public class BaseControllerTest {
         map.add("sort", "invalid,up");
 
         // when
-        PageRequest request = getTestController().parsePageRequest(map);
+        Sort sort = getTestController().parseSort(map, "sort");
 
         // then
-        assertThat(request, notNullValue());
-        assertThat(request.getSort(), notNullValue());
-        assertThat(request.getSort().getOrderFor("foo"), equalTo(new Sort.Order(Sort.Direction.DESC, "foo")));
-        assertThat(request.getSort().getOrderFor("bla"), equalTo(new Sort.Order("bla")));
-        assertThat(StreamSupport.stream(request.getSort().spliterator(), false).count(), equalTo(2L));
+        assertThat(sort.getOrderFor("foo"), equalTo(new Sort.Order(Sort.Direction.DESC, "foo")));
+        assertThat(sort.getOrderFor("bla"), equalTo(new Sort.Order("bla")));
+        assertThat(StreamSupport.stream(sort.spliterator(), false).count(), equalTo(2L));
     }
 
     @Test
