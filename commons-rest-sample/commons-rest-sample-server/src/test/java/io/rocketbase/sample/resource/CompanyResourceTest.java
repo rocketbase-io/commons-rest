@@ -11,6 +11,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,6 +22,7 @@ import javax.annotation.Resource;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.verify;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -91,6 +93,22 @@ public class CompanyResourceTest {
     }
 
     @Test
+    public void shouldFindAllCompanysAndExecute() throws Exception {
+        // given
+        Company Company = companyRepository.save(createDefaultCompany());
+
+        Object mock = Mockito.mock(Object.class);
+
+        // when
+        companyResource.findAllAndExecute(companyData -> {
+            mock.hashCode();
+        }, 1);
+
+        // then
+        verify(mock).hashCode();
+    }
+
+    @Test
     public void shouldCreateCompany() throws Exception {
         // given
         CompanyEdit companyEdit = CompanyEdit.builder()
@@ -124,8 +142,7 @@ public class CompanyResourceTest {
 
             // then
             AssertionErrors.fail("should not create invalid company");
-        }
-        catch (BadRequestException ex) {
+        } catch (BadRequestException ex) {
             ErrorResponse errorResponse = ex.getErrorResponse();
             assertThat(errorResponse, notNullValue());
             assertThat(errorResponse.getFields(), hasEntry(is("email"), not(isEmptyString())));

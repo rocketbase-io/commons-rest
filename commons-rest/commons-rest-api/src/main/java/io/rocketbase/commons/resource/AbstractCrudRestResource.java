@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
+import java.util.function.Consumer;
 
 
 @Slf4j
@@ -16,6 +17,15 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
     @Autowired
     public AbstractCrudRestResource(ObjectMapper objectMapper) {
         super(objectMapper);
+    }
+
+    public void findAllAndExecute(Consumer<Data> execute, int pagesize) {
+        int page = 0;
+        PageableResult<Data> pageableResult;
+        do {
+            pageableResult = find(page++, pagesize);
+            pageableResult.forEach(execute);
+        } while (pageableResult.hasNextPage());
     }
 
     public PageableResult<Data> find(int page, int pagesize) {
