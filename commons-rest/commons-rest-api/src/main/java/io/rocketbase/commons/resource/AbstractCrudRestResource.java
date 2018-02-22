@@ -19,11 +19,17 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
         super(objectMapper);
     }
 
-    public void findAllAndExecute(Consumer<Data> execute, int pagesize) {
+    /**
+     * Will call paged find method, iterate through all results and excute the consumer on all data instances
+     *
+     * @param execute   method to exeute on all found instances
+     * @param batchsize pagesize with which the find method is called
+     */
+    public void executeAll(Consumer<Data> execute, int batchsize) {
         int page = 0;
         PageableResult<Data> pageableResult;
         do {
-            pageableResult = find(page++, pagesize);
+            pageableResult = find(page++, batchsize);
             pageableResult.forEach(execute);
         } while (pageableResult.hasNextPage());
     }

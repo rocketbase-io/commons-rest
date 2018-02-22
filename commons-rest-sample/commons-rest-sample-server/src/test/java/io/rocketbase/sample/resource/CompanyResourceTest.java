@@ -93,14 +93,14 @@ public class CompanyResourceTest {
     }
 
     @Test
-    public void shouldFindAllCompanysAndExecute() throws Exception {
+    public void shouldExecuteAllCompanys() throws Exception {
         // given
         Company Company = companyRepository.save(createDefaultCompany());
 
         Object mock = Mockito.mock(Object.class);
 
         // when
-        companyResource.findAllAndExecute(companyData -> {
+        companyResource.executeAll(companyData -> {
             mock.hashCode();
         }, 1);
 
