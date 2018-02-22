@@ -14,10 +14,10 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.reflect.ParameterizedType;
 
-public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractRestResource {
+public abstract class AbstractBaseCrudRestResource<Read, Write> extends AbstractRestResource {
 
     @Getter
-    protected Class<Data> responseClass;
+    protected Class<Read> responseClass;
 
     @Setter
     private RestTemplate restTemplate;
@@ -25,7 +25,7 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
     @SuppressWarnings("unchecked")
     public AbstractBaseCrudRestResource(ObjectMapper objectMapper) {
         super(objectMapper);
-        responseClass = (Class<Data>) ((ParameterizedType) getClass()
+        responseClass = (Class<Read>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
@@ -38,7 +38,7 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
     }
 
     @SneakyThrows
-    protected PageableResult<Data> find(UriComponentsBuilder uriBuilder) {
+    protected PageableResult<Read> find(UriComponentsBuilder uriBuilder) {
         ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.GET,
                 new HttpEntity<>(createHeaderWithLanguage()),
@@ -47,7 +47,7 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
     }
 
     @SneakyThrows
-    protected Data getById(UriComponentsBuilder uriBuilder) {
+    protected Read getById(UriComponentsBuilder uriBuilder) {
         ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.GET,
                 new HttpEntity<>(createHeaderWithLanguage()),
@@ -56,19 +56,19 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
     }
 
     @SneakyThrows
-    protected Data create(UriComponentsBuilder uriBuilder, Edit edit) {
+    protected Read create(UriComponentsBuilder uriBuilder, Write write) {
         ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.POST,
-                createHttpEntity(edit),
+                createHttpEntity(write),
                 String.class);
         return renderResponse(response, responseClass);
     }
 
     @SneakyThrows
-    protected Data update(UriComponentsBuilder uriBuilder, Edit edit) {
+    protected Read update(UriComponentsBuilder uriBuilder, Write write) {
         ResponseEntity<String> response = restTemplate.exchange(uriBuilder.toUriString(),
                 HttpMethod.PUT,
-                createHttpEntity(edit),
+                createHttpEntity(write),
                 String.class);
         return renderResponse(response, responseClass);
     }
@@ -79,11 +79,11 @@ public abstract class AbstractBaseCrudRestResource<Data, Edit> extends AbstractR
                 null, Void.class);
     }
 
-    protected HttpEntity<Edit> createHttpEntity(Edit edit) {
-        HttpEntity<Edit> entity = new HttpEntity<>(edit, createHeaderWithLanguage());
+    protected HttpEntity<Write> createHttpEntity(Write write) {
+        HttpEntity<Write> entity = new HttpEntity<>(write, createHeaderWithLanguage());
         return entity;
     }
 
-    protected abstract TypeReference<PageableResult<Data>> createPagedTypeReference();
+    protected abstract TypeReference<PageableResult<Read>> createPagedTypeReference();
 
 }

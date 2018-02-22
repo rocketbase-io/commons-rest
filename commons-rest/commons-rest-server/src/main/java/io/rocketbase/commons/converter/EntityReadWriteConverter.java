@@ -6,18 +6,18 @@ import java.util.List;
  * interface that handels converting between Entity, Data and Edit
  *
  * @param <Entity> database entity
- * @param <Data>   response data object
- * @param <Edit>   object with all properties that are changeable
+ * @param <Read>   response data object
+ * @param <Write>  object with all properties that are changeable
  */
-public interface EntityDataEditConverter<Entity, Data, Edit> {
+public interface EntityReadWriteConverter<Entity, Read, Write> {
 
     /**
      * convert data to entity
      *
-     * @param data reponse data object
+     * @param read response data object
      * @return database entity
      */
-    Entity toEntity(Data data);
+    Entity toEntity(Read read);
 
     /**
      * convert vise versa entity to data
@@ -25,7 +25,7 @@ public interface EntityDataEditConverter<Entity, Data, Edit> {
      * @param entity database entity
      * @return response data object
      */
-    Data fromEntity(Entity entity);
+    Read fromEntity(Entity entity);
 
     /**
      * convert list of entities to data
@@ -33,22 +33,22 @@ public interface EntityDataEditConverter<Entity, Data, Edit> {
      * @param entities list of entities
      * @return converted data list
      */
-    List<Data> fromEntities(List<Entity> entities);
+    List<Read> fromEntities(List<Entity> entities);
 
     /**
      * create new entity by given edit
      *
-     * @param edit given edit
+     * @param write values to map to entity
      * @return new entity with edit values
      */
-    Entity newEntity(Edit edit);
+    Entity newEntity(Write write);
 
     /**
      * update exisiting entity by given edit
      *
-     * @param edit   values to map to entity
+     * @param write  values to map to entity
      * @param entity existing entity
      * @return updated entity
      */
-    Entity updateEntityFromEdit(Edit edit, Entity entity);
+    Entity updateEntityFromEdit(Write write, Entity entity);
 }

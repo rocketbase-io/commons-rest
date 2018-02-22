@@ -1,6 +1,6 @@
 package io.rocketbase.sample.converter;
 
-import io.rocketbase.commons.converter.EntityDataEditConverter;
+import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.sample.dto.data.CompanyData;
 import io.rocketbase.sample.dto.edit.CompanyEdit;
 import io.rocketbase.sample.model.Company;
@@ -9,7 +9,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(config = CentralConfig.class)
-public interface CompanyConverter extends EntityDataEditConverter<Company, CompanyData, CompanyEdit> {
+public interface CompanyConverter extends EntityReadWriteConverter<Company, CompanyData, CompanyEdit> {
 
     Company toEntity(CompanyData data);
 

@@ -10,7 +10,7 @@ Focus on tough problems and not on CRUD that the main focus of commons-rest. We 
 
 The implementation bases on spring-boot: mainly on **spring-mvc** and **spring-data** 
 
-We believe in separation of Entity and DTO. We go one step forward and separate also the DTO into Data (response structure) and Edit (create/update structure). This has many advantages for example separation of concern and allow edit by reference id and response with object. Furthermore it improves readability.
+We believe in separation of Entity and DTO. We go one step forward and separate also the DTO into Read (response structure) and Write (create/update structure). This has many advantages for example separation of concern and allow edit by reference id and response with object. Furthermore it improves readability.
 
 Conversion between each object can be automatically generated with [mapstruct](http://mapstruct.org/) see sample-project for details.
 

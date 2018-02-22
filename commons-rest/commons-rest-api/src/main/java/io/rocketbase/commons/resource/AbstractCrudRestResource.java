@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 
 
 @Slf4j
-public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializable> extends AbstractBaseCrudRestResource<Data, Edit> {
+public abstract class AbstractCrudRestResource<Read, Write, ID extends Serializable> extends AbstractBaseCrudRestResource<Read, Write> {
 
 
     @Autowired
@@ -20,37 +20,37 @@ public abstract class AbstractCrudRestResource<Data, Edit, ID extends Serializab
     }
 
     /**
-     * Will call paged find method, iterate through all results and excute the consumer on all data instances
+     * will call paged find method, iterate through all results and execute the consumer on all data instances
      *
      * @param execute   method to exeute on all found instances
-     * @param batchsize pagesize with which the find method is called
+     * @param batchSize pagesize with which the find method is called
      */
-    public void executeAll(Consumer<Data> execute, int batchsize) {
+    public void executeAll(Consumer<Read> execute, int batchSize) {
         int page = 0;
-        PageableResult<Data> pageableResult;
+        PageableResult<Read> pageableResult;
         do {
-            pageableResult = find(page++, batchsize);
+            pageableResult = find(page++, batchSize);
             pageableResult.forEach(execute);
         } while (pageableResult.hasNextPage());
     }
 
-    public PageableResult<Data> find(int page, int pagesize) {
+    public PageableResult<Read> find(int page, int pagesize) {
         return find(buildBaseUriBuilder()
                 .queryParam("page", page)
                 .queryParam("pageSize", pagesize));
     }
 
-    public Data getById(ID id) {
+    public Read getById(ID id) {
         return getById(buildBaseUriBuilder().path(String.valueOf(id)));
     }
 
-    public Data create(Edit edit) {
+    public Read create(Write write) {
         return create(UriComponentsBuilder.fromUriString(
-                getBaseApiUrl()), edit);
+                getBaseApiUrl()), write);
     }
 
-    public Data update(ID id, Edit edit) {
-        return update(buildBaseUriBuilder().path(String.valueOf(id)), edit);
+    public Read update(ID id, Write write) {
+        return update(buildBaseUriBuilder().path(String.valueOf(id)), write);
     }
 
     public void delete(ID id) {

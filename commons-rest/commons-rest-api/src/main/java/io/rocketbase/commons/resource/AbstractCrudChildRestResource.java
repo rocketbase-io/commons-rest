@@ -10,29 +10,29 @@ import java.io.Serializable;
 
 
 @Slf4j
-public abstract class AbstractCrudChildRestResource<Data, Edit, ID extends Serializable> extends AbstractBaseCrudRestResource<Data, Edit> {
+public abstract class AbstractCrudChildRestResource<Read, Write, ID extends Serializable> extends AbstractBaseCrudRestResource<Read, Write> {
 
     @Autowired
     public AbstractCrudChildRestResource(ObjectMapper objectMapper) {
         super(objectMapper);
     }
 
-    public PageableResult<Data> find(ID parentId, int page, int pagesize) {
+    public PageableResult<Read> find(ID parentId, int page, int pagesize) {
         return find(buildBaseUriBuilder(parentId)
                 .queryParam("page", page)
                 .queryParam("pageSize", pagesize));
     }
 
-    public Data getById(ID parentId, ID id) {
+    public Read getById(ID parentId, ID id) {
         return getById(buildBaseUriBuilder(parentId).path(String.valueOf(id)));
     }
 
-    public Data create(ID parentId, Edit edit) {
-        return create(buildBaseUriBuilder(parentId), edit);
+    public Read create(ID parentId, Write write) {
+        return create(buildBaseUriBuilder(parentId), write);
     }
 
-    public Data update(ID parentId, ID id, Edit edit) {
-        return update(buildBaseUriBuilder(parentId).path(String.valueOf(id)), edit);
+    public Read update(ID parentId, ID id, Write write) {
+        return update(buildBaseUriBuilder(parentId).path(String.valueOf(id)), write);
     }
 
     public void delete(ID parentId, ID id) {

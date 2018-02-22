@@ -1,6 +1,6 @@
 package io.rocketbase.commons.controller;
 
-import io.rocketbase.commons.converter.EntityDataEditConverter;
+import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.commons.dto.PageableResult;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,46 +22,46 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  * <b>It's important that you place the pathVariable parentId in your main RequestMapping</b>
  *
  * @param <Entity>    database entity
- * @param <Data>      response data object
- * @param <Edit>      object with all properties that are changeable
+ * @param <Read>      response data object
+ * @param <Write>      object with all properties that are changeable
  * @param <ID>        class of the identifier
- * @param <Converter> interface that allows converting between Entity, Data and Edit
+ * @param <Converter> interface that allows converting between Entity, Read and Write
  */
 @RequiredArgsConstructor
-public abstract class AbstractCrudChildController<Entity, Data, Edit, ID extends Serializable, Converter extends EntityDataEditConverter<Entity, Data, Edit>> implements BaseController {
+public abstract class AbstractCrudChildController<Entity, Read, Write, ID extends Serializable, Converter extends EntityReadWriteConverter<Entity, Read, Write>> implements BaseController {
 
     @Getter(AccessLevel.PROTECTED)
     private final PagingAndSortingRepository<Entity, ID> repository;
 
     @Getter(AccessLevel.PROTECTED)
-    private final EntityDataEditConverter<Entity, Data, Edit> converter;
+    private final EntityReadWriteConverter<Entity, Read, Write> converter;
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public PageableResult<Data> find(@PathVariable("parentId") ID parentId, @RequestParam(required = false) MultiValueMap<String, String> params) {
+    public PageableResult<Read> find(@PathVariable("parentId") ID parentId, @RequestParam(required = false) MultiValueMap<String, String> params) {
         Page<Entity> entities = findAllByParentId(parentId, parsePageRequest(params));
         return PageableResult.contentPage(converter.fromEntities(entities.getContent()), entities);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
     @ResponseBody
-    public Data getById(@PathVariable("parentId") ID parentId, @PathVariable("id") ID id) {
+    public Read getById(@PathVariable("parentId") ID parentId, @PathVariable("id") ID id) {
         Entity entity = getEntity(parentId, id);
         return converter.fromEntity(entity);
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Data create(@PathVariable("parentId") ID parentId, @RequestBody @NotNull @Validated Edit editData) {
-        Entity entity = repository.save(newEntity(parentId, editData));
+    public Read create(@PathVariable("parentId") ID parentId, @RequestBody @NotNull @Validated Write write) {
+        Entity entity = repository.save(newEntity(parentId, write));
         return converter.fromEntity(entity);
     }
 
     @RequestMapping(method = RequestMethod.PUT, path = "/{id}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Data update(@PathVariable("parentId") ID parentId, @PathVariable ID id, @RequestBody @NotNull @Validated Edit editData) {
+    public Read update(@PathVariable("parentId") ID parentId, @PathVariable ID id, @RequestBody @NotNull @Validated Write write) {
         Entity entity = getEntity(parentId, id);
-        converter.updateEntityFromEdit(editData, entity);
+        converter.updateEntityFromEdit(write, entity);
         repository.save(entity);
         return converter.fromEntity(entity);
     }
@@ -76,5 +76,5 @@ public abstract class AbstractCrudChildController<Entity, Data, Edit, ID extends
 
     protected abstract Page<Entity> findAllByParentId(ID parentId, PageRequest pageRequest);
 
-    protected abstract Entity newEntity(ID parentId, Edit editData);
+    protected abstract Entity newEntity(ID parentId, Write writeData);
 }

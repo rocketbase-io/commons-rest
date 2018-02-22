@@ -1,6 +1,6 @@
 package io.rocketbase.commons.controller;
 
-import io.rocketbase.commons.converter.EntityDataEditConverter;
+import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -20,43 +20,43 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  * simple CRUD controller that serves entities
  *
  * @param <Entity>    database entity
- * @param <Data>      response data object
- * @param <Edit>      object with all properties that are changeable
+ * @param <Read>      response data object
+ * @param <Write>      object with all properties that are changeable
  * @param <ID>        class of the identifier
- * @param <Converter> interface that allows converting between Entity, Data and Edit
+ * @param <Converter> interface that allows converting between Entity, Read and Write
  */
 @RequiredArgsConstructor
-public abstract class AbstractCrudController<Entity, Data, Edit, ID extends Serializable, Converter extends EntityDataEditConverter<Entity, Data, Edit>> implements BaseController {
+public abstract class AbstractCrudController<Entity, Read, Write, ID extends Serializable, Converter extends EntityReadWriteConverter<Entity, Read, Write>> implements BaseController {
 
     private final PagingAndSortingRepository<Entity, ID> repository;
-    private final EntityDataEditConverter<Entity, Data, Edit> converter;
+    private final EntityReadWriteConverter<Entity, Read, Write> converter;
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public PageableResult<Data> find(@RequestParam(required = false) MultiValueMap<String, String> params) {
+    public PageableResult<Read> find(@RequestParam(required = false) MultiValueMap<String, String> params) {
         Page<Entity> entities = repository.findAll(parsePageRequest(params));
         return PageableResult.contentPage(converter.fromEntities(entities.getContent()), entities);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
     @ResponseBody
-    public Data getById(@PathVariable("id") ID id) {
+    public Read getById(@PathVariable("id") ID id) {
         Entity entity = getEntity(id);
         return converter.fromEntity(entity);
     }
 
     @RequestMapping(method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Data create(@RequestBody @NotNull @Validated Edit editData) {
-        Entity entity = repository.save(converter.newEntity(editData));
+    public Read create(@RequestBody @NotNull @Validated Write write) {
+        Entity entity = repository.save(converter.newEntity(write));
         return converter.fromEntity(entity);
     }
 
     @RequestMapping(method = RequestMethod.PUT, path = "/{id}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Data update(@PathVariable ID id, @RequestBody @NotNull @Validated Edit editData) {
+    public Read update(@PathVariable ID id, @RequestBody @NotNull @Validated Write write) {
         Entity entity = getEntity(id);
-        converter.updateEntityFromEdit(editData, entity);
+        converter.updateEntityFromEdit(write, entity);
         repository.save(entity);
         return converter.fromEntity(entity);
     }
