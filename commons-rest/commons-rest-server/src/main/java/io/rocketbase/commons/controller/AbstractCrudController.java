@@ -3,6 +3,8 @@ package io.rocketbase.commons.controller;
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
+import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -21,14 +23,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @param <Entity>    database entity
  * @param <Read>      response data object
- * @param <Write>      object with all properties that are changeable
+ * @param <Write>     object with all properties that are changeable
  * @param <ID>        class of the identifier
  * @param <Converter> interface that allows converting between Entity, Read and Write
  */
 @RequiredArgsConstructor
 public abstract class AbstractCrudController<Entity, Read, Write, ID extends Serializable, Converter extends EntityReadWriteConverter<Entity, Read, Write>> implements BaseController {
 
+    @Getter(AccessLevel.PROTECTED)
     private final PagingAndSortingRepository<Entity, ID> repository;
+
+    @Getter(AccessLevel.PROTECTED)
     private final EntityReadWriteConverter<Entity, Read, Write> converter;
 
     @RequestMapping(method = RequestMethod.GET)
