@@ -3,6 +3,7 @@ package io.rocketbase.sample.resource;
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.BadRequestException;
+import io.rocketbase.commons.request.PageableRequest;
 import io.rocketbase.sample.dto.data.CompanyData;
 import io.rocketbase.sample.dto.edit.CompanyEdit;
 import io.rocketbase.sample.model.Company;
@@ -14,11 +15,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -188,10 +191,68 @@ public class CompanyResourceTest {
         assertThat(companyRepository.findOne(company.getId()), nullValue());
     }
 
+    @Test
+    public void shouldSortAsc() {
+        // given
+        Company aCompany = Company.builder()
+                .name("a-company")
+                .email("a@company.org")
+                .url("https://a-company.org")
+                .build();
+        companyRepository.save(Arrays.asList(createDefaultCompany(), aCompany));
+
+
+        // when
+        PageableResult<CompanyData> result = companyResource.find(PageableRequest.builder()
+                .sort(new Sort(Sort.Direction.ASC, "name"))
+                .build());
+
+        // then
+        assertThat(result, notNullValue());
+        assertThat(result.getTotalElements(), is(2L));
+        assertThat(result.getPage(), is(0));
+        assertThat(result.getTotalPages(), is(1));
+        assertThat(result.getContent(), hasSize(2));
+        assertCompanySameWithoutId(aCompany,
+                result.getContent()
+                        .get(0));
+    }
+
+    @Test
+    public void shouldSortDesc() {
+        // given
+        Company aCompany = Company.builder()
+                .name("a-company")
+                .email("a@company.org")
+                .url("https://a-company.org")
+                .build();
+        companyRepository.save(Arrays.asList(createDefaultCompany(), aCompany));
+
+
+        // when
+        PageableResult<CompanyData> result = companyResource.find(PageableRequest.builder()
+                .sort(new Sort(Sort.Direction.DESC, "name"))
+                .build());
+
+        // then
+        assertThat(result, notNullValue());
+        assertThat(result.getTotalElements(), is(2L));
+        assertThat(result.getPage(), is(0));
+        assertThat(result.getTotalPages(), is(1));
+        assertThat(result.getContent(), hasSize(2));
+        assertCompanySameWithoutId(createDefaultCompany(),
+                result.getContent()
+                        .get(0));
+    }
+
 
     private void assertCompanySame(Company company, CompanyData data) {
-        assertThat(data, notNullValue());
+        assertCompanySameWithoutId(company, data);
         assertThat(data.getId(), is(company.getId()));
+    }
+
+    private void assertCompanySameWithoutId(Company company, CompanyData data) {
+        assertThat(data, notNullValue());
         assertThat(data.getName(), is(company.getName()));
         assertThat(data.getEmail(), is(company.getEmail()));
         assertThat(data.getUrl(), is(company.getUrl()));
@@ -205,6 +266,5 @@ public class CompanyResourceTest {
                 .url("https://company.org")
                 .build();
     }
-
 
 }

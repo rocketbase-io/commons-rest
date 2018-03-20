@@ -2,6 +2,7 @@ package io.rocketbase.commons.resource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
+import io.rocketbase.commons.request.PageableRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,9 +19,12 @@ public abstract class AbstractCrudChildRestResource<Read, Write, ID extends Seri
     }
 
     public PageableResult<Read> find(ID parentId, int page, int pagesize) {
-        return find(buildBaseUriBuilder(parentId)
-                .queryParam("page", page)
-                .queryParam("pageSize", pagesize));
+        return find(appendParams(buildBaseUriBuilder(parentId),
+                new PageableRequest(page, pagesize, null)));
+    }
+
+    public PageableResult<Read> find(ID parentId, PageableRequest request) {
+        return find(appendParams(buildBaseUriBuilder(parentId), request));
     }
 
     public Read getById(ID parentId, ID id) {
