@@ -48,7 +48,7 @@ public abstract class AbstractRestResource {
         return headers;
     }
 
-    private void handleErrorStatus(ResponseEntity<String> response) throws IOException {
+    protected void handleErrorStatus(ResponseEntity<String> response) throws IOException {
         if (response.getStatusCode()
                 .equals(HttpStatus.BAD_REQUEST)) {
             ErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ErrorResponse.class);
