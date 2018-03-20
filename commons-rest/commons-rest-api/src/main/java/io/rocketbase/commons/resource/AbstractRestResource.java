@@ -59,17 +59,4 @@ public abstract class AbstractRestResource {
         }
     }
 
-    protected final class NoopResponseErrorHandler implements ResponseErrorHandler {
-
-        @Override
-        public boolean hasError(ClientHttpResponse response) throws IOException {
-            return !response.getStatusCode()
-                    .is2xxSuccessful();
-        }
-
-        @Override
-        public void handleError(ClientHttpResponse response) throws IOException {
-        }
-    }
-
 }
