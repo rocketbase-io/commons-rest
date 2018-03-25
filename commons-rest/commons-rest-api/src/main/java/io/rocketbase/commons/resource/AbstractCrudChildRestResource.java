@@ -44,9 +44,9 @@ public abstract class AbstractCrudChildRestResource<Read, Write, ID extends Seri
     }
 
     UriComponentsBuilder buildBaseUriBuilder(ID parentId) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(getBaseParentApiUrl() + (getBaseParentApiUrl().endsWith("/") ? "" : "/"));
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(ensureEndsWithSlash(getBaseParentApiUrl()));
         builder.path(String.valueOf(parentId));
-        builder.path((getChildPath().startsWith("/") ? "" : "/") + getChildPath() + (getChildPath().endsWith("/") ? "" : "/"));
+        builder.path((getChildPath().startsWith("/") ? "" : "/") + ensureEndsWithSlash(getChildPath()));
         return builder;
     }
 

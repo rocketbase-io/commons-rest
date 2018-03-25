@@ -67,7 +67,7 @@ public abstract class AbstractCrudRestResource<Read, Write, ID extends Serializa
     protected abstract String getBaseApiUrl();
 
     UriComponentsBuilder buildBaseUriBuilder() {
-        return UriComponentsBuilder.fromUriString(getBaseApiUrl() + (getBaseApiUrl().endsWith("/") ? "" : "/"));
+        return UriComponentsBuilder.fromUriString(ensureEndsWithSlash(getBaseApiUrl()));
     }
 
 }
