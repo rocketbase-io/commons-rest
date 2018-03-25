@@ -2,14 +2,10 @@ package io.rocketbase.commons.resource;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.rocketbase.commons.dto.ErrorResponse;
-import io.rocketbase.commons.exception.BadRequestException;
-import io.rocketbase.commons.exception.InternalServerErrorException;
 import io.rocketbase.commons.request.PageableRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -42,23 +38,21 @@ public abstract class AbstractRestResource {
     }
 
     protected <T> T renderResponse(ResponseEntity<String> response, Class<T> responseClass) throws IOException {
-        if (response.getStatusCode()
-                .is2xxSuccessful()) {
+        if (response.getStatusCode().is2xxSuccessful()) {
             return objectMapper.readValue(response.getBody(), responseClass);
         } else {
-            handleErrorStatus(response);
+            // in case of not found - otherwise it will return empty object
+            return null;
         }
-        return null;
     }
 
     protected <T> T renderResponse(ResponseEntity<String> response, TypeReference<T> typeReference) throws IOException {
-        if (response.getStatusCode()
-                .is2xxSuccessful()) {
+        if (response.getStatusCode().is2xxSuccessful()) {
             return objectMapper.readValue(response.getBody(), typeReference);
         } else {
-            handleErrorStatus(response);
+            // in case of not found - otherwise it will return empty object
+            return null;
         }
-        return null;
     }
 
     protected HttpHeaders createHeaderWithLanguage() {
@@ -67,17 +61,6 @@ public abstract class AbstractRestResource {
                 LocaleContextHolder.getLocale()
                         .getLanguage());
         return headers;
-    }
-
-    protected void handleErrorStatus(ResponseEntity<String> response) throws IOException {
-        if (response.getStatusCode()
-                .equals(HttpStatus.BAD_REQUEST)) {
-            ErrorResponse errorResponse = objectMapper.readValue(response.getBody(), ErrorResponse.class);
-            throw new BadRequestException(errorResponse);
-        } else if (response.getStatusCode()
-                .is5xxServerError()) {
-            throw new InternalServerErrorException(response.getBody());
-        }
     }
 
 }

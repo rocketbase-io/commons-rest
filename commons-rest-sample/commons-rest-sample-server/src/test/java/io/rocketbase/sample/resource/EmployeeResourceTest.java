@@ -3,6 +3,7 @@ package io.rocketbase.sample.resource;
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.BadRequestException;
+import io.rocketbase.commons.resource.BasicResponseErrorHandler;
 import io.rocketbase.sample.dto.data.EmployeeData;
 import io.rocketbase.sample.dto.edit.EmployeeEdit;
 import io.rocketbase.sample.model.Company;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
@@ -44,7 +46,9 @@ public class EmployeeResourceTest {
 
     @Before
     public void setup() throws Exception {
-        employeeResource.setRestTemplate(testRestTemplate.getRestTemplate());
+        RestTemplate restTemplate = testRestTemplate.getRestTemplate();
+        restTemplate.setErrorHandler(new BasicResponseErrorHandler());
+        employeeResource.setRestTemplate(restTemplate);
         cleanup();
     }
 

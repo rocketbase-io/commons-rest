@@ -32,7 +32,7 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
     protected RestTemplate getRestTemplate() {
         if (restTemplate == null) {
             restTemplate = new RestTemplate();
-            restTemplate.setErrorHandler(new NoopResponseErrorHandler());
+            restTemplate.setErrorHandler(new BasicResponseErrorHandler());
         }
         return restTemplate;
     }

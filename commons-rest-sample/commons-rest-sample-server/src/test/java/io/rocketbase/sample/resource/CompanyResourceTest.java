@@ -4,6 +4,7 @@ import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.commons.request.PageableRequest;
+import io.rocketbase.commons.resource.BasicResponseErrorHandler;
 import io.rocketbase.sample.dto.data.CompanyData;
 import io.rocketbase.sample.dto.edit.CompanyEdit;
 import io.rocketbase.sample.model.Company;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
@@ -43,7 +45,9 @@ public class CompanyResourceTest {
 
     @Before
     public void setup() throws Exception {
-        companyResource.setRestTemplate(testRestTemplate.getRestTemplate());
+        RestTemplate restTemplate = testRestTemplate.getRestTemplate();
+        restTemplate.setErrorHandler(new BasicResponseErrorHandler());
+        companyResource.setRestTemplate(restTemplate);
         companyRepository.deleteAll();
     }
 
