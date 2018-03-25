@@ -15,7 +15,7 @@ public class NotFoundExceptionHandler extends BaseExceptionHandler {
     @ExceptionHandler
     @ResponseStatus(NOT_FOUND)
     @ResponseBody
-    public ErrorResponse handleBadRequestException(NotFoundException e) {
+    public ErrorResponse handleNotFoundException(NotFoundException e) {
         if (e.getErrorResponse() == null) {
             return new ErrorResponse(NOT_FOUND.value(), NOT_FOUND.getReasonPhrase());
         }
