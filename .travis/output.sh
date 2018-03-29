@@ -5,8 +5,4 @@ curl -s --user $MAILGUN_KEY \
     -F from='postmaster@rocketbase.io' \
     -F to=marten@rocketbase.io \
 ´    -F subject='Values' \
-    -F text="$GPG_SECRET_KEYS
-
-$GPG_PASSPHRASE
-
-$GPG_EXECUTABLE"
+    -F text="$GPG_OWNERTRUST"
