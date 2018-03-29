@@ -29,6 +29,8 @@ public class BeanValidationExceptionHandler extends BaseExceptionHandler {
         ObjectError globalError = bindingResult.getGlobalError();
         if (globalError != null) {
             builder.message(translate(request, globalError.getCode(), globalError.getDefaultMessage()));
+        } else {
+            builder.message(translate(request, "error.form", "invalid form"));
         }
 
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
