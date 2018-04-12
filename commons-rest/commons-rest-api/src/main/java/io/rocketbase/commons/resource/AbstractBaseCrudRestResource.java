@@ -3,6 +3,7 @@ package io.rocketbase.commons.resource;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
+import io.rocketbase.commons.exception.NotFoundException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -46,13 +47,22 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
         return renderResponse(response, createPagedTypeReference());
     }
 
+    /**
+     * @param uriBuilder complete uri
+     * @return object or null in case of not found (will catch {@link io.rocketbase.commons.exception.NotFoundException})
+     */
     @SneakyThrows
     protected Read getById(UriComponentsBuilder uriBuilder) {
-        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
-                HttpMethod.GET,
-                new HttpEntity<>(createHeaderWithLanguage()),
-                String.class);
-        return renderResponse(response, responseClass);
+        try {
+            ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
+                    HttpMethod.GET,
+                    new HttpEntity<>(createHeaderWithLanguage()),
+                    String.class);
+
+            return renderResponse(response, responseClass);
+        } catch (NotFoundException notFound) {
+            return null;
+        }
     }
 
     @SneakyThrows

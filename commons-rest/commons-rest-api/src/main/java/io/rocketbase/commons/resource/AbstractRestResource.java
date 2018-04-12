@@ -16,7 +16,7 @@ public abstract class AbstractRestResource implements BaseRestResource {
         if (response.getStatusCode().is2xxSuccessful()) {
             return objectMapper.readValue(response.getBody(), responseClass);
         } else {
-            // in case of not found - otherwise it will return empty object
+            // in case of no error has thrown but the status is not 2xx
             return null;
         }
     }
@@ -25,7 +25,7 @@ public abstract class AbstractRestResource implements BaseRestResource {
         if (response.getStatusCode().is2xxSuccessful()) {
             return objectMapper.readValue(response.getBody(), typeReference);
         } else {
-            // in case of not found - otherwise it will return empty object
+            // in case of no error has thrown but the status is not 2xx
             return null;
         }
     }

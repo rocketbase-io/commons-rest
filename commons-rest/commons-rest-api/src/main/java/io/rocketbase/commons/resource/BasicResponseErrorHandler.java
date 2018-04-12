@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.exception.BadRequestException;
+import io.rocketbase.commons.exception.NotFoundException;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
@@ -37,7 +38,7 @@ public class BasicResponseErrorHandler extends DefaultResponseErrorHandler {
             }
             throw new BadRequestException(errorResponse);
         } else if (response.getStatusCode().equals(NOT_FOUND)) {
-            return;
+            throw new NotFoundException();
         } else {
             super.handleError(response);
         }
