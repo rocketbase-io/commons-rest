@@ -3,7 +3,7 @@ package io.rocketbase.commons.converter;
 import java.util.List;
 
 /**
- * interface that handels converting between Entity, Data and Edit
+ * interface that handles converting between Entity, Data and Edit
  *
  * @param <Entity> database entity
  * @param <Read>   response data object
