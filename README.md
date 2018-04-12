@@ -20,6 +20,7 @@ Conversion between each object can be automatically generated with [mapstruct](h
 * abstract CRUD controller also for parent child situations
 * abstract CRUD resources to consume REST-Services 
 * prodivded a [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) via yeoman
+* provided a jwt security module that is simply pluggable name [commons-auth](https://github.com/rocketbase-io/commons-auth)
 
 ## commons-rest-api
 
