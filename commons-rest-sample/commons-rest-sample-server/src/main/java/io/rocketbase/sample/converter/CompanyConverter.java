@@ -1,28 +1,28 @@
 package io.rocketbase.sample.converter;
 
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
-import io.rocketbase.sample.dto.data.CompanyData;
-import io.rocketbase.sample.dto.edit.CompanyEdit;
+import io.rocketbase.sample.dto.company.CompanyRead;
+import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.Company;
 import org.mapstruct.*;
 
 import java.util.List;
 
 @Mapper(config = CentralConfig.class)
-public interface CompanyConverter extends EntityReadWriteConverter<Company, CompanyData, CompanyEdit> {
+public interface CompanyConverter extends EntityReadWriteConverter<Company, CompanyRead, CompanyWrite> {
 
-    Company toEntity(CompanyData data);
+    Company toEntity(CompanyRead data);
 
     @InheritInverseConfiguration
-    CompanyData fromEntity(Company entity);
+    CompanyRead fromEntity(Company entity);
 
-    List<CompanyData> fromEntities(List<Company> entities);
+    List<CompanyRead> fromEntities(List<Company> entities);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
     })
-    Company newEntity(CompanyEdit workspace);
+    Company newEntity(CompanyWrite workspace);
 
     @InheritConfiguration()
-    Company updateEntityFromEdit(CompanyEdit edit, @MappingTarget Company entity);
+    Company updateEntityFromEdit(CompanyWrite edit, @MappingTarget Company entity);
 }

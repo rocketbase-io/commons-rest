@@ -5,8 +5,8 @@ import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.commons.request.PageableRequest;
 import io.rocketbase.commons.resource.BasicResponseErrorHandler;
-import io.rocketbase.sample.dto.data.CompanyData;
-import io.rocketbase.sample.dto.edit.CompanyEdit;
+import io.rocketbase.sample.dto.company.CompanyRead;
+import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.Company;
 import io.rocketbase.sample.repository.CompanyRepository;
 import org.junit.After;
@@ -62,7 +62,7 @@ public class CompanyResourceTest {
         Company company = companyRepository.save(createDefaultCompany());
 
         // when
-        CompanyData data = companyResource.getById(company.getId());
+        CompanyRead data = companyResource.getById(company.getId());
 
         // then
         assertCompanySame(company, data);
@@ -73,7 +73,7 @@ public class CompanyResourceTest {
         // given
 
         // when
-        CompanyData data = companyResource.getById("notexisting");
+        CompanyRead data = companyResource.getById("notexisting");
 
         // then
         assertThat(data, nullValue());
@@ -85,7 +85,7 @@ public class CompanyResourceTest {
         Company Company = companyRepository.save(createDefaultCompany());
 
         // when
-        PageableResult<CompanyData> result = companyResource.find(0, 10);
+        PageableResult<CompanyRead> result = companyResource.find(0, 10);
 
         // then
         assertThat(result, notNullValue());
@@ -118,34 +118,34 @@ public class CompanyResourceTest {
     @Test
     public void shouldCreateCompany() throws Exception {
         // given
-        CompanyEdit companyEdit = CompanyEdit.builder()
+        CompanyWrite companyWrite = CompanyWrite.builder()
                 .name("testcompany")
                 .email("test@company.org")
                 .url("https://company.org")
                 .build();
 
         // when
-        CompanyData companyData = companyResource.create(companyEdit);
+        CompanyRead companyRead = companyResource.create(companyWrite);
 
         // then
-        assertThat(companyData, notNullValue());
-        assertThat(companyData.getId(), notNullValue());
+        assertThat(companyRead, notNullValue());
+        assertThat(companyRead.getId(), notNullValue());
 
-        Company Company = companyRepository.findOne(companyData.getId());
-        assertCompanySame(Company, companyData);
+        Company Company = companyRepository.findOne(companyRead.getId());
+        assertCompanySame(Company, companyRead);
     }
 
     @Test
     public void shouldNotCreateInvalidCompany() throws Exception {
         // given
-        CompanyEdit companyEdit = CompanyEdit.builder()
+        CompanyWrite companyWrite = CompanyWrite.builder()
                 .name("testcompany")
                 .url("https://company.org")
                 .build();
 
         // when
         try {
-            CompanyData companyData = companyResource.create(companyEdit);
+            CompanyRead companyRead = companyResource.create(companyWrite);
 
             // then
             AssertionErrors.fail("should not create invalid company");
@@ -161,7 +161,7 @@ public class CompanyResourceTest {
     public void shouldUpdateCompany() throws Exception {
         // given
         Company company = companyRepository.save(createDefaultCompany());
-        CompanyEdit companyEdit = CompanyEdit.builder()
+        CompanyWrite companyWrite = CompanyWrite.builder()
                 .name("testcompany all new")
                 .email("test@company2.org")
                 .url("https://company2.org")
@@ -169,18 +169,18 @@ public class CompanyResourceTest {
 
 
         // when
-        CompanyData companyData = companyResource.update(company.getId(), companyEdit);
+        CompanyRead companyRead = companyResource.update(company.getId(), companyWrite);
 
         // then
-        assertThat(companyData, notNullValue());
-        assertThat(companyData.getId(), is(company.getId()));
+        assertThat(companyRead, notNullValue());
+        assertThat(companyRead.getId(), is(company.getId()));
 
-        assertThat(companyData.getName(), is(companyEdit.getName()));
-        assertThat(companyData.getEmail(), is(companyEdit.getEmail()));
-        assertThat(companyData.getUrl(), is(companyEdit.getUrl()));
+        assertThat(companyRead.getName(), is(companyWrite.getName()));
+        assertThat(companyRead.getEmail(), is(companyWrite.getEmail()));
+        assertThat(companyRead.getUrl(), is(companyWrite.getUrl()));
 
         company = companyRepository.findOne(company.getId());
-        assertCompanySame(company, companyData);
+        assertCompanySame(company, companyRead);
     }
 
     @Test
@@ -207,7 +207,7 @@ public class CompanyResourceTest {
 
 
         // when
-        PageableResult<CompanyData> result = companyResource.find(PageableRequest.builder()
+        PageableResult<CompanyRead> result = companyResource.find(PageableRequest.builder()
                 .sort(new Sort(Sort.Direction.ASC, "name"))
                 .build());
 
@@ -234,7 +234,7 @@ public class CompanyResourceTest {
 
 
         // when
-        PageableResult<CompanyData> result = companyResource.find(PageableRequest.builder()
+        PageableResult<CompanyRead> result = companyResource.find(PageableRequest.builder()
                 .sort(new Sort(Sort.Direction.DESC, "name"))
                 .build());
 
@@ -250,12 +250,12 @@ public class CompanyResourceTest {
     }
 
 
-    private void assertCompanySame(Company company, CompanyData data) {
+    private void assertCompanySame(Company company, CompanyRead data) {
         assertCompanySameWithoutId(company, data);
         assertThat(data.getId(), is(company.getId()));
     }
 
-    private void assertCompanySameWithoutId(Company company, CompanyData data) {
+    private void assertCompanySameWithoutId(Company company, CompanyRead data) {
         assertThat(data, notNullValue());
         assertThat(data.getName(), is(company.getName()));
         assertThat(data.getEmail(), is(company.getEmail()));

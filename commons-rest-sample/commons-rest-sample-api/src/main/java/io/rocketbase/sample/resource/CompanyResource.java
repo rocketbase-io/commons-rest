@@ -4,14 +4,14 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.resource.AbstractCrudRestResource;
-import io.rocketbase.sample.dto.data.CompanyData;
-import io.rocketbase.sample.dto.edit.CompanyEdit;
+import io.rocketbase.sample.dto.company.CompanyRead;
+import io.rocketbase.sample.dto.company.CompanyWrite;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CompanyResource extends AbstractCrudRestResource<CompanyData, CompanyEdit, String> {
+public class CompanyResource extends AbstractCrudRestResource<CompanyRead, CompanyWrite, String> {
 
     @Value("${resource.base.api.url}")
     private String baseApiUrl;
@@ -27,8 +27,8 @@ public class CompanyResource extends AbstractCrudRestResource<CompanyData, Compa
     }
 
     @Override
-    protected TypeReference<PageableResult<CompanyData>> createPagedTypeReference() {
-        return new TypeReference<PageableResult<CompanyData>>() {
+    protected TypeReference<PageableResult<CompanyRead>> createPagedTypeReference() {
+        return new TypeReference<PageableResult<CompanyRead>>() {
         };
     }
 }

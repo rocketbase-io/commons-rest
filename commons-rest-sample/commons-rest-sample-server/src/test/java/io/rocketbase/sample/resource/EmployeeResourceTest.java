@@ -4,8 +4,8 @@ import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.commons.resource.BasicResponseErrorHandler;
-import io.rocketbase.sample.dto.data.EmployeeData;
-import io.rocketbase.sample.dto.edit.EmployeeEdit;
+import io.rocketbase.sample.dto.employee.EmployeeRead;
+import io.rocketbase.sample.dto.employee.EmployeeWrite;
 import io.rocketbase.sample.model.Company;
 import io.rocketbase.sample.model.Employee;
 import io.rocketbase.sample.repository.CompanyRepository;
@@ -67,7 +67,7 @@ public class EmployeeResourceTest {
         employee = employeeRepository.save(employee);
 
         // when
-        EmployeeData data = employeeResource.getById(company.getId(), employee.getId());
+        EmployeeRead data = employeeResource.getById(company.getId(), employee.getId());
 
         // then
         assertEmployeeSame(employee, data);
@@ -82,8 +82,8 @@ public class EmployeeResourceTest {
         employee = employeeRepository.save(employee);
 
         // when
-        EmployeeData data = employeeResource.getById(company.getId(), "notexisting");
-        EmployeeData missMatch = employeeResource.getById("notexisting", employee.getId());
+        EmployeeRead data = employeeResource.getById(company.getId(), "notexisting");
+        EmployeeRead missMatch = employeeResource.getById("notexisting", employee.getId());
 
         // then
         assertThat(data, nullValue());
@@ -109,7 +109,7 @@ public class EmployeeResourceTest {
         employeeRepository.save(otherEmployee);
 
         // when
-        PageableResult<EmployeeData> result = employeeResource.find(company.getId(), 0, 10);
+        PageableResult<EmployeeRead> result = employeeResource.find(company.getId(), 0, 10);
 
         // then
         assertThat(result, notNullValue());
@@ -128,7 +128,7 @@ public class EmployeeResourceTest {
         // given
         Company company = companyRepository.save(createDefaultCompany());
 
-        EmployeeEdit employeeEdit = EmployeeEdit.builder()
+        EmployeeWrite employeeWrite = EmployeeWrite.builder()
                 .firstName("max")
                 .lastName("Müller")
                 .email("max@test.de")
@@ -137,14 +137,14 @@ public class EmployeeResourceTest {
                 .build();
 
         // when
-        EmployeeData employeeData = employeeResource.create(company.getId(), employeeEdit);
+        EmployeeRead employeeRead = employeeResource.create(company.getId(), employeeWrite);
 
         // then
-        assertThat(employeeData, notNullValue());
-        assertThat(employeeData.getId(), notNullValue());
+        assertThat(employeeRead, notNullValue());
+        assertThat(employeeRead.getId(), notNullValue());
 
-        Employee employee = employeeRepository.findOneByCompanyIdAndId(company.getId(), employeeData.getId());
-        assertEmployeeSame(employee, employeeData);
+        Employee employee = employeeRepository.findOneByCompanyIdAndId(company.getId(), employeeRead.getId());
+        assertEmployeeSame(employee, employeeRead);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class EmployeeResourceTest {
         // given
         Company company = companyRepository.save(createDefaultCompany());
 
-        EmployeeEdit employeeEdit = EmployeeEdit.builder()
+        EmployeeWrite employeeWrite = EmployeeWrite.builder()
                 .firstName("max")
                 .lastName("Müller")
                 .email("wrongEmail")
@@ -161,7 +161,7 @@ public class EmployeeResourceTest {
 
         // when
         try {
-            EmployeeData employeeData = employeeResource.create(company.getId(), employeeEdit);
+            EmployeeRead employeeRead = employeeResource.create(company.getId(), employeeWrite);
 
             // then
             AssertionErrors.fail("should not create invalid employee");
@@ -181,7 +181,7 @@ public class EmployeeResourceTest {
         employee.setCompany(company);
         employee = employeeRepository.save(employee);
 
-        EmployeeEdit employeeEdit = EmployeeEdit.builder()
+        EmployeeWrite employeeWrite = EmployeeWrite.builder()
                 .firstName("max")
                 .lastName("Müller")
                 .email("max@test.de")
@@ -191,18 +191,18 @@ public class EmployeeResourceTest {
 
 
         // when
-        EmployeeData employeeData = employeeResource.update(company.getId(), employee.getId(), employeeEdit);
+        EmployeeRead employeeRead = employeeResource.update(company.getId(), employee.getId(), employeeWrite);
 
         // then
-        assertThat(employeeData, notNullValue());
-        assertThat(employeeData.getId(), is(employee.getId()));
+        assertThat(employeeRead, notNullValue());
+        assertThat(employeeRead.getId(), is(employee.getId()));
 
-        assertThat(employeeData.getFirstName(), is(employeeEdit.getFirstName()));
-        assertThat(employeeData.getLastName(), is(employeeEdit.getLastName()));
-        assertThat(employeeData.getEmail(), is(employeeEdit.getEmail()));
+        assertThat(employeeRead.getFirstName(), is(employeeWrite.getFirstName()));
+        assertThat(employeeRead.getLastName(), is(employeeWrite.getLastName()));
+        assertThat(employeeRead.getEmail(), is(employeeWrite.getEmail()));
 
-        employee = employeeRepository.findOne(employeeData.getId());
-        assertEmployeeSame(employee, employeeData);
+        employee = employeeRepository.findOne(employeeRead.getId());
+        assertEmployeeSame(employee, employeeRead);
     }
 
     @Test
@@ -221,7 +221,7 @@ public class EmployeeResourceTest {
     }
 
 
-    private void assertEmployeeSame(Employee entity, EmployeeData data) {
+    private void assertEmployeeSame(Employee entity, EmployeeRead data) {
         assertThat(data, notNullValue());
         assertThat(data.getId(), is(entity.getId()));
         assertThat(data.getFirstName(), is(entity.getFirstName()));

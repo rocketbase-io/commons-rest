@@ -3,8 +3,8 @@ package io.rocketbase.sample.controller;
 import io.rocketbase.commons.controller.AbstractCrudChildController;
 import io.rocketbase.commons.exception.NotFoundException;
 import io.rocketbase.sample.converter.EmployeeConverter;
-import io.rocketbase.sample.dto.data.EmployeeData;
-import io.rocketbase.sample.dto.edit.EmployeeEdit;
+import io.rocketbase.sample.dto.employee.EmployeeRead;
+import io.rocketbase.sample.dto.employee.EmployeeWrite;
 import io.rocketbase.sample.model.Company;
 import io.rocketbase.sample.model.Employee;
 import io.rocketbase.sample.repository.CompanyRepository;
@@ -22,7 +22,7 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 @RequestMapping("/api/company/{parentId}/employee")
-public class EmployeeController extends AbstractCrudChildController<Employee, EmployeeData, EmployeeEdit, String, EmployeeConverter> {
+public class EmployeeController extends AbstractCrudChildController<Employee, EmployeeRead, EmployeeWrite, String, EmployeeConverter> {
 
     @Resource
     private CompanyRepository companyRepository;
@@ -52,7 +52,7 @@ public class EmployeeController extends AbstractCrudChildController<Employee, Em
     }
 
     @Override
-    protected Employee newEntity(String parentId, EmployeeEdit editData) {
+    protected Employee newEntity(String parentId, EmployeeWrite editData) {
         Company company = companyRepository.findOne(parentId);
         if (company == null) {
             throw new NotFoundException();

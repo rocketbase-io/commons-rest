@@ -1,5 +1,6 @@
-package io.rocketbase.sample.dto.data;
+package io.rocketbase.sample.dto.employee;
 
+import io.rocketbase.sample.dto.company.CompanyRead;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EmployeeData implements Serializable {
+public class EmployeeRead implements Serializable {
 
     private String id;
 
@@ -26,6 +27,6 @@ public class EmployeeData implements Serializable {
 
     private String email;
 
-    private CompanyData company;
+    private CompanyRead company;
 
 }

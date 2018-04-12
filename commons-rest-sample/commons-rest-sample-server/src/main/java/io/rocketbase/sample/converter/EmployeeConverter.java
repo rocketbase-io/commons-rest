@@ -1,31 +1,31 @@
 package io.rocketbase.sample.converter;
 
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
-import io.rocketbase.sample.dto.data.EmployeeData;
-import io.rocketbase.sample.dto.edit.EmployeeEdit;
+import io.rocketbase.sample.dto.employee.EmployeeRead;
+import io.rocketbase.sample.dto.employee.EmployeeWrite;
 import io.rocketbase.sample.model.Employee;
 import org.mapstruct.*;
 
 import java.util.List;
 
 @Mapper(config = CentralConfig.class, uses = {CompanyConverter.class})
-public interface EmployeeConverter extends EntityReadWriteConverter<Employee, EmployeeData, EmployeeEdit> {
+public interface EmployeeConverter extends EntityReadWriteConverter<Employee, EmployeeRead, EmployeeWrite> {
     @Mappings({
             @Mapping(target = "company", ignore = true)
     })
-    Employee toEntity(EmployeeData data);
+    Employee toEntity(EmployeeRead data);
 
     @InheritInverseConfiguration
-    EmployeeData fromEntity(Employee entity);
+    EmployeeRead fromEntity(Employee entity);
 
-    List<EmployeeData> fromEntities(List<Employee> entities);
+    List<EmployeeRead> fromEntities(List<Employee> entities);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "company", ignore = true),
     })
-    Employee newEntity(EmployeeEdit edit);
+    Employee newEntity(EmployeeWrite edit);
 
     @InheritConfiguration()
-    Employee updateEntityFromEdit(EmployeeEdit edit, @MappingTarget Employee entity);
+    Employee updateEntityFromEdit(EmployeeWrite edit, @MappingTarget Employee entity);
 }
