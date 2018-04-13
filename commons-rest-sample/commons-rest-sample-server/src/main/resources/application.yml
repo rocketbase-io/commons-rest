@@ -1,0 +1,11 @@
+# database connection
+spring:
+  data:
+    mongodb:
+      database: commons-rest-sample
+# json configuration
+  jackson:
+    serialization:
+      WRITE_DATES_AS_TIMESTAMPS: false
+      INDENT_OUTPUT: true
+    default-property-inclusion: non_null

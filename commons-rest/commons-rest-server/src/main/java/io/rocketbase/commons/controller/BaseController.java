@@ -31,11 +31,11 @@ public interface BaseController {
         pageSize = Math.min(pageSize, getMaxPageSize());
         Integer page = parseInteger(params, "page", 0);
 
-        return new PageRequest(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE), parseSort(params, "sort"));
+        return PageRequest.of(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE), parseSort(params, "sort"));
     }
 
     default Sort parseSort(MultiValueMap<String, String> params, String key) {
-        Sort sort = null;
+        Sort sort = Sort.unsorted();
         if (params != null && params.containsKey(key)) {
             List<Sort.Order> orders = new ArrayList<>();
             for (String s : params.get(key)) {
@@ -43,11 +43,11 @@ public interface BaseController {
                     String[] splitted = s.split("\\,");
                     orders.add(new Sort.Order(Sort.Direction.fromString(splitted[1]), splitted[0]));
                 } else if (s.toLowerCase().matches("[a-z0-9]+")) {
-                    orders.add(new Sort.Order(s));
+                    orders.add(Sort.Order.by(s));
                 }
             }
             if (orders.size() > 0) {
-                sort = new Sort(orders);
+                sort = Sort.by(orders);
             }
         }
         return sort;

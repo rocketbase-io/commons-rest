@@ -201,7 +201,7 @@ public class EmployeeResourceTest {
         assertThat(employeeRead.getLastName(), is(employeeWrite.getLastName()));
         assertThat(employeeRead.getEmail(), is(employeeWrite.getEmail()));
 
-        employee = employeeRepository.findOne(employeeRead.getId());
+        employee = employeeRepository.findById(employeeRead.getId()).get();
         assertEmployeeSame(employee, employeeRead);
     }
 
@@ -217,7 +217,7 @@ public class EmployeeResourceTest {
         employeeResource.delete(company.getId(), employee.getId());
 
         // then
-        assertThat(employeeRepository.findOne(employee.getId()), nullValue());
+        assertThat(employeeRepository.findById(employee.getId()).isPresent(), equalTo(false));
     }
 
 

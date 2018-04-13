@@ -44,7 +44,7 @@ public class DataInitializer {
                         .url(company.getUrl())
                         .build());
             }
-            companyRepository.save(companyList);
+            companyRepository.saveAll(companyList);
 
             List<Employee> personList = new ArrayList<>();
             for (int count = 0; count < 1000; count++) {
@@ -59,7 +59,7 @@ public class DataInitializer {
                         .company(companyList.get(ThreadLocalRandom.current().nextInt(0, companyList.size())))
                         .build());
             }
-            personRepository.save(personList);
+            personRepository.saveAll(personList);
             log.info("initialized {} persons and {} companies", personList.size(), companyCounter.get());
 
         }

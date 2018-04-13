@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -73,11 +74,11 @@ public abstract class AbstractCrudController<Entity, Read, Write, ID extends Ser
     }
 
     protected Entity getEntity(ID id) {
-        Entity entity = repository.findOne(id);
-        if (entity == null) {
+        Optional<Entity> entity = repository.findById(id);
+        if (!entity.isPresent()) {
             throw new NotFoundException();
         }
-        return entity;
+        return entity.get();
     }
 
 

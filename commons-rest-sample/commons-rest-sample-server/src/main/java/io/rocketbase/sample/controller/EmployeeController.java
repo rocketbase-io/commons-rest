@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.Optional;
 
 
 @Slf4j
@@ -53,12 +54,12 @@ public class EmployeeController extends AbstractCrudChildController<Employee, Em
 
     @Override
     protected Employee newEntity(String parentId, EmployeeWrite editData) {
-        Company company = companyRepository.findOne(parentId);
-        if (company == null) {
+        Optional<Company> company = companyRepository.findById(parentId);
+        if (!company.isPresent()) {
             throw new NotFoundException();
         }
         Employee entity = getConverter().newEntity(editData);
-        entity.setCompany(company);
+        entity.setCompany(company.get());
         return entity;
     }
 }

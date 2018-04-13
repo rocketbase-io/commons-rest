@@ -131,7 +131,7 @@ public class CompanyResourceTest {
         assertThat(companyRead, notNullValue());
         assertThat(companyRead.getId(), notNullValue());
 
-        Company Company = companyRepository.findOne(companyRead.getId());
+        Company Company = companyRepository.findById(companyRead.getId()).get();
         assertCompanySame(Company, companyRead);
     }
 
@@ -179,7 +179,7 @@ public class CompanyResourceTest {
         assertThat(companyRead.getEmail(), is(companyWrite.getEmail()));
         assertThat(companyRead.getUrl(), is(companyWrite.getUrl()));
 
-        company = companyRepository.findOne(company.getId());
+        company = companyRepository.findById(company.getId()).get();
         assertCompanySame(company, companyRead);
     }
 
@@ -192,7 +192,7 @@ public class CompanyResourceTest {
         companyResource.delete(company.getId());
 
         // then
-        assertThat(companyRepository.findOne(company.getId()), nullValue());
+        assertThat(companyRepository.findById(company.getId()).isPresent(), equalTo(false));
     }
 
     @Test
@@ -203,7 +203,7 @@ public class CompanyResourceTest {
                 .email("a@company.org")
                 .url("https://a-company.org")
                 .build();
-        companyRepository.save(Arrays.asList(createDefaultCompany(), aCompany));
+        companyRepository.saveAll(Arrays.asList(createDefaultCompany(), aCompany));
 
 
         // when
@@ -230,7 +230,7 @@ public class CompanyResourceTest {
                 .email("a@company.org")
                 .url("https://a-company.org")
                 .build();
-        companyRepository.save(Arrays.asList(createDefaultCompany(), aCompany));
+        companyRepository.saveAll(Arrays.asList(createDefaultCompany(), aCompany));
 
 
         // when
