@@ -95,7 +95,7 @@ public class BaseControllerTest {
 
         // then
         assertThat(request, notNullValue());
-        assertThat(request.getSort(), nullValue());
+        assertThat(request.getSort(), equalTo(Sort.unsorted()));
     }
 
     @Test
