@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -137,6 +138,25 @@ public interface BaseController {
 
     default int getMaxPageSize() {
         return DEFAULT_MAX_PAGE_SIZE;
+    }
+
+    /**
+     * get baseUrl without / at the end
+     *
+     * @param request current HttpServletRequest
+     * @return baseUrl without /
+     */
+    default String getBaseUrl(HttpServletRequest request) {
+        String result = request.getScheme() + "://" + request.getServerName();
+        int serverPort = request.getServerPort();
+        if (serverPort != 80 && serverPort != 443) {
+            result += ":" + serverPort;
+        }
+        result += request.getContextPath();
+        if (result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 
 }
