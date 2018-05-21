@@ -1,4 +1,4 @@
-package io.rocketbase.commons.dto.translation;
+package io.rocketbase.commons.translation;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;

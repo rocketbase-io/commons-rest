@@ -1,4 +1,4 @@
-package io.rocketbase.commons.dto.translation;
+package io.rocketbase.commons.translation;
 
 import javax.validation.Constraint;
 import java.lang.annotation.Documented;

@@ -1,4 +1,4 @@
-package io.rocketbase.commons.dto.translation;
+package io.rocketbase.commons.translation;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
