@@ -76,7 +76,7 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
 
     @SneakyThrows
     protected Read update(UriComponentsBuilder uriBuilder, Write write) {
-        ResponseEntity<String> response = restTemplate.exchange(uriBuilder.toUriString(),
+        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.PUT,
                 createHttpEntity(write),
                 String.class);
