@@ -28,7 +28,7 @@ public interface BaseController {
             DateTimeFormatter.ofPattern("d.MM.yyyy"));
 
     default PageRequest parsePageRequest(MultiValueMap<String, String> params) {
-        Integer pageSize = parseInteger(params, "pageSize", getPageSize());
+        Integer pageSize = parseInteger(params, "pageSize", getDefaultPageSize());
         pageSize = Math.min(pageSize, getMaxPageSize());
         Integer page = parseInteger(params, "page", 0);
 
@@ -132,7 +132,7 @@ public interface BaseController {
         return defaultValue;
     }
 
-    default int getPageSize() {
+    default int getDefaultPageSize() {
         return DEFAULT_PAGE_SIZE;
     }
 
