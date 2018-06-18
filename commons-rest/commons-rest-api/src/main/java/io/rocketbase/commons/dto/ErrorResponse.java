@@ -1,13 +1,15 @@
 package io.rocketbase.commons.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.Singular;
 
 import java.util.Map;
 
 @Data
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class ErrorResponse {
 
     private Integer status;
@@ -16,12 +18,15 @@ public class ErrorResponse {
     @Singular
     private Map<String, String> fields;
 
-    public ErrorResponse(Integer status, String message) {
-        this.status = status;
-        this.message = message;
+    public ErrorResponse() {
     }
 
     public ErrorResponse(String errorMessage) {
+        this.message = errorMessage;
+    }
+
+    public ErrorResponse(Integer status, String message) {
+        this.status = status;
         this.message = message;
     }
 }
