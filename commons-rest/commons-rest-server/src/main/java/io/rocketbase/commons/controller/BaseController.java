@@ -1,6 +1,7 @@
 package io.rocketbase.commons.controller;
 
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
 
@@ -27,16 +28,57 @@ public interface BaseController {
             DateTimeFormatter.ofPattern("d/MM/yyyy"),
             DateTimeFormatter.ofPattern("d.MM.yyyy"));
 
-    default PageRequest parsePageRequest(MultiValueMap<String, String> params) {
-        Integer pageSize = parseInteger(params, "pageSize", getDefaultPageSize());
+    /**
+     * parse page, size and sort from request
+     *
+     * @param params MultiValueMap that contains all query params of request
+     * @return a filled {@link PageRequest}
+     */
+    default Pageable parsePageRequest(MultiValueMap<String, String> params) {
+        return parsePageRequest(params, null);
+    }
+
+    /**
+     * parse page, size and sort from request
+     *
+     * @param params      MultiValueMap that contains all query params of request
+     * @param defaultSort sort that should get used in case of not filled parameter
+     * @return a filled {@link PageRequest}
+     */
+    default Pageable parsePageRequest(MultiValueMap<String, String> params, Sort defaultSort) {
+        Integer pageSize = parseInteger(params, "pageSize", null);
+        if (pageSize == null) {
+            pageSize = parseInteger(params, "size", getDefaultPageSize());
+        }
         pageSize = Math.min(pageSize, getMaxPageSize());
         Integer page = parseInteger(params, "page", 0);
 
-        return PageRequest.of(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE), parseSort(params, "sort"));
+        return PageRequest.of(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE), parseSort(params, "sort", defaultSort));
     }
 
+
+    /**
+     * parse sort and build correct {@link Sort} or {@link org.springframework.data.domain.Pageable}
+     *
+     * @param params MultiValueMap that contains all query params of request
+     * @param key    name of sort parameter in uri
+     * @return an unsorted Sort in case of empty param or filled one
+     */
     default Sort parseSort(MultiValueMap<String, String> params, String key) {
-        Sort sort = Sort.unsorted();
+        return parseSort(params, key, null);
+    }
+
+    /**
+     * parse sort and build correct {@link Sort} or {@link org.springframework.data.domain.Pageable}
+     *
+     * @param params      MultiValueMap that contains all query params of request
+     * @param key         name of sort parameter in uri
+     * @param defaultSort sort that should get used in case of not filled parameter
+     * @return defaultSort in case of empty param or filled one
+     */
+    default Sort parseSort(MultiValueMap<String, String> params, String key, Sort defaultSort) {
+        Sort sort = defaultSort != null ? defaultSort : Sort.unsorted();
+
         if (params != null && params.containsKey(key)) {
             List<Sort.Order> orders = new ArrayList<>();
             for (String s : params.get(key)) {

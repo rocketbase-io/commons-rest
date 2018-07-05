@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
@@ -74,7 +74,7 @@ public abstract class AbstractCrudChildController<Entity, Read, Write, ID extend
 
     protected abstract Entity getEntity(ID parentId, ID id);
 
-    protected abstract Page<Entity> findAllByParentId(ID parentId, PageRequest pageRequest);
+    protected abstract Page<Entity> findAllByParentId(ID parentId, Pageable pageable);
 
     protected abstract Entity newEntity(ID parentId, Write writeData);
 }

@@ -1,7 +1,7 @@
 package io.rocketbase.commons.controller;
 
 import org.junit.Test;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -23,7 +23,7 @@ public class BaseControllerTest {
         MultiValueMap map = new LinkedMultiValueMap<String, String>();
 
         // when
-        PageRequest request = getTestController().parsePageRequest(map);
+        Pageable request = getTestController().parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
@@ -41,12 +41,28 @@ public class BaseControllerTest {
         map.add("page", String.valueOf(page));
 
         // when
-        PageRequest request = getTestController().parsePageRequest(map);
+        Pageable request = getTestController().parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
         assertThat(request.getPageSize(), equalTo(totalCount));
         assertThat(request.getPageNumber(), equalTo(page));
+    }
+
+    @Test
+    public void parsePageRequestWithoutParams() {
+        // given
+        MultiValueMap map = new LinkedMultiValueMap<String, String>();
+        Sort sort = Sort.by("id");
+
+        // when
+        Pageable request = getTestController().parsePageRequest(map, sort);
+
+        // then
+        assertThat(request, notNullValue());
+        assertThat(request.getPageSize(), equalTo(BaseController.DEFAULT_PAGE_SIZE));
+        assertThat(request.getPageNumber(), equalTo(0));
+        assertThat(request.getSort(), equalTo(sort));
     }
 
     @Test
@@ -57,7 +73,7 @@ public class BaseControllerTest {
         map.add("page", String.valueOf(-1));
 
         // when
-        PageRequest request = getTestController().parsePageRequest(map);
+        Pageable request = getTestController().parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
@@ -91,7 +107,7 @@ public class BaseControllerTest {
         map.add("sort", "");
 
         // when
-        PageRequest request = getTestController().parsePageRequest(map);
+        Pageable request = getTestController().parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
