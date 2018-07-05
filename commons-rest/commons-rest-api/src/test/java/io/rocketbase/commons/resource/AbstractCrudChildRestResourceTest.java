@@ -1,10 +1,9 @@
 package io.rocketbase.commons.resource;
 
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -43,9 +42,6 @@ public class AbstractCrudChildRestResourceTest {
 
         public static final String BASE_PARENT_API_URL = "https://localhost:8080/api/parent";
 
-        public TestWithoutSlashCrudChildRestResource() {
-            super(new ObjectMapper());
-        }
 
         @Override
         protected String getBaseParentApiUrl() {
@@ -58,8 +54,8 @@ public class AbstractCrudChildRestResourceTest {
         }
 
         @Override
-        protected TypeReference<PageableResult<Object>> createPagedTypeReference() {
-            return new TypeReference<PageableResult<Object>>() {
+        protected ParameterizedTypeReference<PageableResult<Object>> createPagedTypeReference() {
+            return new ParameterizedTypeReference<PageableResult<Object>>() {
             };
         }
     }
@@ -67,9 +63,6 @@ public class AbstractCrudChildRestResourceTest {
 
     private class TestWithSlashCrudChildRestResource extends AbstractCrudChildRestResource<Object, Object, String> {
 
-        public TestWithSlashCrudChildRestResource() {
-            super(new ObjectMapper());
-        }
 
         @Override
         protected String getBaseParentApiUrl() {
@@ -82,8 +75,8 @@ public class AbstractCrudChildRestResourceTest {
         }
 
         @Override
-        protected TypeReference<PageableResult<Object>> createPagedTypeReference() {
-            return new TypeReference<PageableResult<Object>>() {
+        protected ParameterizedTypeReference<PageableResult<Object>> createPagedTypeReference() {
+            return new ParameterizedTypeReference<PageableResult<Object>>() {
             };
         }
     }

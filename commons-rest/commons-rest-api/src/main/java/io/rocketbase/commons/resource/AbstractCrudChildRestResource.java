@@ -1,10 +1,8 @@
 package io.rocketbase.commons.resource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.request.PageableRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
@@ -13,10 +11,6 @@ import java.io.Serializable;
 @Slf4j
 public abstract class AbstractCrudChildRestResource<Read, Write, ID extends Serializable> extends AbstractBaseCrudRestResource<Read, Write> {
 
-    @Autowired
-    public AbstractCrudChildRestResource(ObjectMapper objectMapper) {
-        super(objectMapper);
-    }
 
     public PageableResult<Read> find(ID parentId, int page, int pagesize) {
         return find(appendParams(buildBaseUriBuilder(parentId),

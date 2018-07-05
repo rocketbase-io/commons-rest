@@ -1,10 +1,8 @@
 package io.rocketbase.commons.resource;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.request.PageableRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
@@ -13,12 +11,6 @@ import java.util.function.Consumer;
 
 @Slf4j
 public abstract class AbstractCrudRestResource<Read, Write, ID extends Serializable> extends AbstractBaseCrudRestResource<Read, Write> {
-
-
-    @Autowired
-    public AbstractCrudRestResource(ObjectMapper objectMapper) {
-        super(objectMapper);
-    }
 
     /**
      * will call paged find method, iterate through all results and execute the consumer on all data instances

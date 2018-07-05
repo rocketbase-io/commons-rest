@@ -1,9 +1,8 @@
 package io.rocketbase.commons.resource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import org.junit.Test;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -29,14 +28,9 @@ public class AbstractCrudRestResourceTest {
 
         public static final String BASE_PARENT_API_URL = "https://localhost:8080/api/entity";
 
-        public TestWithoutSlashCrudRestResource() {
-            super(new ObjectMapper());
-        }
-
-
         @Override
-        protected TypeReference<PageableResult<Object>> createPagedTypeReference() {
-            return new TypeReference<PageableResult<Object>>() {
+        protected ParameterizedTypeReference<PageableResult<Object>> createPagedTypeReference() {
+            return new ParameterizedTypeReference<PageableResult<Object>>() {
             };
         }
 

@@ -1,12 +1,11 @@
 package io.rocketbase.commons.resource;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.reflect.ParameterizedType;
 
-public abstract class AbstractBaseCrudRestResource<Read, Write> extends AbstractRestResource {
+public abstract class AbstractBaseCrudRestResource<Read, Write> implements BaseRestResource {
 
     @Getter
     protected Class<Read> responseClass;
@@ -23,9 +22,7 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
     @Setter
     private RestTemplate restTemplate;
 
-    @SuppressWarnings("unchecked")
-    public AbstractBaseCrudRestResource(ObjectMapper objectMapper) {
-        super(objectMapper);
+    public AbstractBaseCrudRestResource() {
         responseClass = (Class<Read>) ((ParameterizedType) getClass()
                 .getGenericSuperclass()).getActualTypeArguments()[0];
     }
@@ -40,11 +37,11 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
 
     @SneakyThrows
     protected PageableResult<Read> find(UriComponentsBuilder uriBuilder) {
-        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
+        ResponseEntity<PageableResult<Read>> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.GET,
                 new HttpEntity<>(createHeaderWithLanguage()),
-                String.class);
-        return renderResponse(response, createPagedTypeReference());
+                createPagedTypeReference());
+        return response.getBody();
     }
 
     /**
@@ -54,12 +51,12 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
     @SneakyThrows
     protected Read getById(UriComponentsBuilder uriBuilder) {
         try {
-            ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
+            ResponseEntity<Read> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                     HttpMethod.GET,
                     new HttpEntity<>(createHeaderWithLanguage()),
-                    String.class);
+                    responseClass);
 
-            return renderResponse(response, responseClass);
+            return response.getBody();
         } catch (NotFoundException notFound) {
             return null;
         }
@@ -67,20 +64,20 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
 
     @SneakyThrows
     protected Read create(UriComponentsBuilder uriBuilder, Write write) {
-        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
+        ResponseEntity<Read> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.POST,
                 createHttpEntity(write),
-                String.class);
-        return renderResponse(response, responseClass);
+                responseClass);
+        return response.getBody();
     }
 
     @SneakyThrows
     protected Read update(UriComponentsBuilder uriBuilder, Write write) {
-        ResponseEntity<String> response = getRestTemplate().exchange(uriBuilder.toUriString(),
+        ResponseEntity<Read> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                 HttpMethod.PUT,
                 createHttpEntity(write),
-                String.class);
-        return renderResponse(response, responseClass);
+                responseClass);
+        return response.getBody();
     }
 
     protected void delete(UriComponentsBuilder uriBuilder) {
@@ -94,6 +91,6 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> extends Abstract
         return entity;
     }
 
-    protected abstract TypeReference<PageableResult<Read>> createPagedTypeReference();
+    protected abstract ParameterizedTypeReference<PageableResult<Read>> createPagedTypeReference();
 
 }
