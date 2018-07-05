@@ -35,7 +35,7 @@ public abstract class AbstractCrudChildController<Entity, Read, Write, ID extend
     private final PagingAndSortingRepository<Entity, ID> repository;
 
     @Getter(AccessLevel.PROTECTED)
-    private final EntityReadWriteConverter<Entity, Read, Write> converter;
+    private final Converter converter;
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
