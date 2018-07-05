@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 
 @Slf4j
@@ -21,7 +22,7 @@ public abstract class AbstractCrudChildRestResource<Read, Write, ID extends Seri
         return find(appendParams(buildBaseUriBuilder(parentId), request));
     }
 
-    public Read getById(ID parentId, ID id) {
+    public Optional<Read> getById(ID parentId, ID id) {
         return getById(buildBaseUriBuilder(parentId).path(String.valueOf(id)));
     }
 

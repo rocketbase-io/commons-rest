@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.Optional;
 
 public abstract class AbstractBaseCrudRestResource<Read, Write> implements BaseRestResource {
 
@@ -46,19 +47,19 @@ public abstract class AbstractBaseCrudRestResource<Read, Write> implements BaseR
 
     /**
      * @param uriBuilder complete uri
-     * @return object or null in case of not found (will catch {@link io.rocketbase.commons.exception.NotFoundException})
+     * @return optional in case of {@link io.rocketbase.commons.exception.NotFoundException}) empty
      */
     @SneakyThrows
-    protected Read getById(UriComponentsBuilder uriBuilder) {
+    protected Optional<Read> getById(UriComponentsBuilder uriBuilder) {
         try {
             ResponseEntity<Read> response = getRestTemplate().exchange(uriBuilder.toUriString(),
                     HttpMethod.GET,
                     new HttpEntity<>(createHeaderWithLanguage()),
                     responseClass);
 
-            return response.getBody();
+            return Optional.of(response.getBody());
         } catch (NotFoundException notFound) {
-            return null;
+            return Optional.empty();
         }
     }
 

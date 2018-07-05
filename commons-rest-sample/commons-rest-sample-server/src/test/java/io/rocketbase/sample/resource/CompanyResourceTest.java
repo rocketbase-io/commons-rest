@@ -24,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -62,10 +63,10 @@ public class CompanyResourceTest {
         Company company = companyRepository.save(createDefaultCompany());
 
         // when
-        CompanyRead data = companyResource.getById(company.getId());
+        Optional<CompanyRead> data = companyResource.getById(company.getId());
 
         // then
-        assertCompanySame(company, data);
+        assertCompanySame(company, data.get());
     }
 
     @Test
@@ -73,10 +74,10 @@ public class CompanyResourceTest {
         // given
 
         // when
-        CompanyRead data = companyResource.getById("notexisting");
+        Optional<CompanyRead>  data = companyResource.getById("notexisting");
 
         // then
-        assertThat(data, nullValue());
+        assertThat(data, equalTo(Optional.empty()));
     }
 
     @Test

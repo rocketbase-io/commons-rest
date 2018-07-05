@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 
@@ -36,7 +37,7 @@ public abstract class AbstractCrudRestResource<Read, Write, ID extends Serializa
         return find(appendParams(buildBaseUriBuilder(), request));
     }
 
-    public Read getById(ID id) {
+    public Optional<Read> getById(ID id) {
         return getById(buildBaseUriBuilder().path(String.valueOf(id)));
     }
 

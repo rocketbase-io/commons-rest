@@ -23,6 +23,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -67,10 +68,10 @@ public class EmployeeResourceTest {
         employee = employeeRepository.save(employee);
 
         // when
-        EmployeeRead data = employeeResource.getById(company.getId(), employee.getId());
+        Optional<EmployeeRead> data = employeeResource.getById(company.getId(), employee.getId());
 
         // then
-        assertEmployeeSame(employee, data);
+        assertEmployeeSame(employee, data.get());
     }
 
     @Test
@@ -82,12 +83,12 @@ public class EmployeeResourceTest {
         employee = employeeRepository.save(employee);
 
         // when
-        EmployeeRead data = employeeResource.getById(company.getId(), "notexisting");
-        EmployeeRead missMatch = employeeResource.getById("notexisting", employee.getId());
+        Optional<EmployeeRead> data = employeeResource.getById(company.getId(), "notexisting");
+        Optional<EmployeeRead> missMatch = employeeResource.getById("notexisting", employee.getId());
 
         // then
-        assertThat(data, nullValue());
-        assertThat(missMatch, nullValue());
+        assertThat(data, equalTo(Optional.empty()));
+        assertThat(missMatch, equalTo(Optional.empty()));
     }
 
     @Test
