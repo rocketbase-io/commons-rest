@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Optional;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -40,7 +40,7 @@ public abstract class AbstractCrudController<Entity, Read, Write, ID extends Ser
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public PageableResult<Read> find(@RequestParam(required = false) MultiValueMap<String, String> params) {
-        Page<Entity> entities = repository.findAll(parsePageRequest(params));
+        Page<Entity> entities = repository.findAll(parsePageRequest(params, getDefaultSort()));
         return PageableResult.contentPage(converter.fromEntities(entities.getContent()), entities);
     }
 
@@ -73,12 +73,22 @@ public abstract class AbstractCrudController<Entity, Read, Write, ID extends Ser
         repository.delete(entity);
     }
 
+    /**
+     * get by Id or throw {@link NotFoundException}
+     *
+     * @param id unique identifier
+     * @return entity
+     */
     protected Entity getEntity(ID id) {
-        Optional<Entity> entity = repository.findById(id);
-        if (!entity.isPresent()) {
-            throw new NotFoundException();
-        }
-        return entity.get();
+        return repository.findById(id)
+                .orElseThrow(() -> new NotFoundException());
+    }
+
+    /**
+     * @return default sort in case nothing is given via parameter
+     */
+    protected Sort getDefaultSort() {
+        return Sort.unsorted();
     }
 
 

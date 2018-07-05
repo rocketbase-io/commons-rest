@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
@@ -39,7 +40,7 @@ public abstract class AbstractCrudChildController<Entity, Read, Write, ID extend
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public PageableResult<Read> find(@PathVariable("parentId") ID parentId, @RequestParam(required = false) MultiValueMap<String, String> params) {
-        Page<Entity> entities = findAllByParentId(parentId, parsePageRequest(params));
+        Page<Entity> entities = findAllByParentId(parentId, parsePageRequest(params, getDefaultSort()));
         return PageableResult.contentPage(converter.fromEntities(entities.getContent()), entities);
     }
 
@@ -70,6 +71,13 @@ public abstract class AbstractCrudChildController<Entity, Read, Write, ID extend
     public void delete(@PathVariable("parentId") ID parentId, @PathVariable("id") ID id) {
         Entity entity = getEntity(parentId, id);
         repository.delete(entity);
+    }
+
+    /**
+     * @return default sort in case nothing is given via parameter
+     */
+    protected Sort getDefaultSort() {
+        return Sort.unsorted();
     }
 
     protected abstract Entity getEntity(ID parentId, ID id);
