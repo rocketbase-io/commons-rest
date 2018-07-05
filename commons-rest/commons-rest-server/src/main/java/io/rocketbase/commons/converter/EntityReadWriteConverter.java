@@ -1,6 +1,7 @@
 package io.rocketbase.commons.converter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * interface that handles converting between Entity, Data and Edit
@@ -10,14 +11,6 @@ import java.util.List;
  * @param <Write>  object with all properties that are changeable
  */
 public interface EntityReadWriteConverter<Entity, Read, Write> {
-
-    /**
-     * convert data to entity
-     *
-     * @param read response data object
-     * @return database entity
-     */
-    Entity toEntity(Read read);
 
     /**
      * convert vise versa entity to data
@@ -33,7 +26,14 @@ public interface EntityReadWriteConverter<Entity, Read, Write> {
      * @param entities list of entities
      * @return converted data list
      */
-    List<Read> fromEntities(List<Entity> entities);
+    default List<Read> fromEntities(List<Entity> entities) {
+        if (entities == null) {
+            return null;
+        }
+        return entities.stream()
+                .map(e -> fromEntity(e))
+                .collect(Collectors.toList());
+    }
 
     /**
      * create new entity by given edit
