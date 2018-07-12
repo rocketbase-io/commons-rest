@@ -1,9 +1,8 @@
 package io.rocketbase.sample.repository;
 
-import io.rocketbase.sample.model.Company;
+import io.rocketbase.sample.model.CompanyEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface CompanyRepository extends MongoRepository<Company, String> {
+public interface CompanyRepository extends MongoRepository<CompanyEntity, String> {
 
-    Company findByName(String name);
 }

@@ -2,8 +2,8 @@ package io.rocketbase.sample.initializer;
 
 import io.codearte.jfairy.Fairy;
 import io.codearte.jfairy.producer.person.Person;
-import io.rocketbase.sample.model.Company;
-import io.rocketbase.sample.model.Employee;
+import io.rocketbase.sample.model.CompanyEntity;
+import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.repository.CompanyRepository;
 import io.rocketbase.sample.repository.EmployeeRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -29,16 +29,16 @@ public class DataInitializer {
 
     private AtomicInteger companyCounter = new AtomicInteger(0);
 
-    private Map<String, Company> companyCache = new HashMap<>();
+    private Map<String, CompanyEntity> companyCache = new HashMap<>();
 
     @PostConstruct
     public void postConstruct() {
         if (companyRepository.count() == 0) {
             Fairy fairy = Fairy.create(Locale.GERMAN);
-            List<Company> companyList = new ArrayList<>();
+            List<CompanyEntity> companyList = new ArrayList<>();
             for (int count = 0; count < 100; count++) {
                 io.codearte.jfairy.producer.company.Company company = fairy.company();
-                companyList.add(Company.builder()
+                companyList.add(CompanyEntity.builder()
                         .name(company.getName())
                         .email(company.getEmail())
                         .url(company.getUrl())
@@ -46,11 +46,11 @@ public class DataInitializer {
             }
             companyRepository.saveAll(companyList);
 
-            List<Employee> personList = new ArrayList<>();
+            List<EmployeeEntity> personList = new ArrayList<>();
             for (int count = 0; count < 1000; count++) {
                 io.codearte.jfairy.producer.person.Person person = fairy.person();
                 DateTime dateOfBirth = person.getDateOfBirth();
-                personList.add(Employee.builder()
+                personList.add(EmployeeEntity.builder()
                         .firstName(person.getFirstName())
                         .lastName(person.getLastName())
                         .dateOfBirth(LocalDate.of(dateOfBirth.getYear(), dateOfBirth.getMonthOfYear(), dateOfBirth.getDayOfMonth()))
@@ -63,7 +63,5 @@ public class DataInitializer {
             log.info("initialized {} persons and {} companies", personList.size(), companyCounter.get());
 
         }
-
-
     }
 }

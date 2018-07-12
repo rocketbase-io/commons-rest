@@ -3,20 +3,20 @@ package io.rocketbase.sample.converter;
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.sample.dto.employee.EmployeeRead;
 import io.rocketbase.sample.dto.employee.EmployeeWrite;
-import io.rocketbase.sample.model.Employee;
+import io.rocketbase.sample.model.EmployeeEntity;
 import org.mapstruct.*;
 
-@Mapper(config = CentralConfig.class, uses = {CompanyConverter.class})
-public interface EmployeeConverter extends EntityReadWriteConverter<Employee, EmployeeRead, EmployeeWrite> {
+@Mapper(config = CentralConfig.class)
+public interface EmployeeConverter extends EntityReadWriteConverter<EmployeeEntity, EmployeeRead, EmployeeWrite> {
 
-    EmployeeRead fromEntity(Employee entity);
+    EmployeeRead fromEntity(EmployeeEntity entity);
 
     @Mappings({
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "company", ignore = true),
     })
-    Employee newEntity(EmployeeWrite edit);
+    EmployeeEntity newEntity(EmployeeWrite workspace);
 
     @InheritConfiguration()
-    Employee updateEntityFromEdit(EmployeeWrite edit, @MappingTarget Employee entity);
+    EmployeeEntity updateEntityFromEdit(EmployeeWrite write, @MappingTarget EmployeeEntity entity);
 }

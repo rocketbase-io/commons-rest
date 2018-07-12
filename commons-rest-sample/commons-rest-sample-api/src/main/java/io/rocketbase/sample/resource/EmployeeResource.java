@@ -4,19 +4,28 @@ import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.resource.AbstractCrudChildRestResource;
 import io.rocketbase.sample.dto.employee.EmployeeRead;
 import io.rocketbase.sample.dto.employee.EmployeeWrite;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.Assert;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-@Service
+
 public class EmployeeResource extends AbstractCrudChildRestResource<EmployeeRead, EmployeeWrite, String> {
 
-    @Value("${resource.base.api.url}")
-    private String baseApiUrl;
+    protected String baseUrl;
+
+    public EmployeeResource(String baseUrl) {
+        this(baseUrl, null);
+    }
+
+    public EmployeeResource(String baseUrl, RestTemplate restTemplate) {
+        Assert.hasText(baseUrl, "baseUrl is required");
+        this.baseUrl = baseUrl;
+        setRestTemplate(restTemplate);
+    }
 
     @Override
     protected String getBaseParentApiUrl() {
-        return baseApiUrl + "/api/company";
+        return baseUrl + "/api/company";
     }
 
     @Override

@@ -1,13 +1,15 @@
 package io.rocketbase.sample.repository;
 
-import io.rocketbase.sample.model.Employee;
+import io.rocketbase.sample.model.EmployeeEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
-public interface EmployeeRepository extends MongoRepository<Employee, String> {
+import java.util.Optional;
 
-    Employee findOneByCompanyIdAndId(String companyId, String id);
+public interface EmployeeRepository extends MongoRepository<EmployeeEntity, String> {
 
-    Page<Employee> findAllByCompanyId(String companyId, Pageable pageRequest);
+    Optional<EmployeeEntity> findOneByCompanyIdAndId(String companyId, String id);
+
+    Page<EmployeeEntity> findAllByCompanyId(String companyId, Pageable pageRequest);
 }

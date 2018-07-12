@@ -4,19 +4,27 @@ import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.resource.AbstractCrudRestResource;
 import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.Assert;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
-@Service
 public class CompanyResource extends AbstractCrudRestResource<CompanyRead, CompanyWrite, String> {
 
-    @Value("${resource.base.api.url}")
-    private String baseApiUrl;
+    protected String baseUrl;
+
+    public CompanyResource(String baseUrl) {
+        this(baseUrl, null);
+    }
+
+    public CompanyResource(String baseUrl, RestTemplate restTemplate) {
+        Assert.hasText(baseUrl, "baseUrl is required");
+        this.baseUrl = baseUrl;
+        setRestTemplate(restTemplate);
+    }
 
     @Override
     protected String getBaseApiUrl() {
-        return baseApiUrl + "/api/company";
+        return baseUrl + "/api/company";
     }
 
     @Override

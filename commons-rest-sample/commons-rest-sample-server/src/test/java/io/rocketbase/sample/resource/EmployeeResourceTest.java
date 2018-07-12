@@ -6,8 +6,8 @@ import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.commons.resource.BasicResponseErrorHandler;
 import io.rocketbase.sample.dto.employee.EmployeeRead;
 import io.rocketbase.sample.dto.employee.EmployeeWrite;
-import io.rocketbase.sample.model.Company;
-import io.rocketbase.sample.model.Employee;
+import io.rocketbase.sample.model.CompanyEntity;
+import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.repository.CompanyRepository;
 import io.rocketbase.sample.repository.EmployeeRepository;
 import org.junit.After;
@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
@@ -33,7 +34,9 @@ import static org.hamcrest.Matchers.*;
 @ActiveProfiles(profiles = "test")
 public class EmployeeResourceTest {
 
-    @Resource
+    @LocalServerPort
+    int randomServerPort;
+
     private EmployeeResource employeeResource;
 
     @Resource
@@ -42,15 +45,10 @@ public class EmployeeResourceTest {
     @Resource
     private EmployeeRepository employeeRepository;
 
-    @Resource
-    private TestRestTemplate testRestTemplate;
-
     @Before
     public void setup() throws Exception {
-        RestTemplate restTemplate = testRestTemplate.getRestTemplate();
-        restTemplate.setErrorHandler(new BasicResponseErrorHandler());
-        employeeResource.setRestTemplate(restTemplate);
         cleanup();
+        employeeResource = new EmployeeResource(String.format("http://localhost:%d", randomServerPort));
     }
 
     @After
@@ -62,8 +60,8 @@ public class EmployeeResourceTest {
     @Test
     public void shouldGetEmployee() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
-        Employee employee = createDefaultEmployee();
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
+        EmployeeEntity employee = createDefaultEmployee();
         employee.setCompany(company);
         employee = employeeRepository.save(employee);
 
@@ -77,8 +75,8 @@ public class EmployeeResourceTest {
     @Test
     public void shouldNotGetUnknownEmployee() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
-        Employee employee = createDefaultEmployee();
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
+        EmployeeEntity employee = createDefaultEmployee();
         employee.setCompany(company);
         employee = employeeRepository.save(employee);
 
@@ -94,16 +92,16 @@ public class EmployeeResourceTest {
     @Test
     public void shouldFindAllEmployees() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
-        Employee employee = createDefaultEmployee();
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
+        EmployeeEntity employee = createDefaultEmployee();
         employee.setCompany(company);
         employee = employeeRepository.save(employee);
 
 
-        Company otherCompany = createDefaultCompany();
+        CompanyEntity otherCompany = createDefaultCompany();
         otherCompany.setName("Other");
-        Company other = companyRepository.save(otherCompany);
-        Employee otherEmployee = createDefaultEmployee();
+        CompanyEntity other = companyRepository.save(otherCompany);
+        EmployeeEntity otherEmployee = createDefaultEmployee();
         otherEmployee.setFirstName("Other");
         otherEmployee.setEmail("other@test.de");
         otherEmployee.setCompany(other);
@@ -127,7 +125,7 @@ public class EmployeeResourceTest {
     @Test
     public void shouldCreateEmployee() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
 
         EmployeeWrite employeeWrite = EmployeeWrite.builder()
                 .firstName("max")
@@ -144,14 +142,14 @@ public class EmployeeResourceTest {
         assertThat(employeeRead, notNullValue());
         assertThat(employeeRead.getId(), notNullValue());
 
-        Employee employee = employeeRepository.findOneByCompanyIdAndId(company.getId(), employeeRead.getId());
-        assertEmployeeSame(employee, employeeRead);
+        Optional<EmployeeEntity> employee = employeeRepository.findOneByCompanyIdAndId(company.getId(), employeeRead.getId());
+        assertEmployeeSame(employee.get(), employeeRead);
     }
 
     @Test
     public void shouldNotCreateInvalidEmployee() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
 
         EmployeeWrite employeeWrite = EmployeeWrite.builder()
                 .firstName("max")
@@ -177,8 +175,8 @@ public class EmployeeResourceTest {
     @Test
     public void shouldUpdateEmployee() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
-        Employee employee = createDefaultEmployee();
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
+        EmployeeEntity employee = createDefaultEmployee();
         employee.setCompany(company);
         employee = employeeRepository.save(employee);
 
@@ -209,8 +207,8 @@ public class EmployeeResourceTest {
     @Test
     public void shouldDeleteCompany() throws Exception {
         // given
-        Company company = companyRepository.save(createDefaultCompany());
-        Employee employee = createDefaultEmployee();
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
+        EmployeeEntity employee = createDefaultEmployee();
         employee.setCompany(company);
         employee = employeeRepository.save(employee);
 
@@ -222,7 +220,7 @@ public class EmployeeResourceTest {
     }
 
 
-    private void assertEmployeeSame(Employee entity, EmployeeRead data) {
+    private void assertEmployeeSame(EmployeeEntity entity, EmployeeRead data) {
         assertThat(data, notNullValue());
         assertThat(data.getId(), is(entity.getId()));
         assertThat(data.getFirstName(), is(entity.getFirstName()));
@@ -235,16 +233,16 @@ public class EmployeeResourceTest {
     }
 
 
-    private Company createDefaultCompany() {
-        return Company.builder()
+    private CompanyEntity createDefaultCompany() {
+        return CompanyEntity.builder()
                 .name("testcompany")
                 .email("test@company.org")
                 .url("https://company.org")
                 .build();
     }
 
-    private Employee createDefaultEmployee() {
-        return Employee.builder()
+    private EmployeeEntity createDefaultEmployee() {
+        return EmployeeEntity.builder()
                 .firstName("firstname")
                 .lastName("lastname")
                 .email("test@test.de")

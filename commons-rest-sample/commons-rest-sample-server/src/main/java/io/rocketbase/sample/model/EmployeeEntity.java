@@ -5,23 +5,32 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
-@Document
+@Document(collection = "employee")
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class Company implements Serializable {
+public class EmployeeEntity implements Serializable {
 
     @Id
     private String id;
 
-    private String name;
+    private String firstName;
+
+    private String lastName;
+
+    private LocalDate dateOfBirth;
+
+    private boolean female;
 
     private String email;
 
-    private String url;
+    @DBRef(lazy = true)
+    private CompanyEntity company;
 }
