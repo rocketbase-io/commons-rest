@@ -28,6 +28,11 @@ public interface BaseRestResource {
         return uriBuilder;
     }
 
+    /**
+     * create HttpHeaders with ACCEPT_LANGUAGE key of given {@link LocaleContextHolder}
+     *
+     * @return Headers with language key
+     */
     default HttpHeaders createHeaderWithLanguage() {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.ACCEPT_LANGUAGE,
@@ -36,6 +41,12 @@ public interface BaseRestResource {
         return headers;
     }
 
+    /**
+     * checks if given uri ends with slash or adds it if missing
+     *
+     * @param uri given url
+     * @return url with / at the end
+     */
     default String ensureEndsWithSlash(String uri) {
         if (uri == null) {
             return "/";
@@ -44,5 +55,15 @@ public interface BaseRestResource {
             return String.format("%s/", uri);
         }
         return uri;
+    }
+
+    /**
+     * instantiate an UriComponentsBuilder from given url and ensures ends with slash
+     *
+     * @param baseApiUrl base url
+     * @return UriComponentsBuilder
+     */
+    default UriComponentsBuilder createUriComponentsBuilder(String baseApiUrl) {
+        return UriComponentsBuilder.fromUriString(ensureEndsWithSlash(baseApiUrl));
     }
 }
