@@ -4,6 +4,7 @@ import io.rocketbase.commons.controller.exceptionhandler.BadRequestExceptionHand
 import io.rocketbase.commons.controller.exceptionhandler.BeanValidationExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.NotFoundExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,18 +28,21 @@ public class CommonsRestAutoConfiguration {
     }
 
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "handler.badRequest.enabled", matchIfMissing = true)
     public BadRequestExceptionHandler badRequestExceptionHandler() {
         return new BadRequestExceptionHandler();
     }
 
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "handler.notFound.enabled", matchIfMissing = true)
     public NotFoundExceptionHandler notFoundExceptionHandler() {
         return new NotFoundExceptionHandler();
     }
 
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "handler.beanValidation.enabled", matchIfMissing = true)
     public BeanValidationExceptionHandler beanValidationExceptionHandler() {
         return new BeanValidationExceptionHandler();
