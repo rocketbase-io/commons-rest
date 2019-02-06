@@ -56,6 +56,11 @@ public class Translation implements Serializable {
         return null;
     }
 
+    public boolean hasLocale(Locale locale) {
+        Locale language = Locale.forLanguageTag(locale.getLanguage());
+        return translations.containsKey(language);
+    }
+
     public String getTranslated() {
         return getTranslated(LocaleContextHolder.getLocale());
     }
