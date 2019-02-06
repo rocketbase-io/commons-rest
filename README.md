@@ -16,7 +16,7 @@ Conversion between each object can be automatically generated with [mapstruct](h
 
 **Features:**
 * basic DTOs as per example a missing PageableResult
-* custom RunetimeExceptions and ExceptionHandler (also for BeanValidationExceptions)
+* custom RuntimeExceptions, ExceptionHandler and BeanValidationExceptions
 * abstract CRUD controller also for parent child situations
 * abstract CRUD resources to consume REST-Services 
 * prodivded a [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) via yeoman
@@ -29,6 +29,20 @@ This module provides some useful runtime exceptions like NotFoundException and b
 ## commons-rest-server
 
 Containing ExceptionHandlers for common errors like BeanValidationExceptions or the custom NotFoundException. Abstract classes to implement CRUD SpringRestController. Also a parent child solution is provided.
+
+### configuration
+
+This module uses the auto configuration feature of spring-boot-starter so that all necessary beans will get configured automatically.
+Nevertheless you can customize the configuration by the following properties
+
+| property                       | default         | explanation                                                  |
+| ------------------------------ | --------------- | ------------------------------------------------------------ |
+| locale.resolver.enabled        | true            | enable/disable default configuration of the LocaleResolver   |
+| locale.resolver.default        | en              |                                                              |
+| handler.badRequest.enabled     | true            | enable/disable ExceptionHandler for BadRequestException      |
+| handler.notFound.enabled       | true            | enable/disable ExceptionHandler for NotFoundException        |
+| handler.beanValidation.enabled | true            | enable/disable ExceptionHandler for MethodArgumentNotValidException (bean validation issues from spring-boot)      |
+ 
 
 ## commons-rest-sample
 
