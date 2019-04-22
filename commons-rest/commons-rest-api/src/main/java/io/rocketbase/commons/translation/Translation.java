@@ -25,6 +25,10 @@ public class Translation implements Serializable {
     @HasDefaultLocale
     private Map<Locale, String> translations = new HashMap<>();
 
+    public static Translation of(Locale locale, String value) {
+        return new Translation().add(locale, value);
+    }
+
     public static Translation translation(String translation) {
         return Translation.builder()
                 .translation(LocaleContextHolder.getLocale(), translation)
@@ -35,10 +39,37 @@ public class Translation implements Serializable {
         return new TranslationBuilder();
     }
 
-
     public Translation add(Locale locale, String value) {
         translations.put(locale, value);
         return this;
+    }
+
+    public Translation english(String value) {
+        return add(Locale.ENGLISH, value);
+    }
+
+    public Translation french(String value) {
+        return add(Locale.FRENCH, value);
+    }
+
+    public Translation german(String value) {
+        return add(Locale.GERMAN, value);
+    }
+
+    public Translation italian(String value) {
+        return add(Locale.ITALIAN, value);
+    }
+
+    public Translation japanese(String value) {
+        return add(Locale.JAPANESE, value);
+    }
+
+    public Translation korean(String value) {
+        return add(Locale.KOREAN, value);
+    }
+
+    public Translation chinese(String value) {
+        return add(Locale.CHINESE, value);
     }
 
     public String getTranslated(Locale locale) {
