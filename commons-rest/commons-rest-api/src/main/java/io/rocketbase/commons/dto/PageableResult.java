@@ -1,7 +1,10 @@
 package io.rocketbase.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.Serializable;
 import java.util.Iterator;
@@ -56,8 +59,14 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
         return content.iterator();
     }
 
+    @JsonIgnore
     public boolean hasNextPage() {
         return page < (totalPages-1);
+    }
+
+    @JsonIgnore
+    public Page<E> toPage() {
+        return new PageImpl<>(getContent(), PageRequest.of(page, pageSize), totalElements);
     }
 
 

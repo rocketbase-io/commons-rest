@@ -2,21 +2,22 @@ package io.rocketbase.commons.resource;
 
 import io.rocketbase.commons.request.PageableRequest;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.util.UriComponentsBuilder;
 
 public interface BaseRestResource {
 
-    default UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, PageableRequest request) {
-        if (uriBuilder != null && request != null) {
-            if (request.getPage() != null && request.getPage().intValue() >= 0) {
-                uriBuilder.queryParam("page", request.getPage());
+    default UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, Pageable pageable) {
+        if (uriBuilder != null && pageable != null) {
+            if (pageable.getPageNumber()  >= 0) {
+                uriBuilder.queryParam("page", pageable.getPageNumber());
             }
-            if (request.getPageSize() != null && request.getPageSize().intValue() >= 0) {
-                uriBuilder.queryParam("pageSize", request.getPageSize());
+            if (pageable.getPageSize() >= 0) {
+                uriBuilder.queryParam("pageSize", pageable.getPageSize());
             }
-            if (request.getSort() != null) {
-                request.getSort()
+            if (pageable.getSort() != null) {
+                pageable.getSort()
                         .iterator()
                         .forEachRemaining(
                                 o -> {

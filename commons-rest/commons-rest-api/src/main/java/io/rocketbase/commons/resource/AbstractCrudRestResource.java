@@ -3,6 +3,8 @@ package io.rocketbase.commons.resource;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.request.PageableRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
@@ -29,12 +31,19 @@ public abstract class AbstractCrudRestResource<Read, Write, ID extends Serializa
     }
 
     public PageableResult<Read> find(int page, int pagesize) {
-        return find(appendParams(buildBaseUriBuilder(),
-                new PageableRequest(page, pagesize, null)));
+        return find(appendParams(buildBaseUriBuilder(), PageRequest.of(page, pagesize)));
     }
 
+    /**
+     * please use {@link org.springframework.data.domain.Pageable}
+     */
+    @Deprecated
     public PageableResult<Read> find(PageableRequest request) {
-        return find(appendParams(buildBaseUriBuilder(), request));
+        return find(appendParams(buildBaseUriBuilder(), request.toPageRequest()));
+    }
+
+    public PageableResult<Read> find(Pageable pageable) {
+        return find(appendParams(buildBaseUriBuilder(), pageable));
     }
 
     public Optional<Read> getById(ID id) {
