@@ -47,7 +47,7 @@ public abstract class AbstractCrudChildRestResource<Read, Write, ID extends Seri
         delete(buildBaseUriBuilder(parentId).path(String.valueOf(id)));
     }
 
-    UriComponentsBuilder buildBaseUriBuilder(ID parentId) {
+    protected UriComponentsBuilder buildBaseUriBuilder(ID parentId) {
         UriComponentsBuilder builder = createUriComponentsBuilder(getBaseParentApiUrl());
         builder.path(String.valueOf(parentId));
         builder.path((getChildPath().startsWith("/") ? "" : "/") + ensureEndsWithSlash(getChildPath()));
