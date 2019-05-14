@@ -33,4 +33,40 @@ public class TranslationSerializerTest {
         assertThat(result, equalTo("{\"de\":\"deutsch\",\"en\":\"english\"}"));
     }
 
+    @Test
+    public void shouldSerializeWithRegion() throws Exception {
+        // given
+        Map<Locale, String> map = new HashMap<>();
+        map.put(Locale.GERMANY, "deutsch");
+        map.put(Locale.US, "english");
+
+        Translation translation = Translation.builder()
+                .translations(map)
+                .build();
+
+        // when
+        String result = mapper.writeValueAsString(translation);
+
+        // then
+        assertThat(result, equalTo("{\"en-US\":\"english\",\"de-DE\":\"deutsch\"}"));
+    }
+
+    @Test
+    public void shouldSerializeWithRegionAndVariant() throws Exception {
+        // given
+        Map<Locale, String> map = new HashMap<>();
+        map.put(new Locale("de", "DE", "bayrisch"), "deitsch");
+        map.put(Locale.US, "english");
+
+        Translation translation = Translation.builder()
+                .translations(map)
+                .build();
+
+        // when
+        String result = mapper.writeValueAsString(translation);
+
+        // then
+        assertThat(result, equalTo("{\"de-DE-bayrisch\":\"deitsch\",\"en-US\":\"english\"}"));
+    }
+
 }

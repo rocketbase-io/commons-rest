@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Map;
 
 public class TranslationDeserializer extends JsonDeserializer<Translation> {
+
     @Override
     public Translation deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
         Map<Locale, String> translations = new HashMap<>();
@@ -23,7 +24,7 @@ public class TranslationDeserializer extends JsonDeserializer<Translation> {
             if (currentToken == JsonToken.FIELD_NAME) {
                 language = jsonParser.getText();
             } else if (currentToken == JsonToken.VALUE_STRING) {
-                translations.put(Locale.forLanguageTag(language), jsonParser.getText());
+                translations.put(parseLanguageTag(language), jsonParser.getText());
             }
         }
         return Translation.builder()
@@ -34,5 +35,15 @@ public class TranslationDeserializer extends JsonDeserializer<Translation> {
     @Override
     public Object deserializeWithType(JsonParser p, DeserializationContext ctxt, TypeDeserializer typeDeserializer) throws IOException {
         return deserialize(p, ctxt);
+    }
+
+    /**
+     * in case locale has been parsed via toString (that uses _ as separator instead of -)
+     */
+    protected Locale parseLanguageTag(String language) {
+        if (language == null) {
+            return null;
+        }
+        return Locale.forLanguageTag(language.replace("_", "-"));
     }
 }
