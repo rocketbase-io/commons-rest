@@ -31,4 +31,25 @@ public final class Nulls {
         }
         return value;
     }
+
+    public static <TARGET, SOURCE> TARGET notNull(SOURCE value, PropertyValueProvider<SOURCE, TARGET> provider, TARGET fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        TARGET result = provider.apply(value);
+        return notNull(result, fallback);
+    }
+
+    public static <SOURCE> String notEmpty(SOURCE value, PropertyValueProvider<SOURCE, String> provider, String fallback) {
+        if (value == null) {
+            return fallback;
+        }
+        String result = provider.apply(value);
+        return notEmpty(result, fallback);
+    }
+
+    public interface PropertyValueProvider<SOURCE, TARGET> {
+        TARGET apply(SOURCE source);
+    }
+
 }
