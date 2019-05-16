@@ -1,6 +1,5 @@
 package io.rocketbase.commons.resource;
 
-import io.rocketbase.commons.request.PageableRequest;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
