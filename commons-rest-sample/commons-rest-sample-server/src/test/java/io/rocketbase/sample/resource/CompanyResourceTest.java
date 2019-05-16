@@ -3,7 +3,6 @@ package io.rocketbase.sample.resource;
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.BadRequestException;
-import io.rocketbase.commons.request.PageableRequest;
 import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.CompanyEntity;
@@ -15,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -69,7 +69,7 @@ public class CompanyResourceTest {
         // given
 
         // when
-        Optional<CompanyRead>  data = companyResource.getById("notexisting");
+        Optional<CompanyRead> data = companyResource.getById("notexisting");
 
         // then
         assertThat(data, equalTo(Optional.empty()));
@@ -203,9 +203,7 @@ public class CompanyResourceTest {
 
 
         // when
-        PageableResult<CompanyRead> result = companyResource.find(PageableRequest.builder()
-                .sort(new Sort(Sort.Direction.ASC, "name"))
-                .build());
+        PageableResult<CompanyRead> result = companyResource.find(PageRequest.of(0, 100, Sort.Direction.ASC, "name"));
 
         // then
         assertThat(result, notNullValue());
@@ -230,9 +228,7 @@ public class CompanyResourceTest {
 
 
         // when
-        PageableResult<CompanyRead> result = companyResource.find(PageableRequest.builder()
-                .sort(new Sort(Sort.Direction.DESC, "name"))
-                .build());
+        PageableResult<CompanyRead> result = companyResource.find(PageRequest.of(0, 100, Sort.Direction.DESC, "name"));
 
         // then
         assertThat(result, notNullValue());
