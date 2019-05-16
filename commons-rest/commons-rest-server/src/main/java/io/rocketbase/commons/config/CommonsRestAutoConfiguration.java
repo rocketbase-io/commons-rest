@@ -9,7 +9,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
-import org.springframework.web.servlet.i18n.FixedLocaleResolver;
+import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.util.Locale;
 
@@ -20,9 +20,10 @@ public class CommonsRestAutoConfiguration {
     private String defaultLocale;
 
     @Bean
+    @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "locale.resolver.enabled", matchIfMissing = true)
     public LocaleResolver localeResolver() {
-        FixedLocaleResolver l = new FixedLocaleResolver();
+        AcceptHeaderLocaleResolver l = new AcceptHeaderLocaleResolver();
         l.setDefaultLocale(Locale.forLanguageTag(defaultLocale));
         return l;
     }
