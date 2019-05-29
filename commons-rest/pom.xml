@@ -41,6 +41,7 @@ SOFTWARE.
     <modules>
         <module>commons-rest-api</module>
         <module>commons-rest-server</module>
+        <module>commons-rest-errorpage</module>
     </modules>
 
     <licenses>
