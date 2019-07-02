@@ -13,16 +13,14 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 ## default build
-script: mvn --settings .travis/settings.xml -U clean verify
+script: mvn --settings .travis/settings.xml -U clean install
 ## release on tag
 deploy:
   - provider: script
     script: ".travis/deploy.sh"
     skip_cleanup: true
     on:
-      repo: rocketbase-io/commons-rest
       tags: true
-      jdk: oraclejdk8
 # code climate upload coverage
 after_script:
   - ./cc-test-reporter format-coverage -d -t jacoco ./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
