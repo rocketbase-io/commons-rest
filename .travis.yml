@@ -7,6 +7,7 @@ services:
 before_install:
   - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+
 # code climate configure
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
@@ -14,6 +15,11 @@ before_script:
   - ./cc-test-reporter before-build
 ## default build
 script: mvn --settings .travis/settings.xml -U clean install
+# code climate upload coverage
+after_script:
+  - JACOCO_SOURCE_PATH=commons-rest ./cc-test-reporter format-coverage -d -t jacoco./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
+  - ./cc-test-reporter upload-coverage -d
+
 ## release on tag
 deploy:
   - provider: script
@@ -21,10 +27,7 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-# code climate upload coverage
-after_script:
-  - ./cc-test-reporter format-coverage -d -t jacoco ./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
-  - ./cc-test-reporter upload-coverage -d
+
 ## disable emailing
 notifications:
   email: false
