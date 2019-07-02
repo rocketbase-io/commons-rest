@@ -1,23 +1,32 @@
 language: java
 jdk:
-- oraclejdk8
+  - oraclejdk8
 services:
-- mongodb
+  - mongodb
 ## gpg stuff
 before_install:
-    - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
-    - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+  - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
+  - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
+# code climate configure
+before_script:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
+  - ./cc-test-reporter before-build
 ## default build
 script: mvn --settings .travis/settings.xml -U clean verify
 ## release on tag
 deploy:
-- provider: script
-  script: ".travis/deploy.sh"
-  skip_cleanup: true
-  on:
-    repo: rocketbase-io/commons-rest
-    tags: true
-    jdk: oraclejdk8
+  - provider: script
+    script: ".travis/deploy.sh"
+    skip_cleanup: true
+    on:
+      repo: rocketbase-io/commons-rest
+      tags: true
+      jdk: oraclejdk8
+# code climate upload coverage
+after_script:
+  - ./cc-test-reporter format-coverage -d -t jacoco ./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
+  - ./cc-test-reporter upload-coverage -d
 ## disable emailing
 notifications:
-    email: false
+  email: false
