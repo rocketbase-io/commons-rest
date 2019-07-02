@@ -17,7 +17,7 @@ before_script:
 script: mvn --settings .travis/settings.xml -U clean install
 # code climate upload coverage
 after_script:
-  - JACOCO_SOURCE_PATH=commons-rest ./cc-test-reporter format-coverage -d -t jacoco./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
+  - JACOCO_SOURCE_PATH=commons-rest ./cc-test-reporter format-coverage -d -t jacoco ./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
   - ./cc-test-reporter upload-coverage -d
 
 ## release on tag
