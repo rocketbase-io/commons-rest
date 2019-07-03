@@ -5,6 +5,8 @@
 
 [![Build Status](https://travis-ci.org/rocketbase-io/commons-rest.svg?branch=master)](https://travis-ci.org/rocketbase-io/commons-rest)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.rocketbase.commons/commons-rest/badge.svg)](https://maven-badges.herokuapp.com/maven-central/io.rocketbase.commons/commons-rest)
+[![Maintainability](https://api.codeclimate.com/v1/badges/7c5864f7af5a1036d6a9/maintainability)](https://codeclimate.com/github/rocketbase-io/commons-rest/maintainability)
+<a href="https://codeclimate.com/github/rocketbase-io/commons-rest/test_coverage"><img src="https://api.codeclimate.com/v1/badges/7c5864f7af5a1036d6a9/test_coverage" /></a>
 
 Focus on tough problems and not on CRUD that the main focus of commons-rest. We [@rocketbase.io](https://www.rocketbase.io) develop many microservices and tried many tools and projects. All of them didn't matched our needs. By using for example [spring-data-rest](https://projects.spring.io/spring-data-rest/) you loose flexibility when you leave the basic path or by using [jHipster](http://www.jhipster.tech/) you have a full blown setup with many dependencies. Commons-rest focus on CRUD and leaves flexibility to you as developer. Additionally we've crafted a yeoman [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) in order to write less code :)
 
