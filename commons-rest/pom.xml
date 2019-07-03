@@ -42,7 +42,6 @@ SOFTWARE.
         <module>commons-rest-api</module>
         <module>commons-rest-server</module>
         <module>commons-rest-errorpage</module>
-        <module>coverage</module>
     </modules>
 
     <licenses>
@@ -114,7 +113,6 @@ SOFTWARE.
     <build>
 
         <pluginManagement>
-
             <plugins>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -122,63 +120,34 @@ SOFTWARE.
                     <version>${jacoco.version}</version>
                 </plugin>
             </plugins>
-
         </pluginManagement>
 
         <plugins>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.22.2</version>
-                <configuration>
-                    <!-- Sets the VM argument line used when unit tests are run. -->
-                    <argLine>${surefireArgLine}</argLine>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.22.2</version>
-                <executions>
-                    <execution>
-                        <id>integration-test</id>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                        <configuration>
-                            <!-- Sets the VM argument line used when integration tests are run. -->
-                            <argLine>${failsafeArgLine}</argLine>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
                 <executions>
-                    <!-- set arg line property for surefire -->
                     <execution>
                         <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <configuration>
-                            <propertyName>surefireArgLine</propertyName>
-                        </configuration>
                     </execution>
-                    <!-- set arg line property for failsafe -->
                     <execution>
-                        <id>prepare-agent-integration</id>
+                        <id>report-prepare</id>
+                        <phase>prepare-package</phase>
                         <goals>
-                            <goal>prepare-agent-integration</goal>
+                            <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <propertyName>failsafeArgLine</propertyName>
-                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>report-test</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

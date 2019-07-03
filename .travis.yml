@@ -17,8 +17,10 @@ before_script:
 script: mvn --settings .travis/settings.xml -U clean install
 # code climate upload coverage
 after_script:
-  - JACOCO_SOURCE_PATH=commons-rest ./cc-test-reporter format-coverage -d -t jacoco ./commons-rest/coverage/target/site/jacoco-all/jacoco.xml
-  - ./cc-test-reporter upload-coverage -d
+  - ./cc-test-reporter format-coverage -d -t jacoco -o coverage/codeclimate.rest-api.json commons-rest/commons-rest-api/target/site/jacoco/jacoco.xml
+  - ./cc-test-reporter format-coverage -d -t jacoco -o coverage/codeclimate.rest-server.json commons-rest/commons-rest-server/target/site/jacoco/jacoco.xml
+  - ./cc-test-reporter sum-coverage -d coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
+  - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage -d; fi  # Upload coverage/codeclimate.json
 
 ## release on tag
 deploy:
