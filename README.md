@@ -24,15 +24,29 @@ Conversion between each object can be automatically generated with [mapstruct](h
 * prodivded a [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) via yeoman
 * provided a jwt security module that is simply pluggable name [commons-auth](https://github.com/rocketbase-io/commons-auth)
 
-## commons-rest-api
+## documentation
+
+Within the [wiki-pages](wiki) you can find some explanations to the different classes, helpers and dtos.
+
+## module overview
+
+### commons-rest-api
 
 This module provides some useful runtime exceptions like NotFoundException and basic DTO classes. Mainly ErrorResponse for rending details to error and also field-validation exceptions (this is handled a BeanValidationExceptionHandler provided by rest-server) and PageableResult to provide results in a paged wrapper. Additionally, you can find abstract implements of resources to consume REST-Services within java-code by use of RestTemplate and Jackson.
 
-## commons-rest-server
+### commons-rest-server
 
 Containing ExceptionHandlers for common errors like BeanValidationExceptions or the custom NotFoundException. Abstract classes to implement CRUD SpringRestController. Also a parent child solution is provided.
 
-### configuration
+### commons-errorpage
+
+Simple designed error pages for 400, 401, 403, 404 and 500 error-codes.
+
+## commons-rest-sample
+
+Sample spring-boot application to demonstrate the use of the provided commons-rest libraries. 
+
+## configuration
 
 This module uses the auto configuration feature of spring-boot-starter so that all necessary beans will get configured automatically.
 Nevertheless you can customize the configuration by the following properties
@@ -46,12 +60,8 @@ Nevertheless you can customize the configuration by the following properties
 | handler.beanValidation.enabled | true            | enable/disable ExceptionHandler for MethodArgumentNotValidException (bean validation issues from spring-boot)      |
  
 
-## commons-rest-sample
-
-Sample spring-boot application to demonstrate the use of the provided commons-rest libraries. 
-
 ### The MIT License (MIT)
-Copyright (c) 2018 rocketbase.io
+Copyright (c) 2019 rocketbase.io
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
