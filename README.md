@@ -26,7 +26,7 @@ Conversion between each object can be automatically generated with [mapstruct](h
 
 ## documentation
 
-Within the [wiki-pages](wiki) you can find some explanations to the different classes, helpers and dtos.
+Within the [wiki-pages](https://github.com/rocketbase-io/commons-rest/wiki) you can find some explanations to the different classes, helpers and dtos.
 
 ## module overview
 
