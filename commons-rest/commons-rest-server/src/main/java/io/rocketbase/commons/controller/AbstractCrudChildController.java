@@ -80,9 +80,18 @@ public abstract class AbstractCrudChildController<Entity, Read, Write, ID extend
         return Sort.unsorted();
     }
 
+    /**
+     * should find entity by given parentId and id. in case anything is not fitting: for example parentId with id it could throw for example {@link io.rocketbase.commons.exception.NotFoundException}
+     */
     protected abstract Entity getEntity(ID parentId, ID id);
 
+    /**
+     * should return a page of all entities that fit to the given parentId and use of pageable
+     */
     protected abstract Page<Entity> findAllByParentId(ID parentId, Pageable pageable);
 
+    /**
+     * should create a new entity and take care to store the relation with parent
+     */
     protected abstract Entity newEntity(ID parentId, Write writeData);
 }

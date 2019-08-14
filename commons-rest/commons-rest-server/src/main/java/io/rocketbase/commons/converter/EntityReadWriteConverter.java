@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * interface that handles converting between Entity, Data and Edit
+ * interface that handles converting between Entity, Read and Write
  *
  * @param <Entity> database entity
  * @param <Read>   response data object
@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 public interface EntityReadWriteConverter<Entity, Read, Write> {
 
     /**
-     * convert vise versa entity to data
+     * convert an entity to ReadDto
      *
      * @param entity database entity
      * @return response data object
@@ -21,7 +21,7 @@ public interface EntityReadWriteConverter<Entity, Read, Write> {
     Read fromEntity(Entity entity);
 
     /**
-     * convert list of entities to data
+     * convert list of entities to list of ReadDtos
      *
      * @param entities list of entities
      * @return converted data list
@@ -36,7 +36,7 @@ public interface EntityReadWriteConverter<Entity, Read, Write> {
     }
 
     /**
-     * create new entity by given edit
+     * create new entity by given write
      *
      * @param write values to map to entity
      * @return new entity with edit values
@@ -44,7 +44,7 @@ public interface EntityReadWriteConverter<Entity, Read, Write> {
     Entity newEntity(Write write);
 
     /**
-     * update exisiting entity by given edit
+     * update existing entity by given WriteDto
      *
      * @param write  values to map to entity
      * @param entity existing entity
