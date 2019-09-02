@@ -1,9 +1,9 @@
 # database connection
 spring:
   datasource:
-    url: 'jdbc:mysql://localhost:3309/timebench'
-    username: 'timebench'
-    password: 'timebench'
+    url: 'jdbc:mysql://localhost:3306/commons-rest'
+    username: 'commons-rest'
+    password: 'commons-rest'
     driverClassName: org.mariadb.jdbc.Driver
   jpa:
     generate-ddl: true
