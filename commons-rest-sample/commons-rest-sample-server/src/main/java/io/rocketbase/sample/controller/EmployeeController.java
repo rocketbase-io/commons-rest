@@ -6,8 +6,8 @@ import io.rocketbase.sample.dto.employee.EmployeeRead;
 import io.rocketbase.sample.dto.employee.EmployeeWrite;
 import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.model.CompanyEntity;
-import io.rocketbase.sample.repository.EmployeeRepository;
-import io.rocketbase.sample.repository.CompanyRepository;
+import io.rocketbase.sample.repository.mongo.EmployeeRepository;
+import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import io.rocketbase.commons.exception.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import java.util.Optional;
 
 
 @Slf4j

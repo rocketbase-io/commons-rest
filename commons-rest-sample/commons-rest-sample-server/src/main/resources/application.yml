@@ -1,5 +1,17 @@
 # database connection
 spring:
+  datasource:
+    url: 'jdbc:mysql://localhost:3309/timebench'
+    username: 'timebench'
+    password: 'timebench'
+    driverClassName: org.mariadb.jdbc.Driver
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDB103Dialect
   data:
     mongodb:
       database: commons-rest-sample

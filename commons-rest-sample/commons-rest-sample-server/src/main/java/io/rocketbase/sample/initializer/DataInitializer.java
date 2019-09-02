@@ -3,9 +3,11 @@ package io.rocketbase.sample.initializer;
 import io.codearte.jfairy.Fairy;
 import io.codearte.jfairy.producer.person.Person;
 import io.rocketbase.sample.model.CompanyEntity;
+import io.rocketbase.sample.model.CustomerEntity;
 import io.rocketbase.sample.model.EmployeeEntity;
-import io.rocketbase.sample.repository.CompanyRepository;
-import io.rocketbase.sample.repository.EmployeeRepository;
+import io.rocketbase.sample.repository.mongo.CompanyRepository;
+import io.rocketbase.sample.repository.jpa.CustomerRepository;
+import io.rocketbase.sample.repository.mongo.EmployeeRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
@@ -27,14 +29,17 @@ public class DataInitializer {
     @Resource
     private CompanyRepository companyRepository;
 
+    @Resource
+    private CustomerRepository customerRepository;
+
     private AtomicInteger companyCounter = new AtomicInteger(0);
 
     private Map<String, CompanyEntity> companyCache = new HashMap<>();
 
     @PostConstruct
     public void postConstruct() {
+        Fairy fairy = Fairy.create(Locale.GERMAN);
         if (companyRepository.count() == 0) {
-            Fairy fairy = Fairy.create(Locale.GERMAN);
             List<CompanyEntity> companyList = new ArrayList<>();
             for (int count = 0; count < 100; count++) {
                 io.codearte.jfairy.producer.company.Company company = fairy.company();
@@ -61,7 +66,17 @@ public class DataInitializer {
             }
             personRepository.saveAll(personList);
             log.info("initialized {} persons and {} companies", personList.size(), companyCounter.get());
-
+        }
+        if (customerRepository.count() == 0) {
+            List<CustomerEntity> customerList = new ArrayList<>();
+            for (int count = 0; count < 100; count++) {
+                io.codearte.jfairy.producer.person.Person person = fairy.person();
+                customerList.add(CustomerEntity.builder()
+                        .name(fairy.person().getFullName())
+                        .build());
+            }
+            customerRepository.saveAll(customerList);
+            log.info("initialized {} customers", customerList.size());
         }
     }
 }

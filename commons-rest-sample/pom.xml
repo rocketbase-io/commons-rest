@@ -25,6 +25,7 @@
     <modules>
         <module>commons-rest-sample-api</module>
         <module>commons-rest-sample-server</module>
+        <module>commons-rest-sample-model</module>
     </modules>
 
     <developers>

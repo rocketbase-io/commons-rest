@@ -42,6 +42,7 @@ SOFTWARE.
         <module>commons-rest-api</module>
         <module>commons-rest-server</module>
         <module>commons-rest-errorpage</module>
+        <module>commons-rest-hashids</module>
     </modules>
 
     <licenses>
@@ -95,6 +96,7 @@ SOFTWARE.
         <spring-boot.version>2.1.7.RELEASE</spring-boot.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <jacoco.version>0.8.4</jacoco.version>
+        <hashids.version>1.0.3</hashids.version>
     </properties>
 
     <dependencyManagement>

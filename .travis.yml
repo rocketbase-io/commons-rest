@@ -3,6 +3,7 @@ jdk:
   - openjdk8
 services:
   - mongodb
+  - mariadb
 ## gpg stuff
 before_install:
   - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import

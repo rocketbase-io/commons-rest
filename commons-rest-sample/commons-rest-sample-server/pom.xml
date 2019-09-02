@@ -14,50 +14,25 @@
     <dependencies>
         <dependency>
             <groupId>io.rocketbase.sample</groupId>
-            <artifactId>commons-rest-sample-api</artifactId>
+            <artifactId>commons-rest-sample-model</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>io.rocketbase.commons</groupId>
-            <artifactId>commons-rest-server</artifactId>
+            <artifactId>commons-rest-hashids</artifactId>
             <version>${commons-rest.version}</version>
         </dependency>
 
-        <!-- web with undertow -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-tomcat</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-undertow</artifactId>
-        </dependency>
-        <!-- web end -->
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>
-
-        <!-- mapstruct -->
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-jdk8</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-processor</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <!-- mapstruct end -->
 
         <!-- demo-data-generator -->
         <dependency>

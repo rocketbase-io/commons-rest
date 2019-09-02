@@ -5,7 +5,7 @@ import io.rocketbase.sample.converter.CompanyConverter;
 import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.CompanyEntity;
-import io.rocketbase.sample.repository.CompanyRepository;
+import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;

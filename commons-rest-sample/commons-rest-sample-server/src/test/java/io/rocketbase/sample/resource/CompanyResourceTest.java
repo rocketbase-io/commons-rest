@@ -6,7 +6,7 @@ import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.CompanyEntity;
-import io.rocketbase.sample.repository.CompanyRepository;
+import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

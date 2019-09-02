@@ -1,4 +1,4 @@
-package io.rocketbase.sample.repository;
+package io.rocketbase.sample.repository.mongo;
 
 import io.rocketbase.sample.model.EmployeeEntity;
 import org.springframework.data.domain.Page;
