@@ -1,21 +1,21 @@
 # database connection
 spring:
   datasource:
-    url: 'jdbc:mysql://localhost:3306/commons-rest'
-    username: 'commons-rest'
-    password: 'commons-rest'
-    driverClassName: org.mariadb.jdbc.Driver
+    url: 'jdbc:h2:mem:testdb'
+    username: 'sa'
+    password: 'password'
+    driverClassName: org.h2.Driver
   jpa:
     generate-ddl: true
     hibernate:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MariaDB103Dialect
+        dialect: org.hibernate.dialect.H2Dialect
   data:
     mongodb:
       database: commons-rest-sample
-# json configuration
+  # json configuration
   jackson:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
