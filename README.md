@@ -42,6 +42,17 @@ Containing ExceptionHandlers for common errors like BeanValidationExceptions or 
 
 Simple designed error pages for 400, 401, 403, 404 and 500 error-codes.
 
+### commons-rest-hashids
+
+Implementation for obfuscatedId interface introduced within the api. Uses [hashids](https://hashids.org/java/) as library to obfuscate long ids.
+
+| property                       | default         | explanation                                                  |
+| ------------------------------ | --------------- | ------------------------------------------------------------ |
+| hashids.salt                   |                 | salt for hashIds                                             |
+| hashids.minHashLength          | 8               | min length of hasid                                          |
+| hashids.alphabet               | abcdefghijklmnopqrstuvwxyz1234567890 | alphabet of hashid (by default we've skipped uppercase)  |
+| handler.obfuscatedDecode.enabled | true          | enable/disable ExceptionHandler for ObfuscatedDecodeException    |
+
 ## commons-rest-sample
 
 Sample spring-boot application to demonstrate the use of the provided commons-rest libraries. 
