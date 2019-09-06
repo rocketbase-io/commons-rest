@@ -58,6 +58,33 @@ public interface BaseRestResource {
     }
 
     /**
+     * checks if given uri starts with slash or adds it if missing
+     *
+     * @param uri given url
+     * @return url with / at the beginning
+     */
+    default String ensureStartsWithSlash(String uri) {
+        if (uri == null) {
+            return "/";
+        }
+        if (!uri.startsWith("/")) {
+            return String.format("/%s", uri);
+        }
+        return uri;
+    }
+
+    /**
+     * checks if given uri ends with slash or adds it if missing
+     *
+     * @param path given path of url
+     * @return path with / at beginning + end
+     */
+    default String ensureStartsAndEndsWithSlash(String path) {
+        String fixedStart = ensureStartsWithSlash(path);
+        return ensureEndsWithSlash(fixedStart);
+    }
+
+    /**
      * instantiate an UriComponentsBuilder from given url and ensures ends with slash
      *
      * @param baseApiUrl base url
