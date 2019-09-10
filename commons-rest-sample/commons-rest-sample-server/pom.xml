@@ -24,6 +24,13 @@
             <version>${commons-rest.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>io.rocketbase.commons</groupId>
+            <artifactId>commons-rest-logging-aspect</artifactId>
+            <version>${commons-rest.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>

@@ -43,6 +43,7 @@ SOFTWARE.
         <module>commons-rest-server</module>
         <module>commons-rest-errorpage</module>
         <module>commons-rest-hashids</module>
+        <module>commons-rest-logging-aspect</module>
     </modules>
 
     <licenses>
@@ -111,6 +112,14 @@ SOFTWARE.
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 
     <build>
 
