@@ -1,5 +1,6 @@
 package io.rocketbase.commons.resource;
 
+import io.rocketbase.commons.util.UrlParts;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +10,7 @@ public interface BaseRestResource {
 
     default UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, Pageable pageable) {
         if (uriBuilder != null && pageable != null) {
-            if (pageable.getPageNumber()  >= 0) {
+            if (pageable.getPageNumber() >= 0) {
                 uriBuilder.queryParam("page", pageable.getPageNumber());
             }
             if (pageable.getPageSize() >= 0) {
@@ -48,13 +49,7 @@ public interface BaseRestResource {
      * @return url with / at the end
      */
     default String ensureEndsWithSlash(String uri) {
-        if (uri == null) {
-            return "/";
-        }
-        if (!uri.endsWith("/")) {
-            return String.format("%s/", uri);
-        }
-        return uri;
+        return UrlParts.ensureEndsWithSlash(uri);
     }
 
     /**
@@ -64,24 +59,17 @@ public interface BaseRestResource {
      * @return url with / at the beginning
      */
     default String ensureStartsWithSlash(String uri) {
-        if (uri == null) {
-            return "/";
-        }
-        if (!uri.startsWith("/")) {
-            return String.format("/%s", uri);
-        }
-        return uri;
+        return UrlParts.ensureEndsWithSlash(uri);
     }
 
     /**
      * checks if given uri ends with slash or adds it if missing
      *
-     * @param path given path of url
+     * @param uri given path of url
      * @return path with / at beginning + end
      */
-    default String ensureStartsAndEndsWithSlash(String path) {
-        String fixedStart = ensureStartsWithSlash(path);
-        return ensureEndsWithSlash(fixedStart);
+    default String ensureStartsAndEndsWithSlash(String uri) {
+        return UrlParts.ensureStartsAndEndsWithSlash(uri);
     }
 
     /**
