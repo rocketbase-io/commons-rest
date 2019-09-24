@@ -12,7 +12,7 @@ public final class StringShorten {
         } else if (value.length() < maxLength) {
             return value;
         } else {
-            return value.substring(0, maxLength) + Nulls.notEmpty(end, "");
+            return value.substring(0, maxLength - Nulls.notEmpty(end, "").length()) + Nulls.notEmpty(end, "");
         }
     }
 
@@ -26,7 +26,7 @@ public final class StringShorten {
         } else if (value.length() < maxLength) {
             return value;
         } else {
-            return Nulls.notEmpty(beginning, "") + value.substring(value.length() - maxLength);
+            return Nulls.notEmpty(beginning, "") + value.substring(value.length() - (maxLength - Nulls.notEmpty(beginning, "").length()));
         }
     }
 }

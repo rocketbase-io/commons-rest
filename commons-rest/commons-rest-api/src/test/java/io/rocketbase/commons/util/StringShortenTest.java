@@ -40,7 +40,8 @@ public class StringShortenTest {
         String result = StringShorten.left(value, 10, "...");
         // then
         assertThat(result, notNullValue());
-        assertThat(result, equalTo("hello agai..."));
+        assertThat(result.length(), equalTo(10));
+        assertThat(result, equalTo("hello a..."));
     }
 
 
@@ -53,6 +54,7 @@ public class StringShortenTest {
         String result = StringShorten.right(value, 10, "...");
         // then
         assertThat(result, notNullValue());
+        assertThat(result.length(), equalTo(0));
         assertThat(result, equalTo(""));
     }
 
@@ -65,6 +67,7 @@ public class StringShortenTest {
         String result = StringShorten.right(value, 10, "...");
         // then
         assertThat(result, notNullValue());
+        assertThat(result.length(), equalTo(5));
         assertThat(result, equalTo(value));
     }
     @Test
@@ -76,6 +79,7 @@ public class StringShortenTest {
         String result = StringShorten.right(value, 10, "...");
         // then
         assertThat(result, notNullValue());
-        assertThat(result, equalTo("...a and rest"));
+        assertThat(result.length(), equalTo(10));
+        assertThat(result, equalTo("...nd rest"));
     }
 }
