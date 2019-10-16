@@ -3,6 +3,7 @@ package io.rocketbase.commons.translation;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import io.rocketbase.commons.util.LocaleFilter;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 
 
 @Data
@@ -73,23 +75,31 @@ public class Translation implements Serializable {
     }
 
     public String getTranslated(Locale locale) {
-        Locale language = Locale.forLanguageTag(locale.getLanguage());
+        Entry<Locale, String> foundEntry = LocaleFilter.findClosest(locale, translations, Locale.ENGLISH);
 
-        if (translations.containsKey(language)) {
-            return translations.get(language);
-        } else if (translations.containsKey(Locale.ENGLISH)) {
-            return translations.get(Locale.ENGLISH);
+        if (foundEntry != null) {
+            return foundEntry.getValue();
         } else {
             if (translations.containsKey(LocaleContextHolder.getLocale())) {
-                return translations.get(LocaleContextHolder.getLocale());
+                foundEntry = LocaleFilter.findClosest(LocaleContextHolder.getLocale(), translations);
+                return foundEntry != null ? foundEntry.getValue() : null;
             }
         }
         return null;
     }
 
+    /**
+     * exactly search within map if locale contains
+     */
     public boolean hasLocale(Locale locale) {
-        Locale language = Locale.forLanguageTag(locale.getLanguage());
-        return translations.containsKey(language);
+        return translations.containsKey(locale);
+    }
+
+    /**
+     * uses the {@link LocaleFilter} function to search if locale could be found
+     */
+    public boolean hasLocaleLooselyFilter(Locale locale) {
+        return LocaleFilter.findClosest(locale, translations) != null;
     }
 
     public String getTranslated() {
