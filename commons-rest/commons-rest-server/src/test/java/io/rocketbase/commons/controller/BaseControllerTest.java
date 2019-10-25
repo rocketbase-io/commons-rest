@@ -93,8 +93,8 @@ public class BaseControllerTest {
         Sort sort = getTestController().parseSort(map, "sort");
 
         // then
-        assertThat(sort.getOrderFor("foo"), equalTo(new Sort.Order(Sort.Direction.DESC, "foo")));
-        assertThat(sort.getOrderFor("bla"), equalTo(new Sort.Order("bla")));
+        assertThat(sort.getOrderFor("foo"), equalTo(Sort.Order.desc("foo")));
+        assertThat(sort.getOrderFor("bla"), equalTo(Sort.Order.asc("bla")));
         assertThat(StreamSupport.stream(sort.spliterator(), false).count(), equalTo(2L));
     }
 
