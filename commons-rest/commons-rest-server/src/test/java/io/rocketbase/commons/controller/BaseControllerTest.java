@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -253,6 +254,63 @@ public class BaseControllerTest {
         assertThat(v1, equalTo(localDateTime));
         assertThat(invalid, nullValue());
         assertThat(invalidWithDefault, equalTo(defaultValue));
+    }
+
+    @Test
+    public void parseInstant() {
+        // given
+        MultiValueMap map = new LinkedMultiValueMap<String, String>();
+        Instant instant = Instant.now();
+        map.add("v1", instant.toString());
+        map.add("invalid", "121234");
+
+
+        // when
+        Instant v1 = getTestController().parseInstant(map, "v1", null);
+        Instant invalid = getTestController().parseInstant(map, "invalid", null);
+        Instant defaultValue = Instant.now();
+        Instant invalidWithDefault = getTestController().parseInstant(map, "invalid", defaultValue);
+
+
+        // then
+        assertThat(v1, equalTo(instant));
+        assertThat(invalid, nullValue());
+        assertThat(invalidWithDefault, equalTo(defaultValue));
+    }
+
+    @Test
+    public void parseInstantWithMillisOrSec() {
+        // given
+        MultiValueMap map = new LinkedMultiValueMap<String, String>();
+        Instant instant = Instant.now();
+        instant = instant.minusNanos(instant.getNano());
+
+        Instant defaultValue = Instant.now();
+
+        map.add("v1", String.valueOf(instant.getEpochSecond()));
+        map.add("invalid", "121234");
+        map.add("millisTooOld", "912380400000");
+        Instant _2005 = Instant.ofEpochSecond(1104537600L);
+        _2005 = _2005.minusNanos(_2005.getNano());
+        map.add("secs", String.valueOf(_2005.getEpochSecond()));
+
+
+        // when
+        Instant v1 = getTestController().parseInstant(map, "v1", null);
+        Instant invalid = getTestController().parseInstant(map, "invalid", null);
+        Instant invalidWithDefault = getTestController().parseInstant(map, "invalid", defaultValue);
+        Instant millisTooOld = getTestController().parseInstant(map, "millisTooOld", null);
+        Instant millisTooOldWithDefault = getTestController().parseInstant(map, "millisTooOld", defaultValue);
+        Instant secs = getTestController().parseInstant(map, "secs", defaultValue);
+
+
+        // then
+        assertThat(v1.minusNanos(v1.getNano()), equalTo(instant));
+        assertThat(invalid, nullValue());
+        assertThat(invalidWithDefault, equalTo(defaultValue));
+        assertThat(millisTooOld, nullValue());
+        assertThat(millisTooOldWithDefault, equalTo(defaultValue));
+        assertThat(secs.minusNanos(secs.getNano()), equalTo(_2005));
     }
 
     private BaseController getTestController() {

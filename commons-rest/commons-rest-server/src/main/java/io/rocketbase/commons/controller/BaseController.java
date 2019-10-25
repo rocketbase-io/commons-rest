@@ -6,9 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -173,6 +171,32 @@ public interface BaseController {
         }
         return defaultValue;
     }
+
+    default Instant parseInstant(MultiValueMap<String, String> params, String key, Instant defaultValue) {
+        if (params != null) {
+            String value = params.getFirst(key);
+            if (value != null) {
+                try {
+                    Instant instant = Instant.parse(value);
+                    return instant;
+                } catch (DateTimeParseException ex) {
+                    if (value.matches("[0-9]+")) {
+                        long longValue = Long.parseLong(value);
+                        int currentYear = LocalDate.now().getYear();
+
+                        Instant instant = Instant.ofEpochSecond(longValue);
+                        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+                        if (zonedDateTime.getYear() < currentYear + 100 && zonedDateTime.getYear() > 2001) {
+                            return instant;
+                        }
+                        return defaultValue;
+                    }
+                }
+            }
+        }
+        return defaultValue;
+    }
+
 
     default int getDefaultPageSize() {
         return DEFAULT_PAGE_SIZE;
