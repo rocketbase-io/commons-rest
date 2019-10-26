@@ -1,5 +1,6 @@
 package io.rocketbase.commons.controller;
 
+import io.rocketbase.commons.util.QueryParamParser;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,12 +20,7 @@ import java.util.List;
 public interface BaseController {
 
     int DEFAULT_PAGE_SIZE = 25;
-    int DEFAULT_MIN_PAGE_SIZE = 1;
     int DEFAULT_MAX_PAGE_SIZE = 200;
-
-    List<DateTimeFormatter> DEFAULT_DATE_FORMATTERS = Arrays.asList(DateTimeFormatter.ISO_LOCAL_DATE,
-            DateTimeFormatter.ofPattern("d/MM/yyyy"),
-            DateTimeFormatter.ofPattern("d.MM.yyyy"));
 
     /**
      * parse page, size and sort from request
@@ -33,7 +29,7 @@ public interface BaseController {
      * @return a filled {@link PageRequest}
      */
     default Pageable parsePageRequest(MultiValueMap<String, String> params) {
-        return parsePageRequest(params, null);
+        return QueryParamParser.parsePageRequest(params);
     }
 
     /**
@@ -44,14 +40,7 @@ public interface BaseController {
      * @return a filled {@link PageRequest}
      */
     default Pageable parsePageRequest(MultiValueMap<String, String> params, Sort defaultSort) {
-        Integer pageSize = parseInteger(params, "pageSize", null);
-        if (pageSize == null) {
-            pageSize = parseInteger(params, "size", getDefaultPageSize());
-        }
-        pageSize = Math.min(pageSize, getMaxPageSize());
-        Integer page = parseInteger(params, "page", 0);
-
-        return PageRequest.of(Math.max(page, 0), Math.max(pageSize, DEFAULT_MIN_PAGE_SIZE), parseSort(params, "sort", defaultSort));
+        return QueryParamParser.parsePageRequest(params, defaultSort, getDefaultPageSize(), getMaxPageSize());
     }
 
 
@@ -63,7 +52,7 @@ public interface BaseController {
      * @return an unsorted Sort in case of empty param or filled one
      */
     default Sort parseSort(MultiValueMap<String, String> params, String key) {
-        return parseSort(params, key, null);
+        return QueryParamParser.parseSort(params,key);
     }
 
     /**
@@ -75,126 +64,35 @@ public interface BaseController {
      * @return defaultSort in case of empty param or filled one
      */
     default Sort parseSort(MultiValueMap<String, String> params, String key, Sort defaultSort) {
-        Sort sort = defaultSort != null ? defaultSort : Sort.unsorted();
-
-        if (params != null && params.containsKey(key)) {
-            List<Sort.Order> orders = new ArrayList<>();
-            for (String s : params.get(key)) {
-                if (s.toLowerCase().matches("[a-z0-9]+\\,(asc|desc)")) {
-                    String[] splitted = s.split("\\,");
-                    orders.add(new Sort.Order(Sort.Direction.fromString(splitted[1]), splitted[0]));
-                } else if (s.toLowerCase().matches("[a-z0-9]+")) {
-                    orders.add(Sort.Order.by(s));
-                }
-            }
-            if (orders.size() > 0) {
-                sort = Sort.by(orders);
-            }
-        }
-        return sort;
+        return QueryParamParser.parseSort(params, key, defaultSort);
     }
 
     default Integer parseInteger(MultiValueMap<String, String> params, String key, Integer defaultValue) {
-        Long value = parseLong(params, key, null);
-        if (value != null) {
-            return value.intValue();
-        }
-        return defaultValue;
+        return QueryParamParser.parseInteger(params, key, defaultValue);
     }
 
     default Long parseLong(MultiValueMap<String, String> params, String key, Long defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null && value.matches("-?[0-9]+")) {
-                try {
-                    return Long.parseLong(value);
-                } catch (NumberFormatException f) {
-                }
-            }
-        }
-        return defaultValue;
+        return QueryParamParser.parseLong(params, key, defaultValue);
     }
 
     default Boolean parseBoolean(MultiValueMap<String, String> params, String key, Boolean defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                return value.matches("(true|1|yes|on)");
-            }
-        }
-        return defaultValue;
+        return QueryParamParser.parseBoolean(params, key, defaultValue);
     }
 
     default LocalDate parseLocalDate(MultiValueMap<String, String> params, String key, LocalDate defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                for (DateTimeFormatter formatter : DEFAULT_DATE_FORMATTERS) {
-                    try {
-                        LocalDate localDate = LocalDate.parse(value, formatter);
-                        return localDate;
-                    } catch (DateTimeParseException ex) {
-                    }
-                }
-                return defaultValue;
-            }
-        }
-        return defaultValue;
+        return QueryParamParser.parseLocalDate(params, key, defaultValue);
     }
 
     default LocalTime parseLocalTime(MultiValueMap<String, String> params, String key, LocalTime defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                try {
-                    LocalTime localTime = LocalTime.parse(value, DateTimeFormatter.ISO_LOCAL_TIME);
-                    return localTime;
-                } catch (DateTimeParseException ex) {
-                    return defaultValue;
-                }
-            }
-        }
-        return defaultValue;
+        return QueryParamParser.parseLocalTime(params, key, defaultValue);
     }
 
     default LocalDateTime parseLocalDateTime(MultiValueMap<String, String> params, String key, LocalDateTime defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                try {
-                    LocalDateTime localDateTime = LocalDateTime.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-                    return localDateTime;
-                } catch (DateTimeParseException ex) {
-                    return defaultValue;
-                }
-            }
-        }
-        return defaultValue;
+        return QueryParamParser.parseLocalDateTime(params, key, defaultValue);
     }
 
     default Instant parseInstant(MultiValueMap<String, String> params, String key, Instant defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                try {
-                    Instant instant = Instant.parse(value);
-                    return instant;
-                } catch (DateTimeParseException ex) {
-                    if (value.matches("[0-9]+")) {
-                        long longValue = Long.parseLong(value);
-                        int currentYear = LocalDate.now().getYear();
-
-                        Instant instant = Instant.ofEpochSecond(longValue);
-                        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
-                        if (zonedDateTime.getYear() < currentYear + 100 && zonedDateTime.getYear() > 2001) {
-                            return instant;
-                        }
-                        return defaultValue;
-                    }
-                }
-            }
-        }
-        return defaultValue;
+        return QueryParamParser.parseInstant(params, key, defaultValue);
     }
 
 

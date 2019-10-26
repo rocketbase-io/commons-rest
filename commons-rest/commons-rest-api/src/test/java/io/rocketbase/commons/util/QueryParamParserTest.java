@@ -1,4 +1,4 @@
-package io.rocketbase.commons.controller;
+package io.rocketbase.commons.util;
 
 import org.junit.Test;
 import org.springframework.data.domain.Pageable;
@@ -6,17 +6,17 @@ import org.springframework.data.domain.Sort;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.*;
 
-public class BaseControllerTest {
+public class QueryParamParserTest {
+
 
     @Test
     public void parsePageRequestWithDefaults() {
@@ -24,11 +24,11 @@ public class BaseControllerTest {
         MultiValueMap map = new LinkedMultiValueMap<String, String>();
 
         // when
-        Pageable request = getTestController().parsePageRequest(map);
+        Pageable request = QueryParamParser.parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
-        assertThat(request.getPageSize(), equalTo(BaseController.DEFAULT_PAGE_SIZE));
+        assertThat(request.getPageSize(), equalTo(25));
         assertThat(request.getPageNumber(), equalTo(0));
     }
 
@@ -42,7 +42,7 @@ public class BaseControllerTest {
         map.add("page", String.valueOf(page));
 
         // when
-        Pageable request = getTestController().parsePageRequest(map);
+        Pageable request = QueryParamParser.parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
@@ -57,11 +57,11 @@ public class BaseControllerTest {
         Sort sort = Sort.by("id");
 
         // when
-        Pageable request = getTestController().parsePageRequest(map, sort);
+        Pageable request = QueryParamParser.parsePageRequest(map, sort, 25, 200);
 
         // then
         assertThat(request, notNullValue());
-        assertThat(request.getPageSize(), equalTo(BaseController.DEFAULT_PAGE_SIZE));
+        assertThat(request.getPageSize(), equalTo(25));
         assertThat(request.getPageNumber(), equalTo(0));
         assertThat(request.getSort(), equalTo(sort));
     }
@@ -74,11 +74,11 @@ public class BaseControllerTest {
         map.add("page", String.valueOf(-1));
 
         // when
-        Pageable request = getTestController().parsePageRequest(map);
+        Pageable request = QueryParamParser.parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
-        assertThat(request.getPageSize(), equalTo(BaseController.DEFAULT_MIN_PAGE_SIZE));
+        assertThat(request.getPageSize(), equalTo(1));
         assertThat(request.getPageNumber(), equalTo(0));
     }
 
@@ -91,7 +91,7 @@ public class BaseControllerTest {
         map.add("sort", "invalid,up");
 
         // when
-        Sort sort = getTestController().parseSort(map, "sort");
+        Sort sort = QueryParamParser.parseSort(map, "sort");
 
         // then
         assertThat(sort.getOrderFor("foo"), equalTo(Sort.Order.desc("foo")));
@@ -108,7 +108,7 @@ public class BaseControllerTest {
         map.add("sort", "");
 
         // when
-        Pageable request = getTestController().parsePageRequest(map);
+        Pageable request = QueryParamParser.parsePageRequest(map);
 
         // then
         assertThat(request, notNullValue());
@@ -122,7 +122,7 @@ public class BaseControllerTest {
         map.add("id", String.valueOf(100));
 
         // when
-        Integer value = getTestController().parseInteger(map, "id", null);
+        Integer value = QueryParamParser.parseInteger(map, "id", null);
 
         // then
         assertThat(value, notNullValue());
@@ -136,8 +136,8 @@ public class BaseControllerTest {
         map.add("id", "abcd");
 
         // when
-        Integer value = getTestController().parseInteger(map, "id", null);
-        Integer valueWithDefault = getTestController().parseInteger(map, "id", -1);
+        Integer value = QueryParamParser.parseInteger(map, "id", null);
+        Integer valueWithDefault = QueryParamParser.parseInteger(map, "id", -1);
 
         // then
         assertThat(value, nullValue());
@@ -152,7 +152,7 @@ public class BaseControllerTest {
         map.add("id", String.valueOf(id));
 
         // when
-        Long value = getTestController().parseLong(map, "id", null);
+        Long value = QueryParamParser.parseLong(map, "id", null);
 
         // then
         assertThat(value, notNullValue());
@@ -169,10 +169,10 @@ public class BaseControllerTest {
         map.add("off", "off");
 
         // when
-        Boolean ok = getTestController().parseBoolean(map, "ok", null);
-        Boolean no = getTestController().parseBoolean(map, "no", null);
-        Boolean yes = getTestController().parseBoolean(map, "yes", null);
-        Boolean off = getTestController().parseBoolean(map, "off", null);
+        Boolean ok = QueryParamParser.parseBoolean(map, "ok", null);
+        Boolean no = QueryParamParser.parseBoolean(map, "no", null);
+        Boolean yes = QueryParamParser.parseBoolean(map, "yes", null);
+        Boolean off = QueryParamParser.parseBoolean(map, "off", null);
 
         // then
         assertThat(ok, equalTo(true));
@@ -193,12 +193,12 @@ public class BaseControllerTest {
 
 
         // when
-        LocalDate v1 = getTestController().parseLocalDate(map, "v1", null);
-        LocalDate v2 = getTestController().parseLocalDate(map, "v2", null);
-        LocalDate v3 = getTestController().parseLocalDate(map, "v3", null);
-        LocalDate invalid = getTestController().parseLocalDate(map, "invalid", null);
+        LocalDate v1 = QueryParamParser.parseLocalDate(map, "v1", null);
+        LocalDate v2 = QueryParamParser.parseLocalDate(map, "v2", null);
+        LocalDate v3 = QueryParamParser.parseLocalDate(map, "v3", null);
+        LocalDate invalid = QueryParamParser.parseLocalDate(map, "invalid", null);
         LocalDate defaultValue = LocalDate.now();
-        LocalDate invalidWithDefault = getTestController().parseLocalDate(map, "invalid", defaultValue);
+        LocalDate invalidWithDefault = QueryParamParser.parseLocalDate(map, "invalid", defaultValue);
 
 
         // then
@@ -220,11 +220,11 @@ public class BaseControllerTest {
 
 
         // when
-        LocalTime v1 = getTestController().parseLocalTime(map, "v1", null);
-        LocalTime v2 = getTestController().parseLocalTime(map, "v2", null);
-        LocalTime invalid = getTestController().parseLocalTime(map, "invalid", null);
+        LocalTime v1 = QueryParamParser.parseLocalTime(map, "v1", null);
+        LocalTime v2 = QueryParamParser.parseLocalTime(map, "v2", null);
+        LocalTime invalid = QueryParamParser.parseLocalTime(map, "invalid", null);
         LocalTime defaultValue = LocalTime.now();
-        LocalTime invalidWithDefault = getTestController().parseLocalTime(map, "invalid", defaultValue);
+        LocalTime invalidWithDefault = QueryParamParser.parseLocalTime(map, "invalid", defaultValue);
 
 
         // then
@@ -240,18 +240,21 @@ public class BaseControllerTest {
         MultiValueMap map = new LinkedMultiValueMap<String, String>();
         LocalDateTime localDateTime = LocalDateTime.now();
         map.add("v1", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(localDateTime));
+        map.add("v2", Instant.ofEpochSecond(localDateTime.toEpochSecond(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now()))).toString());
         map.add("invalid", "121234");
 
 
         // when
-        LocalDateTime v1 = getTestController().parseLocalDateTime(map, "v1", null);
-        LocalDateTime invalid = getTestController().parseLocalDateTime(map, "invalid", null);
+        LocalDateTime v1 = QueryParamParser.parseLocalDateTime(map, "v1", null);
+        LocalDateTime v2 = QueryParamParser.parseLocalDateTime(map, "v2", null);
+        LocalDateTime invalid = QueryParamParser.parseLocalDateTime(map, "invalid", null);
         LocalDateTime defaultValue = LocalDateTime.now();
-        LocalDateTime invalidWithDefault = getTestController().parseLocalDateTime(map, "invalid", defaultValue);
+        LocalDateTime invalidWithDefault = QueryParamParser.parseLocalDateTime(map, "invalid", defaultValue);
 
 
         // then
         assertThat(v1, equalTo(localDateTime));
+        assertThat(v2.plusNanos(localDateTime.getNano()), equalTo(localDateTime));
         assertThat(invalid, nullValue());
         assertThat(invalidWithDefault, equalTo(defaultValue));
     }
@@ -263,19 +266,23 @@ public class BaseControllerTest {
         Instant instant = Instant.now();
         map.add("v1", instant.toString());
         map.add("invalid", "121234");
+        LocalDateTime localDateTime = LocalDateTime.now();
+        map.add("localDate", DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(localDateTime));
 
 
         // when
-        Instant v1 = getTestController().parseInstant(map, "v1", null);
-        Instant invalid = getTestController().parseInstant(map, "invalid", null);
+        Instant v1 = QueryParamParser.parseInstant(map, "v1", null);
+        Instant invalid = QueryParamParser.parseInstant(map, "invalid", null);
         Instant defaultValue = Instant.now();
-        Instant invalidWithDefault = getTestController().parseInstant(map, "invalid", defaultValue);
+        Instant invalidWithDefault = QueryParamParser.parseInstant(map, "invalid", defaultValue);
+        Instant localDate = QueryParamParser.parseInstant(map, "localDate", defaultValue);
 
 
         // then
         assertThat(v1, equalTo(instant));
         assertThat(invalid, nullValue());
         assertThat(invalidWithDefault, equalTo(defaultValue));
+        assertThat(localDate, equalTo(localDate));
     }
 
     @Test
@@ -296,12 +303,12 @@ public class BaseControllerTest {
 
 
         // when
-        Instant v1 = getTestController().parseInstant(map, "v1", null);
-        Instant invalid = getTestController().parseInstant(map, "invalid", null);
-        Instant invalidWithDefault = getTestController().parseInstant(map, "invalid", defaultValue);
-        Instant millisTooOld = getTestController().parseInstant(map, "millisTooOld", null);
-        Instant millisTooOldWithDefault = getTestController().parseInstant(map, "millisTooOld", defaultValue);
-        Instant secs = getTestController().parseInstant(map, "secs", defaultValue);
+        Instant v1 = QueryParamParser.parseInstant(map, "v1", null);
+        Instant invalid = QueryParamParser.parseInstant(map, "invalid", null);
+        Instant invalidWithDefault = QueryParamParser.parseInstant(map, "invalid", defaultValue);
+        Instant millisTooOld = QueryParamParser.parseInstant(map, "millisTooOld", null);
+        Instant millisTooOldWithDefault = QueryParamParser.parseInstant(map, "millisTooOld", defaultValue);
+        Instant secs = QueryParamParser.parseInstant(map, "secs", defaultValue);
 
 
         // then
@@ -311,12 +318,5 @@ public class BaseControllerTest {
         assertThat(millisTooOld, nullValue());
         assertThat(millisTooOldWithDefault, equalTo(defaultValue));
         assertThat(secs.minusNanos(secs.getNano()), equalTo(_2005));
-    }
-
-    private BaseController getTestController() {
-        return new TestController();
-    }
-
-    private class TestController implements BaseController {
     }
 }
