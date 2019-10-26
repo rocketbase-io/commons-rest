@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
 
 public final class QueryParamBuilder {
 
@@ -166,6 +167,14 @@ public final class QueryParamBuilder {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value.toString());
+        return uriBuilder;
+    }
+
+    public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Enum value) {
+        if (uriBuilder == null || key == null || value == null) {
+            return uriBuilder;
+        }
+        uriBuilder.queryParam(key, value.name());
         return uriBuilder;
     }
 }

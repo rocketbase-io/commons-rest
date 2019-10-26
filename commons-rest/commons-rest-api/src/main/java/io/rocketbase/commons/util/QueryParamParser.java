@@ -208,4 +208,17 @@ public final class QueryParamParser {
         return defaultValue;
     }
 
+    public static <T extends Enum> T parseEnum(MultiValueMap<String, String> params, String key, Class<T> clazz, T defaultValue) {
+        if (params != null) {
+            String value = params.getFirst(key);
+            if (value != null) {
+                try {
+                    return (T) Enum.valueOf(clazz, value.toUpperCase());
+                } catch (IllegalArgumentException | NullPointerException e) {
+                }
+            }
+        }
+        return defaultValue;
+    }
+
 }

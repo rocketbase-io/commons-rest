@@ -319,4 +319,28 @@ public class QueryParamParserTest {
         assertThat(millisTooOldWithDefault, equalTo(defaultValue));
         assertThat(secs.minusNanos(secs.getNano()), equalTo(_2005));
     }
+
+    enum TestSample {
+        GOOD,
+        NOT_GOOD;
+    }
+
+    @Test
+    public void parseEnum() {
+        // given
+        MultiValueMap map = new LinkedMultiValueMap<String, String>();
+        map.add("valid", TestSample.GOOD.name());
+        map.add("lower", TestSample.GOOD.name().toLowerCase());
+        map.add("invalid", "invalid-text");
+
+        // when
+        TestSample value = QueryParamParser.parseEnum(map, "valid",  TestSample.class, null);
+        TestSample lower = QueryParamParser.parseEnum(map, "lower",  TestSample.class, null);
+        TestSample invalid = QueryParamParser.parseEnum(map, "invalid",  TestSample.class, null);
+
+        // then
+        assertThat(value, equalTo(TestSample.GOOD));
+        assertThat(lower, equalTo(TestSample.GOOD));
+        assertThat(invalid, nullValue());
+    }
 }
