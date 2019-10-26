@@ -1,5 +1,6 @@
 package io.rocketbase.commons.resource;
 
+import io.rocketbase.commons.util.QueryParamBuilder;
 import io.rocketbase.commons.util.UrlParts;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Pageable;
@@ -9,24 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 public interface BaseRestResource {
 
     default UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, Pageable pageable) {
-        if (uriBuilder != null && pageable != null) {
-            if (pageable.getPageNumber() >= 0) {
-                uriBuilder.queryParam("page", pageable.getPageNumber());
-            }
-            if (pageable.getPageSize() >= 0) {
-                uriBuilder.queryParam("pageSize", pageable.getPageSize());
-            }
-            if (pageable.getSort() != null) {
-                pageable.getSort()
-                        .iterator()
-                        .forEachRemaining(
-                                o -> {
-                                    uriBuilder.queryParam("sort", String.format("%s,%s", o.getProperty(), o.getDirection().name().toLowerCase()));
-                                }
-                        );
-            }
-        }
-        return uriBuilder;
+        return QueryParamBuilder.appendParams(uriBuilder, pageable);
     }
 
     /**

@@ -48,6 +48,26 @@ public final class QueryParamParser {
         return PageRequest.of(Math.max(page, 0), Math.max(pageSize, 1), parseSort(params, "sort", defaultSort));
     }
 
+    /**
+     * parse page, size and sort from request
+     *
+     * @param params          MultiValueMap that contains all query params of request
+     * @param pageSizeKey     queryParam of current size of page to query
+     * @param pageKey         queryParam of current page to query
+     * @param sortKey         queryParam of sort to query
+     * @param defaultSort     sort that should get used in case of not filled parameter
+     * @param defaultPageSize in case the pageSize is not set - which value to take
+     * @param maxPageSize     maximum size of pageSize to limit the response size
+     * @return a filled {@link PageRequest}
+     */
+    public static Pageable parsePageRequest(MultiValueMap<String, String> params, String pageSizeKey, String pageKey, String sortKey, Sort defaultSort, int defaultPageSize, int maxPageSize) {
+        Integer pageSize = parseInteger(params, pageSizeKey, defaultPageSize);
+        pageSize = Math.min(pageSize, maxPageSize);
+        Integer page = parseInteger(params, pageKey, 0);
+
+        return PageRequest.of(Math.max(page, 0), Math.max(pageSize, 1), parseSort(params, sortKey, defaultSort));
+    }
+
 
     /**
      * parse sort and build correct {@link Sort} or {@link org.springframework.data.domain.Pageable}
