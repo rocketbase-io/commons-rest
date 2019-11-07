@@ -88,7 +88,7 @@ exampleService(2019-11-07T12:19:08.800Z) 🕓 2 sec 9 ms
 | commons.logging.skipArgs         | true             | disable to log also args                                        |
 | commons.logging.skipResult         | true             | disable log also result object (toString)                                    |
 | commons.logging.logLevel         | DEBUG             | level to log a normal hit                                    |
-| commons.logging.errorLogLevel         | DEBUG             | level to log an error hit                                   |
+| commons.logging.errorLogLevel         | WARN             | level to log an error hit                                   |
 
 
 ## commons-rest-sample
