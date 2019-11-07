@@ -1,8 +1,8 @@
 package io.rocketbase.commons.config;
 
+import io.rocketbase.commons.logging.RequestLoggingAspect;
 import io.rocketbase.commons.logging.LoggableConfig;
 import io.rocketbase.commons.logging.MethodLogger;
-import io.rocketbase.commons.logging.RequestLogger;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -32,8 +32,8 @@ public class CommonsRestLoggingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "commons.logging.mvc.enabled", matchIfMissing = true)
-    public RequestLogger requestLogger(@Autowired ApplicationContext applicationContext) {
-        return new RequestLogger(getAuditorAware(applicationContext), new LoggableConfig(logAspectConfig));
+    public RequestLoggingAspect requestLoggingAspect(@Autowired ApplicationContext applicationContext) {
+        return new RequestLoggingAspect(getAuditorAware(applicationContext), new LoggableConfig(logAspectConfig));
     }
 
     @Bean
@@ -47,7 +47,7 @@ public class CommonsRestLoggingAutoConfiguration {
             try {
                 auditorAware = applicationContext.getBean(AuditorAware.class);
             } catch (BeansException e) {
-                log.debug("logging-aspect: in order to add audit configure AuditorAware bean!");
+                log.debug("logging-aspect without audit info: configure AuditorAware to enable it!");
                 auditorAware = () -> Optional.empty();
             }
         }
