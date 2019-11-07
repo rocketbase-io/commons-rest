@@ -53,6 +53,44 @@ Implementation for obfuscatedId interface introduced within the api. Uses [hashi
 | hashids.alphabet               | abcdefghijklmnopqrstuvwxyz1234567890 | alphabet of hashid (by default we've skipped uppercase)  |
 | handler.obfuscatedDecode.enabled | true          | enable/disable ExceptionHandler for ObfuscatedDecodeException    |
 
+## commons-rest-logging-aspect
+
+Adds a RequestLoggingAspect that wraps around all RestController Mappings and loggs: method, path, parameter, duration...
+
+```
+GET /api/company 🕓 61 ms ⮐ find({}) ⮑ PageableResult(totalElements=100, totalPages=4, page=0, pageSize=25, content=[CompanyRead(id=5dc3...
+```
+
+Furthermore you can annotate a Service Method with @Loggable and get a duration tracking as well. 
+**It's only working on Services that are wrappable by aspect**. So you can only use it on Services calls from other services - no internal calls within the same Service.
+
+```java
+@Service
+public class SampleService {
+
+    @SneakyThrows
+    @Loggable
+    public void exampleService(Instant startExecution) {
+        TimeUnit.SECONDS.sleep(2);
+    }
+}
+```
+```
+exampleService(2019-11-07T12:19:08.800Z) 🕓 2 sec 9 ms
+```
+
+| property                       | default         | explanation                                                  |
+| ------------------------------ | --------------- | ------------------------------------------------------------ |
+| commons.logging.mvc.enabled    | true            | in case you only want to use Loggable Method aspect - disable RestController aspect  |
+| commons.logging.trim         | true             | trim result                                         |
+| commons.logging.trimLength         | 100             | trim after string length                                         |
+| commons.logging.duration         | true             | track duration                                        |
+| commons.logging.skipArgs         | true             | disable to log also args                                        |
+| commons.logging.skipResult         | true             | disable log also result object (toString)                                    |
+| commons.logging.logLevel         | DEBUG             | level to log a normal hit                                    |
+| commons.logging.errorLogLevel         | DEBUG             | level to log an error hit                                   |
+
+
 ## commons-rest-sample
 
 Sample spring-boot application to demonstrate the use of the provided commons-rest libraries. 
