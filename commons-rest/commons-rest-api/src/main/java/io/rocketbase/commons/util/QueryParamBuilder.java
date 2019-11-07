@@ -177,4 +177,14 @@ public final class QueryParamBuilder {
         uriBuilder.queryParam(key, value.name());
         return uriBuilder;
     }
+
+    public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Collection<Enum> values) {
+        if (uriBuilder == null || key == null || values == null) {
+            return uriBuilder;
+        }
+        for (Enum v : values) {
+            appendParams(uriBuilder, key, v);
+        }
+        return uriBuilder;
+    }
 }
