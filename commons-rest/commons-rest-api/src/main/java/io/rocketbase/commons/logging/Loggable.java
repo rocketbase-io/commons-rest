@@ -19,14 +19,19 @@ public @interface Loggable {
     boolean duration() default true;
 
     /**
+     * log current logged in user
+     */
+    boolean audit() default true;
+
+    /**
      * allow to skip args...
      */
-    boolean skipArgs() default false;
+    boolean args() default true;
 
     /**
      * allow to skip results from log
      */
-    boolean skipResult() default true;
+    boolean result() default false;
 
     String logLevel() default "DEBUG";
 

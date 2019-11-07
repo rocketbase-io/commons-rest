@@ -15,8 +15,9 @@ public class LoggableConfig {
 
     private boolean trim;
     private boolean duration;
-    private boolean skipArgs;
-    private boolean skipResult;
+    private boolean audit;
+    private boolean args;
+    private boolean result;
     private boolean query;
 
     @Builder.Default
@@ -31,8 +32,9 @@ public class LoggableConfig {
     public LoggableConfig(Loggable loggable) {
         trim = loggable.trimLength() > 0;
         duration = loggable.duration();
-        skipArgs = loggable.skipArgs();
-        skipResult = loggable.skipResult();
+        audit = loggable.audit();
+        args = loggable.args();
+        result = loggable.result();
         logLevel = Level.valueOf(loggable.logLevel());
         loggable.errorLogLevel();
         if (!loggable.errorLogLevel().equalsIgnoreCase("NONE")) {
@@ -44,8 +46,9 @@ public class LoggableConfig {
     public LoggableConfig(LoggingAspectProperties config) {
         trim = config.isTrim();
         duration = config.isDuration();
-        skipArgs = config.isSkipArgs();
-        skipResult = config.isSkipResult();
+        audit = config.isAudit();
+        args = config.isArgs();
+        result = config.isResult();
         query = config.isQuery();
         logLevel = Level.valueOf(config.getLogLevel());
         if (config.getErrorLogLevel() != null && !config.getErrorLogLevel().equalsIgnoreCase("NONE")) {

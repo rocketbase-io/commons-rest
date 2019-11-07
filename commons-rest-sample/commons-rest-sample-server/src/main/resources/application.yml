@@ -29,6 +29,6 @@ logging:
 
 commons:
   logging:
-    skip-args: false
-    skip-result: false
+    args: false
+    result: false
     query: true

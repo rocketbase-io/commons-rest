@@ -70,10 +70,12 @@ public abstract class AbstractLoggingAspect extends LogHelper {
         return result;
     }
 
-    protected void addUserWhenPossible(StringBuilder msg) {
-        Optional optional = auditorAware.getCurrentAuditor();
-        if (optional.isPresent()) {
-            msg.append(" ツ ").append(optional.get());
+    protected void addUserWhenPossible(LoggableConfig config, StringBuilder msg) {
+        if (config.isAudit()) {
+            Optional optional = auditorAware.getCurrentAuditor();
+            if (optional.isPresent()) {
+                msg.append(" ツ ").append(optional.get());
+            }
         }
     }
 
@@ -85,7 +87,7 @@ public abstract class AbstractLoggingAspect extends LogHelper {
     }
 
     protected void addResultWhenEnabled(Method method, LoggableConfig config, Object result, StringBuilder msg) {
-        if (!Void.TYPE.equals(method.getReturnType()) && !config.isSkipResult()) {
+        if (!Void.TYPE.equals(method.getReturnType()) && config.isResult()) {
             msg.append(" ⮑ ").append(objToText(config, result));
         }
     }
@@ -95,7 +97,7 @@ public abstract class AbstractLoggingAspect extends LogHelper {
             if (isLogEnabled(log, config.getErrorLogLevel())) {
                 StringBuilder msg = new StringBuilder();
                 msg.append(toText(config, point));
-                addUserWhenPossible(msg);
+                addUserWhenPossible(config, msg);
 
                 msg.append(": thrown ");
                 msg.append(throwableToText(ex));

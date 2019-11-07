@@ -51,7 +51,7 @@ Implementation for obfuscatedId interface introduced within the api. Uses [hashi
 | hashids.salt                   |                 | salt for hashIds                                             |
 | hashids.minHashLength          | 8               | min length of hasid                                          |
 | hashids.alphabet               | abcdefghijklmnopqrstuvwxyz1234567890 | alphabet of hashid (by default we've skipped uppercase)  |
-| handler.obfuscatedDecode.enabled | true          | enable/disable ExceptionHandler for ObfuscatedDecodeException    |
+| handler.obfuscatedDecode.enabled | true         | enable/disable ExceptionHandler for ObfuscatedDecodeException    |
 
 ## commons-rest-logging-aspect
 
@@ -81,14 +81,16 @@ exampleService(2019-11-07T12:19:08.800Z) 🕓 2 sec 9 ms
 
 | property                       | default         | explanation                                                  |
 | ------------------------------ | --------------- | ------------------------------------------------------------ |
-| commons.logging.mvc.enabled    | true            | in case you only want to use Loggable Method aspect - disable RestController aspect  |
-| commons.logging.trim         | true             | trim result                                         |
-| commons.logging.trimLength         | 100             | trim after string length                                         |
-| commons.logging.duration         | true             | track duration                                        |
-| commons.logging.skipArgs         | true             | disable to log also args                                        |
-| commons.logging.skipResult         | true             | disable log also result object (toString)                                    |
-| commons.logging.logLevel         | DEBUG             | level to log a normal hit                                    |
-| commons.logging.errorLogLevel         | WARN             | level to log an error hit                                   |
+| commons.logging.mvc.enabled   | true           | in case you only want to use Loggable Method aspect - disable RestController aspect  |
+| commons.logging.trim        | true           | trim result                                         |
+| commons.logging.trimLength        | 100            | trim after string length                                         |
+| commons.logging.duration        | true            | track duration  |
+| commons.logging.audti        | true            | when AuditorAware is present log value of   |
+| commons.logging.args        | false            | log each args.toString() with trimLength                                        |
+| commons.logging.result        | false            | log result.toString() with trimLength                                 |
+| commons.logging.query | true | add query parameter to url |
+| commons.logging.logLevel        | DEBUG            | level to log a normal hit                                    |
+| commons.logging.errorLogLevel        | WARN            | level to log an error hit                                   |
 
 
 ## commons-rest-sample
@@ -107,7 +109,7 @@ Nevertheless you can customize the configuration by the following properties
 | handler.badRequest.enabled     | true            | enable/disable ExceptionHandler for BadRequestException      |
 | handler.notFound.enabled       | true            | enable/disable ExceptionHandler for NotFoundException        |
 | handler.beanValidation.enabled | true            | enable/disable ExceptionHandler for MethodArgumentNotValidException (bean validation issues from spring-boot)      |
- 
+
 
 ### The MIT License (MIT)
 Copyright (c) 2019 rocketbase.io

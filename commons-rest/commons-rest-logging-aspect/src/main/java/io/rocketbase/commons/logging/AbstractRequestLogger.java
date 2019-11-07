@@ -39,11 +39,11 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
             StringBuilder msg = new StringBuilder();
 
             handleLogging(msg, point, method);
-            addUserWhenPossible(msg);
+            addUserWhenPossible(config, msg);
             addDurationWhenEnabled(config, start, msg);
 
 
-            if (!config.isSkipArgs()) {
+            if (config.isArgs()) {
                 msg.append(" ⮐ ")
                         .append(toText(config, point));
             }

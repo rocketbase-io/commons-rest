@@ -17,7 +17,7 @@ public class LogHelper {
         StringBuilder log = new StringBuilder();
         log.append(method.getName())
                 .append("(");
-        if (!config.isSkipArgs()) {
+        if (config.isArgs()) {
             for (int pos = 0; pos < args.length; ++pos) {
                 if (pos > 0) {
                     log.append(", ");
@@ -48,7 +48,7 @@ public class LogHelper {
         StringBuilder text = new StringBuilder();
         if (arg == null) {
             text.append("null");
-        } else if (!config.isSkipArgs()) {
+        } else {
             try {
                 text.append(objToText(config, arg));
             } catch (Throwable ex) {
