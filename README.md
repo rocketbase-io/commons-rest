@@ -58,7 +58,7 @@ Implementation for obfuscatedId interface introduced within the api. Uses [hashi
 Adds a RequestLoggingAspect that wraps around all RestController Mappings and loggs: method, path, parameter, duration...
 
 ```
-GET /api/company 🕓 61 ms ⮐ find({}) ⮑ PageableResult(totalElements=100, totalPages=4, page=0, pageSize=25, content=[CompanyRead(id=5dc3...
+GET /api/company ツ username 🕓 61 ms ⮐ find({}) ⮑ PageableResult(totalElements=100, totalPages=4, page=0, pageSize=25, content=[CompanyRead(id=5dc3...
 ```
 
 Furthermore you can annotate a Service Method with @Loggable and get a duration tracking as well. 
@@ -76,7 +76,7 @@ public class SampleService {
 }
 ```
 ```
-exampleService(2019-11-07T12:19:08.800Z) 🕓 2 sec 9 ms
+exampleService(2019-11-07T12:19:08.800Z) ツ username 🕓 2 sec 9 ms
 ```
 
 | property                       | default         | explanation                                                  |
@@ -85,7 +85,7 @@ exampleService(2019-11-07T12:19:08.800Z) 🕓 2 sec 9 ms
 | commons.logging.trim        | true           | trim result                                         |
 | commons.logging.trimLength        | 100            | trim after string length                                         |
 | commons.logging.duration        | true            | track duration  |
-| commons.logging.audti        | true            | when AuditorAware is present log value of   |
+| commons.logging.audit        | true            | when AuditorAware is present log value of   |
 | commons.logging.args        | false            | log each args.toString() with trimLength                                        |
 | commons.logging.result        | false            | log result.toString() with trimLength                                 |
 | commons.logging.query | true | add query parameter to url |
