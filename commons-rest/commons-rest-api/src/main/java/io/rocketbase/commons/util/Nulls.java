@@ -48,6 +48,15 @@ public final class Nulls {
         return notEmpty(result, fallback);
     }
 
+    public static <T> boolean noneNullValue(T... values) {
+        for (T v : values) {
+            if (v == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public interface PropertyValueProvider<SOURCE, TARGET> {
         TARGET apply(SOURCE source);
     }
