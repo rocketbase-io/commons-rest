@@ -4,10 +4,9 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "commons.logging.mvc")
+@ConfigurationProperties(prefix = "commons.logging")
 public class LoggingAspectProperties {
 
-    private boolean enabled = true;
     private boolean trim = true;
     private boolean duration = true;
     private boolean skipArgs = true;
