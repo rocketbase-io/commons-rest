@@ -96,4 +96,11 @@ public class TimeUtilTest {
         assertThat(TimeUtil.isAfterOrEquals(twoThousand.toInstant(UTC), twoThousand.toInstant(UTC)), equalTo(true));
         assertThat(TimeUtil.isAfterOrEquals(twoThousandOne.toInstant(UTC), twoThousand.toInstant(UTC)), equalTo(true));
     }
+
+    @Test
+    public void convertMillisToMinSecFormat() {
+        assertThat(TimeUtil.convertMillisToMinSecFormat(100), equalTo("100 ms"));
+        assertThat(TimeUtil.convertMillisToMinSecFormat(1010), equalTo("1 sec 10 ms"));
+        assertThat(TimeUtil.convertMillisToMinSecFormat(60010), equalTo("1 min 0 sec 10 ms"));
+    }
 }

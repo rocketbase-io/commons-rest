@@ -86,4 +86,17 @@ public abstract class TimeUtil {
     public static boolean isAfterOrEquals(Instant val, Instant compare) {
         return val.isAfter(compare) || val.compareTo(compare) == 0;
     }
+
+    public static String convertMillisToMinSecFormat(long millis) {
+        long ms = millis % 1000;
+        long s = (millis / 1000) % 60;
+        long m = ((millis / 1000) / 60) % 60;
+        if (s > 0 && m <= 0) {
+            return String.format("%d sec %d ms", s, ms);
+        } else if (s > 0 || m > 0) {
+            return String.format("%d min %d sec %d ms", m, s, ms);
+        } else {
+            return String.format("%d ms", ms);
+        }
+    }
 }

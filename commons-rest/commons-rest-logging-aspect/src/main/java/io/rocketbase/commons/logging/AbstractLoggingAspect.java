@@ -1,5 +1,6 @@
 package io.rocketbase.commons.logging;
 
+import io.rocketbase.commons.util.TimeUtil;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -79,7 +80,7 @@ public abstract class AbstractLoggingAspect extends LogHelper {
     protected void addDurationWhenEnabled(LoggableConfig config, long start, StringBuilder append) {
         if (config.isDuration()) {
             append.append(" \uD83D\uDD53 ")
-                    .append(convertMillisToMinSecFormat(System.currentTimeMillis() - start));
+                    .append(TimeUtil.convertMillisToMinSecFormat(System.currentTimeMillis() - start));
         }
     }
 

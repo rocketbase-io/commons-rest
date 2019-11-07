@@ -58,19 +58,6 @@ public class LogHelper {
         return text.toString();
     }
 
-    protected String convertMillisToMinSecFormat(long millis) {
-        long ms = millis % 1000;
-        long s = (millis / 1000) % 60;
-        long m = ((millis / 1000) / 60) % 60;
-        if (s > 0 && m <= 0) {
-            return String.format("%d sec %d ms", s, ms);
-        } else if (s > 0 || m > 0) {
-            return String.format("%d min %d sec %d ms", m, s, ms);
-        } else {
-            return String.format("%d ms", ms);
-        }
-    }
-
     protected String objToText(LoggableConfig config, Object arg) {
         String text;
         if (arg.getClass()
