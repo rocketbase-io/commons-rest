@@ -8,9 +8,7 @@ import org.springframework.util.MultiValueMap;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public final class QueryParamParser {
 
@@ -108,6 +106,11 @@ public final class QueryParamParser {
         return sort;
     }
 
+    private static String getFirstValue(MultiValueMap<String, String> params, String key) {
+        return params != null && params.containsKey(key) ? params.getFirst(key) : null;
+    }
+
+
     public static Integer parseInteger(MultiValueMap<String, String> params, String key, Integer defaultValue) {
         Long value = parseLong(params, key, null);
         if (value != null) {
@@ -116,38 +119,49 @@ public final class QueryParamParser {
         return defaultValue;
     }
 
+    public static Integer parseInteger(String value, Integer defaultValue) {
+        Long v = parseLong(value, null);
+        if (v != null) {
+            return v.intValue();
+        }
+        return defaultValue;
+    }
+
     public static Long parseLong(MultiValueMap<String, String> params, String key, Long defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null && value.matches("-?[0-9]+")) {
-                try {
-                    return Long.parseLong(value);
-                } catch (NumberFormatException f) {
-                }
+        return parseLong(getFirstValue(params, key), defaultValue);
+    }
+
+    public static Long parseLong(String value, Long defaultValue) {
+        if (value != null && value.matches("-?[0-9]+")) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException f) {
             }
         }
         return defaultValue;
     }
 
     public static Boolean parseBoolean(MultiValueMap<String, String> params, String key, Boolean defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                return value.matches("(true|1|yes|on)");
-            }
+        return parseBoolean(getFirstValue(params, key), defaultValue);
+    }
+
+    public static Boolean parseBoolean(String value, Boolean defaultValue) {
+        if (value != null) {
+            return value.matches("(true|1|yes|on)");
         }
         return defaultValue;
     }
 
     public static LocalDate parseLocalDate(MultiValueMap<String, String> params, String key, LocalDate defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                for (DateTimeFormatter formatter : DEFAULT_DATE_FORMATTERS) {
-                    try {
-                        return LocalDate.parse(value, formatter);
-                    } catch (DateTimeParseException ex) {
-                    }
+        return parseLocalDate(getFirstValue(params, key), defaultValue);
+    }
+
+    public static LocalDate parseLocalDate(String value, LocalDate defaultValue) {
+        if (value != null) {
+            for (DateTimeFormatter formatter : DEFAULT_DATE_FORMATTERS) {
+                try {
+                    return LocalDate.parse(value, formatter);
+                } catch (DateTimeParseException ex) {
                 }
             }
         }
@@ -155,29 +169,31 @@ public final class QueryParamParser {
     }
 
     public static LocalTime parseLocalTime(MultiValueMap<String, String> params, String key, LocalTime defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                try {
-                    return LocalTime.parse(value, DateTimeFormatter.ISO_LOCAL_TIME);
-                } catch (DateTimeParseException ex) {
-                }
+        return parseLocalTime(getFirstValue(params, key), defaultValue);
+    }
+
+    public static LocalTime parseLocalTime(String value, LocalTime defaultValue) {
+        if (value != null) {
+            try {
+                return LocalTime.parse(value, DateTimeFormatter.ISO_LOCAL_TIME);
+            } catch (DateTimeParseException ex) {
             }
         }
         return defaultValue;
     }
 
     public static LocalDateTime parseLocalDateTime(MultiValueMap<String, String> params, String key, LocalDateTime defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
+        return parseLocalDateTime(getFirstValue(params, key), defaultValue);
+    }
+
+    public static LocalDateTime parseLocalDateTime(String value, LocalDateTime defaultValue) {
+        if (value != null) {
+            try {
+                return LocalDateTime.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            } catch (DateTimeParseException ex) {
                 try {
-                    return LocalDateTime.parse(value, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-                } catch (DateTimeParseException ex) {
-                    try {
-                        return Instant.parse(value).atZone(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())).toLocalDateTime();
-                    } catch (DateTimeException eex) {
-                    }
+                    return Instant.parse(value).atZone(ZoneOffset.systemDefault().getRules().getOffset(LocalDateTime.now())).toLocalDateTime();
+                } catch (DateTimeException eex) {
                 }
             }
         }
@@ -185,22 +201,23 @@ public final class QueryParamParser {
     }
 
     public static Instant parseInstant(MultiValueMap<String, String> params, String key, Instant defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                try {
-                    Instant instant = Instant.parse(value);
-                    return instant;
-                } catch (DateTimeParseException ex) {
-                    if (value.matches("[0-9]+")) {
-                        long longValue = Long.parseLong(value);
-                        int currentYear = LocalDate.now().getYear();
+        return parseInstant(getFirstValue(params, key), defaultValue);
+    }
 
-                        Instant instant = Instant.ofEpochSecond(longValue);
-                        ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
-                        if (zonedDateTime.getYear() < currentYear + 100 && zonedDateTime.getYear() > 2001) {
-                            return instant;
-                        }
+    public static Instant parseInstant(String value, Instant defaultValue) {
+        if (value != null) {
+            try {
+                Instant instant = Instant.parse(value);
+                return instant;
+            } catch (DateTimeParseException ex) {
+                if (value.matches("[0-9]+")) {
+                    long longValue = Long.parseLong(value);
+                    int currentYear = LocalDate.now().getYear();
+
+                    Instant instant = Instant.ofEpochSecond(longValue);
+                    ZonedDateTime zonedDateTime = instant.atZone(ZoneId.systemDefault());
+                    if (zonedDateTime.getYear() < currentYear + 100 && zonedDateTime.getYear() > 2001) {
+                        return instant;
                     }
                 }
             }
@@ -209,14 +226,29 @@ public final class QueryParamParser {
     }
 
     public static <T extends Enum> T parseEnum(MultiValueMap<String, String> params, String key, Class<T> clazz, T defaultValue) {
-        if (params != null) {
-            String value = params.getFirst(key);
-            if (value != null) {
-                try {
-                    return (T) Enum.valueOf(clazz, value.toUpperCase());
-                } catch (IllegalArgumentException | NullPointerException e) {
+        return parseEnum(getFirstValue(params, key), clazz, defaultValue);
+    }
+
+    public static <T extends Enum> T parseEnum(String value, Class<T> clazz, T defaultValue) {
+        if (value != null) {
+            try {
+                return (T) Enum.valueOf(clazz, value.toUpperCase());
+            } catch (IllegalArgumentException | NullPointerException e) {
+            }
+        }
+        return defaultValue;
+    }
+
+    public static <T extends Enum> Set<T> parseEnumSet(MultiValueMap<String, String> params, String key, Class<T> clazz, Set<T> defaultValue) {
+        if (params.containsKey(key)) {
+            Set result = new HashSet();
+            for (String v : params.get(key)) {
+                T enumValue = parseEnum(v, clazz, null);
+                if (enumValue != null) {
+                    result.add(enumValue);
                 }
             }
+            return result.isEmpty() ? defaultValue : result;
         }
         return defaultValue;
     }
