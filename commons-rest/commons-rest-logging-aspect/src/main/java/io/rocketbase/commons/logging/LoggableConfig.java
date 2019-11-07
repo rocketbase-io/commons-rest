@@ -17,6 +17,7 @@ public class LoggableConfig {
     private boolean duration;
     private boolean skipArgs;
     private boolean skipResult;
+    private boolean query;
 
     @Builder.Default
     private Level logLevel = Level.DEBUG;
@@ -33,7 +34,8 @@ public class LoggableConfig {
         skipArgs = loggable.skipArgs();
         skipResult = loggable.skipResult();
         logLevel = Level.valueOf(loggable.logLevel());
-        if (loggable.errorLogLevel() != null && !loggable.errorLogLevel().equalsIgnoreCase("NONE")) {
+        loggable.errorLogLevel();
+        if (!loggable.errorLogLevel().equalsIgnoreCase("NONE")) {
             errorLogLevel = Level.valueOf(loggable.errorLogLevel());
         }
         trimLength = loggable.trimLength();
@@ -44,6 +46,7 @@ public class LoggableConfig {
         duration = config.isDuration();
         skipArgs = config.isSkipArgs();
         skipResult = config.isSkipResult();
+        query = config.isQuery();
         logLevel = Level.valueOf(config.getLogLevel());
         if (config.getErrorLogLevel() != null && !config.getErrorLogLevel().equalsIgnoreCase("NONE")) {
             errorLogLevel = Level.valueOf(config.getErrorLogLevel());

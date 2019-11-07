@@ -11,6 +11,7 @@ public class LoggingAspectProperties {
     private boolean duration = true;
     private boolean skipArgs = true;
     private boolean skipResult = true;
+    private boolean query = true;
     private String logLevel = "DEBUG";
 
     /**

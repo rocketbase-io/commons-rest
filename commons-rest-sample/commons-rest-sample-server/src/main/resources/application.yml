@@ -29,6 +29,6 @@ logging:
 
 commons:
   logging:
-    mvc:
-      skip-args: false
-      skip-result: false
+    skip-args: false
+    skip-result: false
+    query: true
