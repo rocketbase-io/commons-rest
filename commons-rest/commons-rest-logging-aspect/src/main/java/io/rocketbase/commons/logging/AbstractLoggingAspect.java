@@ -72,11 +72,18 @@ public abstract class AbstractLoggingAspect extends LogHelper {
 
     protected void addUserWhenPossible(LoggableConfig config, StringBuilder msg) {
         if (config.isAudit()) {
-            Optional optional = auditorAware.getCurrentAuditor();
+            Optional optional = lookupCurrentAuditor();
             if (optional.isPresent()) {
                 msg.append(" ツ ").append(optional.get());
             }
         }
+    }
+
+    /**
+     * allows to overwrite lookup in case of flux
+     */
+    protected Optional lookupCurrentAuditor() {
+        return auditorAware.getCurrentAuditor();
     }
 
     protected void addDurationWhenEnabled(LoggableConfig config, long start, StringBuilder append) {
@@ -93,27 +100,25 @@ public abstract class AbstractLoggingAspect extends LogHelper {
     }
 
     protected void logError(ProceedingJoinPoint point, LoggableConfig config, long start, Logger log, Throwable ex) {
-        if (config.getErrorLogLevel() != null) {
-            if (isLogEnabled(log, config.getErrorLogLevel())) {
-                StringBuilder msg = new StringBuilder();
-                msg.append(toText(config, point));
-                addUserWhenPossible(config, msg);
+        if (isLogEnabled(log, config.getErrorLogLevel())) {
+            StringBuilder msg = new StringBuilder();
+            msg.append(toText(config, point));
+            addUserWhenPossible(config, msg);
 
-                msg.append(": thrown ");
-                msg.append(throwableToText(ex));
+            msg.append(": thrown ");
+            msg.append(throwableToText(ex));
 
-                StackTraceElement trace = ex.getStackTrace()[0];
-                msg.append(" @")
-                        .append(trace.getClassName())
-                        .append('#')
-                        .append(trace.getMethodName())
-                        .append(" line: ")
-                        .append(trace.getLineNumber());
+            StackTraceElement trace = ex.getStackTrace()[0];
+            msg.append(" @")
+                    .append(trace.getClassName())
+                    .append('#')
+                    .append(trace.getMethodName())
+                    .append(" line: ")
+                    .append(trace.getLineNumber());
 
 
-                addDurationWhenEnabled(config, start, msg);
-                printLog(log, config.getErrorLogLevel(), msg.toString());
-            }
+            addDurationWhenEnabled(config, start, msg);
+            printLog(log, config.getErrorLogLevel(), msg.toString());
         }
     }
 

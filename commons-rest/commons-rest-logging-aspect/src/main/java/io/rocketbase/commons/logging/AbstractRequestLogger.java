@@ -35,7 +35,7 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
     }
 
     protected void afterSuccess(Logger log, ProceedingJoinPoint point, Method method, long start, Object result) {
-        if (log.isDebugEnabled()) {
+        if (isLogEnabled(log, config.getLogLevel())) {
             StringBuilder msg = new StringBuilder();
 
             handleLogging(msg, point, method);
@@ -50,7 +50,7 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
 
             addResultWhenEnabled(method, config, result, msg);
 
-            log.debug(msg.toString());
+            printLog(log, config.getLogLevel(), msg.toString());
         }
     }
 
