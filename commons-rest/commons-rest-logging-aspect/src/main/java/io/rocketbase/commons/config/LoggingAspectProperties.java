@@ -10,8 +10,8 @@ public class LoggingAspectProperties {
     private boolean trim = true;
     private boolean duration = true;
     private boolean audit = true;
-    private boolean args = true;
-    private boolean result = true;
+    private boolean args = false;
+    private boolean result = false;
     private boolean query = true;
     private String logLevel = "DEBUG";
 
