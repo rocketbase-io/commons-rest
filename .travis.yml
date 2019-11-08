@@ -31,5 +31,5 @@ deploy:
       tags: true
 
 ## disable emailing
-notifications:
-  email: false
+#notifications:
+#  email: false
