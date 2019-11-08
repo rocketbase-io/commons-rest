@@ -93,6 +93,63 @@ exampleService(2019-11-07T12:19:08.800Z) ツ username 🕓 2 sec 9 ms
 | commons.logging.errorLogLevel        | WARN            | level to log an error hit                                   |
 
 
+### how to work within spring-webflux
+
+Normally the RequestLoggerAspect would log only the time of returning a Mono. If you would like to get the time for processing the request you need to create your own Aspect that could look like this.
+
+```java
+@Aspect
+public class FluxLogger extends AbstractRequestLogger {
+    
+    
+    public FluxLogger(AuditorAware auditorAware, LoggableConfig config) {
+        super(auditorAware, config);
+    }
+
+    @Around("execution(* *(..)) && @annotation(org.springframework.web.bind.annotation.RequestMapping)")
+    public Object wrapMethod(ProceedingJoinPoint point) throws Throwable {
+        Method method = ((MethodSignature) point.getSignature())
+                .getMethod();
+
+        return this.wrap(point, method);
+    }
+
+    private Object wrap(ProceedingJoinPoint point, Method method) throws Throwable {
+        long start = System.currentTimeMillis();
+
+        Logger log = getLog(point);
+        try {
+            Optional<?> currentAuditor = getAuditorAware().getCurrentAuditor();
+
+            Object result = point.proceed();
+            if (result instanceof Mono) {
+                Mono<?> requestMono = (Mono<?>) result;
+                Mono<? extends Tuple2<Long, ?>> elapsed = requestMono.elapsed();
+
+                if (isLogEnabled(log, getConfig().getLogLevel())) {
+                    elapsed.subscribe(o -> {
+                        Long elapsedTime = o.getT1();
+                        afterSuccess(log, point, method, System.currentTimeMillis() - elapsedTime, result, currentAuditor);
+                    });
+                }
+                if (isLogEnabled(log, getConfig().getErrorLogLevel())) {
+                    requestMono.toFuture()
+                            .exceptionally(throwable -> {
+                                logError(point, getConfig(), start, log, throwable);
+                                return null;
+                            });
+                }
+            }
+            return result;
+        } catch (Throwable ex) {
+            logError(point, getConfig(), start, log, ex);
+            throw ex;
+        }
+    }
+
+}
+```
+
 ## commons-rest-sample
 
 Sample spring-boot application to demonstrate the use of the provided commons-rest libraries. 

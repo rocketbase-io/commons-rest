@@ -16,6 +16,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class AbstractLoggingAspect extends LogHelper {
 
+    public static final String USER_SIGN = " ツ ";
+    public static final String TIME_SIGN = " \uD83D\uDD53 ";
+    public static final String ARGS_SIGN = " ⮐ ";
+    public static final String RETURN_SIGN = " ⮑ ";
+
     @Getter(AccessLevel.PROTECTED)
     private final AuditorAware auditorAware;
 
@@ -70,17 +75,20 @@ public abstract class AbstractLoggingAspect extends LogHelper {
         return result;
     }
 
-    protected void addUserWhenPossible(LoggableConfig config, StringBuilder msg) {
+    protected void addUserWhenEnabled(LoggableConfig config, StringBuilder msg) {
         if (config.isAudit()) {
-            Optional optional = lookupCurrentAuditor();
-            if (optional.isPresent()) {
-                msg.append(" ツ ").append(optional.get());
-            }
+            addUserWhenPossible(lookupCurrentAuditor(), msg);
+        }
+    }
+
+    protected void addUserWhenPossible(Optional optional, StringBuilder msg) {
+        if (optional.isPresent()) {
+            msg.append(USER_SIGN).append(optional.get());
         }
     }
 
     /**
-     * allows to overwrite lookup in case of flux
+     * allows to overwrite way of user lookup
      */
     protected Optional lookupCurrentAuditor() {
         return auditorAware.getCurrentAuditor();
@@ -88,14 +96,14 @@ public abstract class AbstractLoggingAspect extends LogHelper {
 
     protected void addDurationWhenEnabled(LoggableConfig config, long start, StringBuilder append) {
         if (config.isDuration()) {
-            append.append(" \uD83D\uDD53 ")
+            append.append(TIME_SIGN)
                     .append(TimeUtil.convertMillisToMinSecFormat(System.currentTimeMillis() - start));
         }
     }
 
     protected void addResultWhenEnabled(Method method, LoggableConfig config, Object result, StringBuilder msg) {
         if (!Void.TYPE.equals(method.getReturnType()) && config.isResult()) {
-            msg.append(" ⮑ ").append(objToText(config, result));
+            msg.append(RETURN_SIGN).append(objToText(config, result));
         }
     }
 
@@ -103,7 +111,7 @@ public abstract class AbstractLoggingAspect extends LogHelper {
         if (isLogEnabled(log, config.getErrorLogLevel())) {
             StringBuilder msg = new StringBuilder();
             msg.append(toText(config, point));
-            addUserWhenPossible(config, msg);
+            addUserWhenEnabled(config, msg);
 
             msg.append(": thrown ");
             msg.append(throwableToText(ex));

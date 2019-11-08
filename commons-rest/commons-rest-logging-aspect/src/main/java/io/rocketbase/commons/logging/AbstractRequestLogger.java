@@ -17,6 +17,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,23 +35,42 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
         this.config = config;
     }
 
+    /**
+     * normal version used within a servlet context
+     */
     protected void afterSuccess(Logger log, ProceedingJoinPoint point, Method method, long start, Object result) {
+        afterSuccess(log, point, method, start, result, null);
+    }
+
+    /**
+     * allows to inject current auditor information<br>
+     * in flux context the auditAware information is gone (no security context anymore)
+     */
+    protected void afterSuccess(Logger log, ProceedingJoinPoint point, Method method, long start, Object result, Optional currentAuditor) {
         if (isLogEnabled(log, config.getLogLevel())) {
             StringBuilder msg = new StringBuilder();
 
             handleLogging(msg, point, method);
-            addUserWhenPossible(config, msg);
+            handleCurrentAuditor(currentAuditor, msg);
             addDurationWhenEnabled(config, start, msg);
 
-
             if (config.isArgs()) {
-                msg.append(" ⮐ ")
-                        .append(toText(config, point));
+                msg.append(ARGS_SIGN).append(toText(config, point));
             }
 
             addResultWhenEnabled(method, config, result, msg);
 
             printLog(log, config.getLogLevel(), msg.toString());
+        }
+    }
+
+    protected void handleCurrentAuditor(Optional currentAuditor, StringBuilder msg) {
+        if (currentAuditor != null) {
+            if (config.isAudit()) {
+                addUserWhenPossible(currentAuditor, msg);
+            }
+        } else {
+            addUserWhenEnabled(config, msg);
         }
     }
 

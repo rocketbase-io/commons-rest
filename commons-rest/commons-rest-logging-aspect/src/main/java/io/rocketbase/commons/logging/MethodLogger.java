@@ -37,7 +37,7 @@ public class MethodLogger extends AbstractLoggingAspect {
                 StringBuilder msg = new StringBuilder();
 
                 msg.append(toText(config, point));
-                addUserWhenPossible(config, msg);
+                addUserWhenEnabled(config, msg);
                 addDurationWhenEnabled(config, start, msg);
                 addResultWhenEnabled(method, config, result, msg);
 
