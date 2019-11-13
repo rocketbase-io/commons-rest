@@ -1,5 +1,10 @@
 package io.rocketbase.commons.util;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * shorten null checks
  */
@@ -20,6 +25,36 @@ public final class Nulls {
      */
     public static String notNull(String value) {
         return notNull(value, "");
+    }
+
+    /**
+     * in case of null value return's Collections.emptyList()
+     */
+    public static List notNull(List value) {
+        if (value == null) {
+            return Collections.emptyList();
+        }
+        return value;
+    }
+
+    /**
+     * in case of null value return's Collections.emptySet()
+     */
+    public static Set notNull(Set value) {
+        if (value == null) {
+            return Collections.emptySet();
+        }
+        return value;
+    }
+
+    /**
+     * in case of null value return's Collections.emptyMap()
+     */
+    public static Map notNull(Map value) {
+        if (value == null) {
+            return Collections.emptyMap();
+        }
+        return value;
     }
 
     /**
