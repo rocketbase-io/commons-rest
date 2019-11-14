@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 /**
  * shorten null checks
@@ -55,6 +56,15 @@ public final class Nulls {
             return Collections.emptyMap();
         }
         return value;
+    }
+
+    /**
+     * consume when value is not null
+     */
+    public static <T> void notNull(T value, Consumer<T> consumer) {
+        if (value != null) {
+            consumer.accept(value);
+        }
     }
 
     /**
