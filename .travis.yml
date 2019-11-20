@@ -14,14 +14,15 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 ## default build
-script: mvn --settings .travis/settings.xml -U clean deploy -Dregistry=https://maven.pkg.github.com/rocketbase-io -Dtoken=$GH_TOKEN
+script: mvn --settings .travis/settings.xml -U clean install
 # code climate upload coverage
 after_script:
   - JACOCO_SOURCE_PATH=commons-rest/commons-rest-api/src/main/java ./cc-test-reporter format-coverage -t jacoco -o coverage/codeclimate.rest-api.json commons-rest/commons-rest-api/target/site/jacoco/jacoco.xml
   - JACOCO_SOURCE_PATH=commons-rest/commons-rest-server/src/main/java ./cc-test-reporter format-coverage -t jacoco -o coverage/codeclimate.rest-server.json commons-rest/commons-rest-server/target/site/jacoco/jacoco.xml
   - ./cc-test-reporter sum-coverage coverage/codeclimate.*.json -p 2                  # Sum both coverage parts into coverage/codeclimate.json
   - if [[ "$TRAVIS_TEST_RESULT" == 0 ]]; then ./cc-test-reporter upload-coverage; fi  # Upload coverage/codeclimate.json
-
+  - cd commons-rest # goto library folder
+  - mvn deploy -Dregistry=https://maven.pkg.github.com/rocketbase-io -Dtoken=$GH_TOKEN # push to github packages
 ## release on tag
 deploy:
   - provider: script
