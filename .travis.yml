@@ -28,10 +28,6 @@ deploy:
     skip_cleanup: true
     on:
       tags: true
-  - provider: script
-    script: "cd commons-rest | mvn deploy -Dregistry=https://maven.pkg.github.com/rocketbase-io -Dtoken=$GH_TOKEN"
-    on:
-      tags: false
 
 ## disable emailing
 #notifications:
