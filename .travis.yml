@@ -14,7 +14,7 @@ before_script:
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
 ## default build
-script: mvn --settings .travis/settings.xml -U clean install
+script: mvn --settings .travis/settings.xml -U clean deploy -Dregistry=https://maven.pkg.github.com/rocketbase-io -Dtoken=$GH_TOKEN
 # code climate upload coverage
 after_script:
   - JACOCO_SOURCE_PATH=commons-rest/commons-rest-api/src/main/java ./cc-test-reporter format-coverage -t jacoco -o coverage/codeclimate.rest-api.json commons-rest/commons-rest-api/target/site/jacoco/jacoco.xml
