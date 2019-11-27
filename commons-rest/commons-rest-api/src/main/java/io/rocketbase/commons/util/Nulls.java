@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * shorten null checks
@@ -59,12 +60,22 @@ public final class Nulls {
     }
 
     /**
-     * consume when value is not null
+     * accept when value is not null
      */
-    public static <T> void notNull(T value, Consumer<T> consumer) {
+    public static <T> void accept(T value, Consumer<T> consumer) {
         if (value != null) {
             consumer.accept(value);
         }
+    }
+
+    /**
+     * apply when value is not null
+     */
+    public static <T, R> R apply(T value, Function<T, R> function, R fallback) {
+        if (value != null) {
+            return function.apply(value);
+        }
+        return fallback;
     }
 
     /**
