@@ -5,17 +5,17 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import io.rocketbase.commons.exception.ObfuscatedDecodeException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Resource;
 import java.io.IOException;
 
 @JsonComponent
+@RequiredArgsConstructor
 public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
 
-    @Resource
-    private IdObfuscator idObfuscator;
+    private final IdObfuscator idObfuscator;
 
     @Override
     public ObfuscatedId deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {

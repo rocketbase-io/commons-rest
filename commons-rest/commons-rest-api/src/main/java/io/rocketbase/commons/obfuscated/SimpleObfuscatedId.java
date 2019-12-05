@@ -1,13 +1,15 @@
 package io.rocketbase.commons.obfuscated;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 
-@RequiredArgsConstructor
+
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 public class SimpleObfuscatedId implements ObfuscatedId {
 
-    private final Long id;
-    private final String obfuscated;
-
+    private Long id;
+    private String obfuscated;
 }

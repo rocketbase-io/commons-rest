@@ -1,10 +1,10 @@
 package io.rocketbase.commons.config;
 
-import io.rocketbase.commons.controller.exceptionhandler.BeanValidationExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.ObfuscatedDecodeExceptionHandler;
-import io.rocketbase.commons.obfuscated.ObfuscatedId;
-import io.rocketbase.commons.service.DefaultIdObfuscator;
 import io.rocketbase.commons.obfuscated.IdObfuscator;
+import io.rocketbase.commons.obfuscated.ObfuscatedId;
+import io.rocketbase.commons.obfuscated.ObfuscatedIdDeserializer;
+import io.rocketbase.commons.service.DefaultIdObfuscator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hashids.Hashids;
@@ -37,6 +37,12 @@ public class CommonsRestHashIdsAutoConfiguration {
     @ConditionalOnProperty(name = "handler.obfuscatedDecode.enabled", matchIfMissing = true)
     public ObfuscatedDecodeExceptionHandler obfuscatedDecodeExceptionHandler() {
         return new ObfuscatedDecodeExceptionHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ObfuscatedIdDeserializer obfuscatedIdDeserializer(@Autowired IdObfuscator idObfuscator) {
+        return new ObfuscatedIdDeserializer(idObfuscator);
     }
 
     @RestControllerAdvice
