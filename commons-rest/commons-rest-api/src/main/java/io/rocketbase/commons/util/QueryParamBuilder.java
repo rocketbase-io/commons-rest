@@ -57,7 +57,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Sort value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         value.iterator()
@@ -78,7 +78,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Number value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, String.valueOf(value));
@@ -95,7 +95,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Boolean value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value ? "true" : "false");
@@ -112,7 +112,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, LocalDate value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, DateTimeFormatter.ISO_LOCAL_DATE.format(value));
@@ -129,7 +129,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, LocalTime value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, DateTimeFormatter.ISO_LOCAL_TIME.format(value));
@@ -146,7 +146,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, LocalDateTime value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(value));
@@ -163,7 +163,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Instant value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value.toString());
@@ -171,7 +171,7 @@ public final class QueryParamBuilder {
     }
 
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Enum value) {
-        if (uriBuilder == null || key == null || value == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value.name());
@@ -179,7 +179,7 @@ public final class QueryParamBuilder {
     }
 
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Collection<Enum> values) {
-        if (uriBuilder == null || key == null || values == null) {
+        if (!Nulls.noneNullValue(uriBuilder , key , values)) {
             return uriBuilder;
         }
         for (Enum v : values) {
