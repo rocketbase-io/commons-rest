@@ -64,7 +64,7 @@ public abstract class LocaleFilter {
             }
         }
         if (values != null && fallback != null) {
-            return findClosest(fallback, values, null);
+            return findClosest(fallback, values, !fallback.equals(Locale.ROOT) ? Locale.ROOT  : null);
         }
         return null;
     }

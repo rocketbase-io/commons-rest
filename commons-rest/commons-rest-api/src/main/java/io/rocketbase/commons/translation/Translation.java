@@ -74,6 +74,10 @@ public class Translation implements Serializable {
         return add(Locale.CHINESE, value);
     }
 
+    public Translation root(String value) {
+        return add(Locale.ROOT, value);
+    }
+
     public String getTranslated(Locale locale) {
         Entry<Locale, String> foundEntry = LocaleFilter.findClosest(locale, translations, Locale.ENGLISH);
 
