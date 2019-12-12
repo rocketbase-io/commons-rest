@@ -1,18 +1,17 @@
 package io.rocketbase.commons.controller;
 
 import io.rocketbase.commons.util.QueryParamParser;
+import io.rocketbase.commons.util.UrlParts;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.*;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * a until interface that provides convenient functions for MVC controller
@@ -111,16 +110,7 @@ public interface BaseController {
      * @return baseUrl without /
      */
     default String getBaseUrl(HttpServletRequest request) {
-        String result = request.getScheme() + "://" + request.getServerName();
-        int serverPort = request.getServerPort();
-        if (serverPort != 80 && serverPort != 443) {
-            result += ":" + serverPort;
-        }
-        result += request.getContextPath();
-        if (result.endsWith("/")) {
-            result = result.substring(0, result.length() - 1);
-        }
-        return result;
+        return UrlParts.getBaseUrl(request);
     }
 
 }

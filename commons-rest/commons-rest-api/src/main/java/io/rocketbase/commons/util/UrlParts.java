@@ -2,6 +2,8 @@ package io.rocketbase.commons.util;
 
 import org.springframework.util.StringUtils;
 
+import javax.servlet.http.HttpServletRequest;
+
 public final class UrlParts {
 
     public static String concatPaths(Object... parts) {
@@ -61,5 +63,25 @@ public final class UrlParts {
     public static String ensureStartsAndEndsWithSlash(String path) {
         String fixedStart = ensureStartsWithSlash(path);
         return ensureEndsWithSlash(fixedStart);
+    }
+
+
+    /**
+     * get baseUrl without / at the end
+     *
+     * @param request current HttpServletRequest
+     * @return baseUrl without /
+     */
+    public static String getBaseUrl(HttpServletRequest request) {
+        String result = request.getScheme() + "://" + request.getServerName();
+        int serverPort = request.getServerPort();
+        if (serverPort != 80 && serverPort != 443) {
+            result += ":" + serverPort;
+        }
+        result += request.getContextPath();
+        if (result.endsWith("/")) {
+            result = result.substring(0, result.length() - 1);
+        }
+        return result;
     }
 }
