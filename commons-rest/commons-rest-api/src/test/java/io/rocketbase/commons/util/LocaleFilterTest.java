@@ -66,4 +66,17 @@ public class LocaleFilterTest {
         assertThat(result.getValue(), equalTo("Moin moin"));
     }
 
+    @Test
+    public void findClosestViaFallbackRootLanguage() {
+        // given
+        Map<Locale, String> valueMap = new HashMap<>();
+        valueMap.put(Locale.GERMANY, "Moin moin");
+        valueMap.put(Locale.ROOT, "Hello");
+        // when
+        Map.Entry<Locale, String> result = LocaleFilter.findClosest(Locale.CHINESE, valueMap, Locale.FRENCH);
+        // then
+        assertThat(result, notNullValue());
+        assertThat(result.getValue(), equalTo("Hello"));
+    }
+
 }
