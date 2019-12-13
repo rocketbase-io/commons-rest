@@ -69,4 +69,22 @@ public class TranslationSerializerTest {
         assertThat(result, equalTo("{\"de-DE-bayrisch\":\"deitsch\",\"en-US\":\"english\"}"));
     }
 
+    @Test
+    public void shouldSerializeRootCorrectly() throws Exception {
+        // given
+        Map<Locale, String> map = new HashMap<>();
+        map.put(Locale.ROOT, "root");
+        map.put(Locale.US, "us");
+
+        Translation translation = Translation.builder()
+                .translations(map)
+                .build();
+
+        // when
+        String result = mapper.writeValueAsString(translation);
+
+        // then
+        assertThat(result, equalTo("{\"und\":\"root\",\"en-US\":\"us\"}"));
+    }
+
 }
