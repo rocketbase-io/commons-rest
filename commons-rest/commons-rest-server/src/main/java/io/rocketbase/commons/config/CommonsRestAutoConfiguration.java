@@ -2,6 +2,7 @@ package io.rocketbase.commons.config;
 
 import io.rocketbase.commons.controller.exceptionhandler.BadRequestExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.BeanValidationExceptionHandler;
+import io.rocketbase.commons.controller.exceptionhandler.InsufficientPrivilegesExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.NotFoundExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -47,6 +48,13 @@ public class CommonsRestAutoConfiguration {
     @ConditionalOnProperty(name = "handler.beanValidation.enabled", matchIfMissing = true)
     public BeanValidationExceptionHandler beanValidationExceptionHandler() {
         return new BeanValidationExceptionHandler();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "handler.insufficientPrivileges.enabled", matchIfMissing = true)
+    public InsufficientPrivilegesExceptionHandler insufficientPrivilegesExceptionHandler() {
+        return new InsufficientPrivilegesExceptionHandler();
     }
 
 }
