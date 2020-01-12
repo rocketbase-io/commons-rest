@@ -16,9 +16,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
@@ -129,6 +134,26 @@ public class CompanyResourceTest {
 
         CompanyEntity Company = companyRepository.findById(companyRead.getId()).get();
         assertCompanySame(Company, companyRead);
+    }
+
+    @Test
+    public void shouldGetStatusCode201OnCreate() {
+        // given
+        CompanyWrite companyWrite = CompanyWrite.builder()
+                .name("new-create")
+                .email("new@company.org")
+                .url("https://company.org")
+                .build();
+
+        // when
+        ResponseEntity<CompanyRead> response = new RestTemplate().exchange(String.format("http://localhost:%d/api/company", randomServerPort),
+                HttpMethod.POST,
+                new HttpEntity<>(companyWrite),
+                CompanyRead.class);
+
+        // then
+        assertThat(response, notNullValue());
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
     }
 
     @Test

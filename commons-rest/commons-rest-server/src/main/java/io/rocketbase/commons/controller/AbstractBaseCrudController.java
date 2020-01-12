@@ -2,13 +2,13 @@ package io.rocketbase.commons.controller;
 
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.commons.dto.PageableResult;
-import io.rocketbase.commons.exception.NotFoundException;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +46,7 @@ public abstract class AbstractBaseCrudController<Entity, Read, Write, ID extends
 
     @RequestMapping(method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
+    @ResponseStatus(value = HttpStatus.CREATED)
     public Read create(@RequestBody @NotNull @Validated Write write) {
         Entity entity = repository.save(converter.newEntity(write));
         return converter.fromEntity(entity);

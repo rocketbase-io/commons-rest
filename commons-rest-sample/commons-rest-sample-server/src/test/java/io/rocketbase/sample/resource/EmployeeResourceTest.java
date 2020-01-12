@@ -15,9 +15,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
@@ -142,6 +148,55 @@ public class EmployeeResourceTest {
         Optional<EmployeeEntity> employee = employeeRepository.findOneByCompanyIdAndId(company.getId(), employeeRead.getId());
         assertEmployeeSame(employee.get(), employeeRead);
     }
+
+    @Test
+    public void shouldGetStatusCode201OnCreate() {
+        // given
+        CompanyEntity company = companyRepository.save(createDefaultCompany());
+
+        EmployeeWrite employeeWrite = EmployeeWrite.builder()
+                .firstName("mew")
+                .lastName("max")
+                .email("new@test.de")
+                .dateOfBirth(LocalDate.now())
+                .female(false)
+                .build();
+
+        // when
+        ResponseEntity<EmployeeRead> response = new RestTemplate().exchange(String.format("http://localhost:%d/api/company/%s/employee", randomServerPort, company.getId()),
+                HttpMethod.POST,
+                new HttpEntity<>(employeeWrite),
+                EmployeeRead.class);
+
+        // then
+        assertThat(response, notNullValue());
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+    }
+
+    @Test
+    public void shouldGetStatusCode404OnInvalidCreate() {
+        // given
+        EmployeeWrite employeeWrite = EmployeeWrite.builder()
+                .firstName("mew")
+                .lastName("max")
+                .email("new@test.de")
+                .dateOfBirth(LocalDate.now())
+                .female(false)
+                .build();
+
+        // when
+        try {
+            ResponseEntity<EmployeeRead> response = new RestTemplate().exchange(String.format("http://localhost:%d/api/company/%s/employee", randomServerPort, "unkown-id"),
+                    HttpMethod.POST,
+                    new HttpEntity<>(employeeWrite),
+                    EmployeeRead.class);
+
+            // then
+        } catch (HttpClientErrorException httpClientError) {
+            assertThat(httpClientError.getRawStatusCode(), is(HttpStatus.NOT_FOUND.value()));
+        }
+    }
+
 
     @Test
     public void shouldNotCreateInvalidEmployee() throws Exception {

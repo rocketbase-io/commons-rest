@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -53,6 +54,7 @@ public abstract class AbstractCrudChildController<Entity, Read, Write, ID extend
 
     @RequestMapping(method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
+    @ResponseStatus(value = HttpStatus.CREATED)
     public Read create(@PathVariable("parentId") ID parentId, @RequestBody @NotNull @Validated Write write) {
         Entity entity = repository.save(newEntity(parentId, write));
         return converter.fromEntity(entity);
