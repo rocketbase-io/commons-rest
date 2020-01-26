@@ -1,9 +1,6 @@
 package io.rocketbase.commons.util;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -30,31 +27,31 @@ public final class Nulls {
     }
 
     /**
-     * in case of null value return's Collections.emptyList()
+     * in case of null value return's new ArrayList
      */
-    public static List notNull(List value) {
+    public static <T> List<T> notNull(List<T> value) {
         if (value == null) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return value;
     }
 
     /**
-     * in case of null value return's Collections.emptySet()
+     * in case of null value return's new HashSet
      */
-    public static Set notNull(Set value) {
+    public static <T> Set<T> notNull(Set<T> value) {
         if (value == null) {
-            return Collections.emptySet();
+            return new HashSet<>();
         }
         return value;
     }
 
     /**
-     * in case of null value return's Collections.emptyMap()
+     * in case of null value return's new HashMap<K,V
      */
-    public static Map notNull(Map value) {
+    public static <K,V> Map<K,V> notNull(Map<K,V> value) {
         if (value == null) {
-            return Collections.emptyMap();
+            return new HashMap<>();
         }
         return value;
     }
