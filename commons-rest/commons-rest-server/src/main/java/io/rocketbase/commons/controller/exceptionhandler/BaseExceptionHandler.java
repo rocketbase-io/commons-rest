@@ -15,8 +15,8 @@ public class BaseExceptionHandler {
     @Resource
     private MessageSource messageSource;
 
-    protected String translate(HttpServletRequest request, String messageProperty, String defaultMessage) {
+    protected String translate(HttpServletRequest request, String messageProperty, String defaultMessage, Object... args) {
         Locale locale = localeResolver.resolveLocale(request);
-        return messageSource.getMessage(messageProperty, null, defaultMessage, locale);
+        return messageSource.getMessage(messageProperty, args, defaultMessage, locale);
     }
 }
