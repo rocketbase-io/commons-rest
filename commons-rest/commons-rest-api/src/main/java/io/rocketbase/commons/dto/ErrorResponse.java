@@ -61,4 +61,12 @@ public class ErrorResponse {
     public String getFirstFieldValue(String path) {
         return hasField(path) && !fields.get(path).isEmpty() ? fields.get(path).get(0) : null;
     }
+
+    /*
+     * check within fields and get values<br>
+     * return null when path not found
+     */
+    public List<String> getFieldValue(String path) {
+        return hasField(path) ? fields.get(path) : null;
+    }
 }
