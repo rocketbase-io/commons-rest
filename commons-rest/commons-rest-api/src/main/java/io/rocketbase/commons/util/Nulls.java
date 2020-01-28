@@ -49,7 +49,7 @@ public final class Nulls {
     /**
      * in case of null value return's new HashMap<K,V
      */
-    public static <K,V> Map<K,V> notNull(Map<K,V> value) {
+    public static <K, V> Map<K, V> notNull(Map<K, V> value) {
         if (value == null) {
             return new HashMap<>();
         }
@@ -101,6 +101,10 @@ public final class Nulls {
         return notEmpty(result, fallback);
     }
 
+    /**
+     * return's true if all values are not null<br>
+     * false in case one is null
+     */
     public static <T> boolean noneNullValue(T... values) {
         for (T v : values) {
             if (v == null) {
@@ -108,6 +112,18 @@ public final class Nulls {
             }
         }
         return true;
+    }
+
+    /**
+     * return's true if at least one of the values it not null
+     */
+    public static <T> boolean anyNoneNullValue(T... values) {
+        for (T v : values) {
+            if (v != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public interface PropertyValueProvider<SOURCE, TARGET> {
