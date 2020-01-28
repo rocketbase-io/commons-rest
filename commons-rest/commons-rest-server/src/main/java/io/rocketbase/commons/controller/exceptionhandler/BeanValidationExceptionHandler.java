@@ -22,23 +22,22 @@ public class BeanValidationExceptionHandler extends BaseExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public ErrorResponse handleBeanValidationException(HttpServletRequest request, MethodArgumentNotValidException e) {
-        ErrorResponse.ErrorResponseBuilder builder = ErrorResponse.builder()
-                .status(ErrorCodes.FORM_ERROR.getStatus());
+        ErrorResponse result = new ErrorResponse(ErrorCodes.FORM_ERROR.getStatus(), null);
 
         BindingResult bindingResult = e.getBindingResult();
         ObjectError globalError = bindingResult.getGlobalError();
         if (globalError != null) {
-            builder.message(translate(request, globalError.getCode(), globalError.getDefaultMessage()));
+            result.setMessage(translate(request, globalError.getCode(), globalError.getDefaultMessage()));
         } else {
-            builder.message(translate(request, "error.form", "invalid form"));
+            result.setMessage(translate(request, "error.form", "invalid form"));
         }
 
         for (FieldError fieldError : bindingResult.getFieldErrors()) {
             String code = fieldError.getCode();
             String defaultMessage = fieldError.getDefaultMessage();
-            builder.field(fieldError.getField(), translate(request, "error.form." + code, defaultMessage));
+            result.addField(fieldError.getField(), translate(request, "error.form." + code, defaultMessage));
         }
 
-        return builder.build();
+        return result;
     }
 }

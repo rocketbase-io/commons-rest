@@ -219,7 +219,8 @@ public class EmployeeResourceTest {
         } catch (BadRequestException ex) {
             ErrorResponse errorResponse = ex.getErrorResponse();
             assertThat(errorResponse, notNullValue());
-            assertThat(errorResponse.getFields(), hasEntry(is("email"), not(isEmptyString())));
+            assertThat(errorResponse.getFields(), hasKey("email"));
+            assertThat(errorResponse.getFirstFieldValue("email"), not(emptyString()));
         }
 
     }
