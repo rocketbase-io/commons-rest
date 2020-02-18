@@ -1,5 +1,6 @@
 package io.rocketbase.commons.util;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -24,6 +25,36 @@ public final class Nulls {
      */
     public static String notNull(String value) {
         return notNull(value, "");
+    }
+
+    /**
+     * return false when value is null
+     */
+    public static Boolean notNull(Boolean value) {
+        if (value == null) {
+            return false;
+        }
+        return value;
+    }
+
+    /**
+     * return 0 when value is null
+     */
+    public static Long notNull(Long value) {
+        if (value == null) {
+            return 0l;
+        }
+        return value;
+    }
+
+    /**
+     * return BigDecimal.ZERO when value is null
+     */
+    public static BigDecimal notNull(BigDecimal value) {
+        if (value == null) {
+            return BigDecimal.ZERO;
+        }
+        return value;
     }
 
     /**
