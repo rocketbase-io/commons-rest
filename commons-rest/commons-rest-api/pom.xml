@@ -82,5 +82,56 @@ SOFTWARE.
         </dependency>
     </dependencies>
 
+    <!--
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>2.20.583</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <classPatterns>
+                        <classPattern>io.rocketbase.commons.dto.**</classPattern>
+                        <classPattern>io.rocketbase.commons.obfuscated.ObfuscatedId</classPattern>
+                        <classPattern>io.rocketbase.commons.translation.Translation</classPattern>
+                    </classPatterns>
+                    <excludeClassPatterns>
+                        <excludeClassPattern>**Builder</excludeClassPattern>
+                        <excludeClassPattern>**Deserializer</excludeClassPattern>
+                        <excludeClassPattern>**Serializer</excludeClassPattern>
+                        <excludeClassPattern>**Exception</excludeClassPattern>
+                        <excludeClassPattern>**Visitor</excludeClassPattern>
+                    </excludeClassPatterns>
+                    <excludeClasses>
+                        <excludeClass>java.io.Serializable</excludeClass>
+                        <excludeClass>java.lang.Iterable</excludeClass>
+                    </excludeClasses>
+                    <customTypeMappings>
+                        <customTypeMapping>java.net.URL:string</customTypeMapping>
+                        <customTypeMapping>java.time.LocalDate:string</customTypeMapping>
+                        <customTypeMapping>java.time.LocalTime:string</customTypeMapping>
+                        <customTypeMapping>java.time.LocalDateTime:string</customTypeMapping>
+                        <customTypeMapping>java.time.Instant:string</customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.obfuscated.ObfuscatedId:string</customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.translation.Translation:Record&lt;string, string></customTypeMapping>
+                    </customTypeMappings>
+                    <outputKind>module</outputKind>
+                    <noEslintDisable>true</noEslintDisable>
+                    <noTslintDisable>true</noTslintDisable>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    -->
 
 </project>
