@@ -82,6 +82,7 @@ SOFTWARE.
         </dependency>
     </dependencies>
 
+    <!--
     <build>
         <plugins>
             <plugin>
@@ -162,5 +163,6 @@ SOFTWARE.
             </plugin>
         </plugins>
     </build>
+    -->
 
 </project>
