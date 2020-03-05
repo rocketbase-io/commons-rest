@@ -26,12 +26,12 @@ public enum Gender {
     private Translation translation;
 
     @Getter
-    private Translation salation;
+    private Translation salutation;
 
-    Gender(String value, Translation translation, Translation salation) {
+    Gender(String value, Translation translation, Translation salutation) {
         this.value = value;
         this.translation = translation;
-        this.salation = salation;
+        this.salutation = salutation;
     }
 
     public static Gender findByValue(String value) {

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
+import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ public class ErrorResponse {
     private String message;
 
     @Singular
+    @Nullable
     private Map<String, List<String>> fields;
 
     public ErrorResponse() {
