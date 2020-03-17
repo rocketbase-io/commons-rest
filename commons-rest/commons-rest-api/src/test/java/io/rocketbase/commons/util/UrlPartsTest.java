@@ -64,4 +64,20 @@ public class UrlPartsTest {
         assertThat(withEndSample, equalTo("/bla/"));
         assertThat(withoutSample, equalTo("/bla/"));
     }
+
+    @Test
+    public void removeEndsWithSlash() {
+        // given
+        // when
+        String blaSample = UrlParts.removeEndsWithSlash("/bla");
+        String nullSample = UrlParts.removeEndsWithSlash(null);
+        String withEndSample = UrlParts.removeEndsWithSlash("bla/");
+        String withoutSample = UrlParts.removeEndsWithSlash("bla");
+
+        // then
+        assertThat(blaSample, equalTo("/bla"));
+        assertThat(nullSample, equalTo(""));
+        assertThat(withEndSample, equalTo("bla"));
+        assertThat(withoutSample, equalTo("bla"));
+    }
 }

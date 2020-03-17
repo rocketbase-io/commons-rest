@@ -65,6 +65,19 @@ public final class UrlParts {
         return ensureEndsWithSlash(fixedStart);
     }
 
+    /**
+     * check if given uri end with slash and removes it if existing
+     *
+     * @param path given path of url
+     * @return path without / at end
+     */
+    public static String removeEndsWithSlash(String path) {
+        String value = Nulls.notNull(path);
+        if (value.endsWith("/")) {
+            value = value.substring(0, value.length() - 1);
+        }
+        return value;
+    }
 
     /**
      * get baseUrl without / at the end
