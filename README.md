@@ -51,7 +51,8 @@ Implementation for obfuscatedId interface introduced within the api. Uses [hashi
 | hashids.salt                   |                 | salt for hashIds                                             |
 | hashids.minHashLength          | 8               | min length of hasid                                          |
 | hashids.alphabet               | abcdefghijklmnopqrstuvwxyz1234567890 | alphabet of hashid (by default we've skipped uppercase)  |
-| handler.obfuscatedDecode.enabled | true         | enable/disable ExceptionHandler for ObfuscatedDecodeException    |
+| hashids.handler.enabled        | true         | enable/disable ExceptionHandler for ObfuscatedDecodeException    |
+| hashids.invalid.allowed        | false         | ObfuscatedIdSupport will return NotFound in invalid case. When allowed invalid ObfuscatedId will get inject as Parameter text is available but id is null!   |
 
 ## commons-rest-logging-aspect
 
@@ -166,6 +167,7 @@ Nevertheless you can customize the configuration by the following properties
 | handler.badRequest.enabled     | true            | enable/disable ExceptionHandler for BadRequestException      |
 | handler.notFound.enabled       | true            | enable/disable ExceptionHandler for NotFoundException        |
 | handler.beanValidation.enabled | true            | enable/disable ExceptionHandler for MethodArgumentNotValidException (bean validation issues from spring-boot)      |
+| handler.insufficientPrivileges.enabled | true            | enable/disable ExceptionHandler for InsufficientPrivilegesException     |
 
 
 ### The MIT License (MIT)

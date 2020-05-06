@@ -9,4 +9,8 @@ public interface ObfuscatedId {
 
     Long getId();
 
+    default boolean isValid() {
+        return getId() != null;
+    }
+
 }

@@ -1,10 +1,13 @@
 package io.rocketbase.commons.config;
 
 import io.rocketbase.commons.controller.exceptionhandler.ObfuscatedDecodeExceptionHandler;
+import io.rocketbase.commons.exception.ObfuscatedDecodeException;
 import io.rocketbase.commons.obfuscated.IdObfuscator;
 import io.rocketbase.commons.obfuscated.ObfuscatedId;
 import io.rocketbase.commons.obfuscated.ObfuscatedIdDeserializer;
+import io.rocketbase.commons.obfuscated.SimpleObfuscatedId;
 import io.rocketbase.commons.service.DefaultIdObfuscator;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hashids.Hashids;
@@ -20,7 +23,6 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.beans.PropertyEditorSupport;
-import java.text.ParseException;
 import java.util.Locale;
 
 @Configuration
@@ -34,15 +36,15 @@ public class CommonsRestHashIdsAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    @ConditionalOnProperty(name = "handler.obfuscatedDecode.enabled", matchIfMissing = true)
+    @ConditionalOnProperty(name = "hashids.handler.enabled", matchIfMissing = true)
     public ObfuscatedDecodeExceptionHandler obfuscatedDecodeExceptionHandler() {
         return new ObfuscatedDecodeExceptionHandler();
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public ObfuscatedIdDeserializer obfuscatedIdDeserializer(@Autowired IdObfuscator idObfuscator) {
-        return new ObfuscatedIdDeserializer(idObfuscator);
+    public ObfuscatedIdDeserializer obfuscatedIdDeserializer(@Autowired IdObfuscator idObfuscator, @Value("${hashids.invalid.allowed:false}") boolean invalidAllowed) {
+        return new ObfuscatedIdDeserializer(idObfuscator, invalidAllowed);
     }
 
     @RestControllerAdvice
@@ -51,9 +53,12 @@ public class CommonsRestHashIdsAutoConfiguration {
         @Autowired
         IdObfuscator obfuscator;
 
+        @Value("${hashids.invalid.allowed:false}")
+        boolean invalidAllowed;
+
         @InitBinder
         public void addSupportForObfuscatedId(WebDataBinder binder) {
-            binder.registerCustomEditor(ObfuscatedId.class, new ObfuscatedIdSupport(obfuscator));
+            binder.registerCustomEditor(ObfuscatedId.class, new ObfuscatedIdSupport(obfuscator, invalidAllowed));
         }
 
     }
@@ -64,12 +69,15 @@ public class CommonsRestHashIdsAutoConfiguration {
 
         private final IdObfuscator obfuscator;
 
-        public static final void registerCustomEditor(final WebDataBinder binder, final IdObfuscator obfuscator) {
+        @Getter
+        private final boolean invalidAllowed;
+
+        public static final void registerCustomEditor(final WebDataBinder binder, final IdObfuscator obfuscator, final boolean invalidAllowed) {
             if (binder == null) throw new IllegalArgumentException();
             if (obfuscator == null) throw new IllegalArgumentException();
 
             Class<ObfuscatedId> theClazz = ObfuscatedId.class;
-            ObfuscatedIdSupport propertyEditor = new ObfuscatedIdSupport(obfuscator);
+            ObfuscatedIdSupport propertyEditor = new ObfuscatedIdSupport(obfuscator, invalidAllowed);
 
             binder.registerCustomEditor(theClazz, propertyEditor);
             log.debug("Registered {} to support parameters of type {}.", propertyEditor, theClazz);
@@ -83,17 +91,31 @@ public class CommonsRestHashIdsAutoConfiguration {
         }
 
         public void setAsText(String text) throws IllegalArgumentException {
-            this.setValue(obfuscator.decode(text));
+            try {
+                this.setValue(obfuscator.decode(text));
+            } catch (ObfuscatedDecodeException e) {
+                if (isInvalidAllowed()) {
+                    this.setValue(new SimpleObfuscatedId(null, text));
+                }
+            }
         }
 
         @Override
-        public ObfuscatedId parse(String text, Locale locale) throws ParseException {
-            return obfuscator.decode(text);
+        public ObfuscatedId parse(String text, Locale locale) {
+            try {
+                return obfuscator.decode(text);
+            } catch (ObfuscatedDecodeException e) {
+                if (isInvalidAllowed()) {
+                    return new SimpleObfuscatedId(null, text);
+                } else {
+                    throw e;
+                }
+            }
         }
 
         @Override
         public String print(ObfuscatedId object, Locale locale) {
-            return object.getObfuscated();
+            return object != null ? object.getObfuscated() : null;
         }
     }
 

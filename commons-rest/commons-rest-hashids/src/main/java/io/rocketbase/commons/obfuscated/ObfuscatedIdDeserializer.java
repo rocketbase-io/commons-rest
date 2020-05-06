@@ -5,17 +5,23 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
 import io.rocketbase.commons.exception.ObfuscatedDecodeException;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.jackson.JsonComponent;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 
 @JsonComponent
-@RequiredArgsConstructor
 public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
 
     private final IdObfuscator idObfuscator;
+    private final boolean invalidAllowed;
+
+    public ObfuscatedIdDeserializer(@Autowired IdObfuscator idObfuscator, @Value("${hashids.invalid.allowed:false}") boolean invalidAllowed) {
+        this.idObfuscator = idObfuscator;
+        this.invalidAllowed = invalidAllowed;
+    }
 
     @Override
     public ObfuscatedId deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
@@ -26,7 +32,11 @@ public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
             } catch (ObfuscatedDecodeException ignore) {
             }
         }
-        return null;
+        if (invalidAllowed) {
+            return new SimpleObfuscatedId(null, value);
+        } else {
+            return null;
+        }
     }
 
     @Override
