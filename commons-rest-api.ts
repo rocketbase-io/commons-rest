@@ -31,4 +31,7 @@ export interface ContactDto {
     cellphone?: string;
 }
 
+export interface Translation extends Record<string, string>{
+}
+
 export type Gender = "female" | "male" | "diverse";
