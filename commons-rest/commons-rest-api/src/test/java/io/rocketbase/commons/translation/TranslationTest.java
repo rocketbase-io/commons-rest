@@ -39,6 +39,20 @@ public class TranslationTest {
     }
 
     @Test
+    public void getTranslatedRootFallbackInCaseOfMany() {
+        // given
+        Translation translation = Translation.of(Locale.GERMAN, "Hallo")
+                .root("-_-");
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+
+        // when
+        String result = translation.getTranslated();
+
+        // then
+        assertThat(result, equalTo("-_-"));
+    }
+
+    @Test
     public void getTranslatedExaktMatch() {
         // given
         Translation translation = Translation.of(Locale.GERMAN, "Hallo")

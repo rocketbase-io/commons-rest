@@ -9,12 +9,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.annotation.PersistenceConstructor;
+import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 
 @Data
@@ -27,10 +29,23 @@ public class Translation implements Serializable {
     @HasDefaultLocale
     private Map<Locale, String> translations = new HashMap<>();
 
+    /**
+     * init Translation
+     *
+     * @param locale Locale of value
+     * @param value  text
+     * @return new Translation instant
+     */
     public static Translation of(Locale locale, String value) {
         return new Translation().add(locale, value);
     }
 
+    /**
+     * init Translation with value for Locale of LocaleContextHolder
+     *
+     * @param translation value
+     * @return new Translation instant
+     */
     public static Translation translation(String translation) {
         return Translation.builder()
                 .translation(LocaleContextHolder.getLocale(), translation)
@@ -41,6 +56,9 @@ public class Translation implements Serializable {
         return new TranslationBuilder();
     }
 
+    /**
+     * add translation to list - overwrite existing
+     */
     public Translation add(Locale locale, String value) {
         translations.put(locale, value);
         return this;
@@ -78,6 +96,24 @@ public class Translation implements Serializable {
         return add(Locale.ROOT, value);
     }
 
+    public Set<Locale> getLocales() {
+        return translations.keySet();
+    }
+
+    /**
+     * lookup for locale in following order:
+     * <ul>
+     *     <li>lookup for exact locale (de-DE-bayrisch)</li>
+     *     <li>afterwards for only parts of the locale-tag (de-DE, de)</li>
+     *     <li>afterwards fpr (en)</li>
+     *     <li>then for (ROOT "")</li>
+     *     <li>when only one translation exists return it</li>
+     * </ul>
+     *
+     * @param locale exact match locale
+     * @return translated value when found
+     */
+    @Nullable
     public String getTranslated(Locale locale) {
         Entry<Locale, String> foundEntry = LocaleFilter.findClosest(locale, translations, Locale.ENGLISH);
 
@@ -89,10 +125,22 @@ public class Translation implements Serializable {
                 return foundEntry != null ? foundEntry.getValue() : null;
             }
         }
-        if (translations.size() == 1) {
+        if (getLocales().contains(Locale.ROOT) && Locale.ROOT.equals(locale)) {
+            return getTranslated(Locale.ROOT);
+        } else if (translations.size() == 1) {
             return translations.values().iterator().next();
         }
         return null;
+    }
+
+    /**
+     * lookup with locale of LocaleContextHolder
+     *
+     * @return translated value when found
+     */
+    @Nullable
+    public String getTranslated() {
+        return getTranslated(LocaleContextHolder.getLocale());
     }
 
     /**
@@ -107,10 +155,6 @@ public class Translation implements Serializable {
      */
     public boolean hasLocaleLooselyFilter(Locale locale) {
         return LocaleFilter.findClosest(locale, translations) != null;
-    }
-
-    public String getTranslated() {
-        return getTranslated(LocaleContextHolder.getLocale());
     }
 
     public static class TranslationBuilder {
