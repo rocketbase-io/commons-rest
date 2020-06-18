@@ -89,6 +89,9 @@ public class Translation implements Serializable {
                 return foundEntry != null ? foundEntry.getValue() : null;
             }
         }
+        if (translations.size() == 1) {
+            return translations.values().iterator().next();
+        }
         return null;
     }
 
