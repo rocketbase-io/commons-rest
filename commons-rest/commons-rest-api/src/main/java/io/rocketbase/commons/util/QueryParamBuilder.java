@@ -14,6 +14,22 @@ import java.util.Collection;
 public final class QueryParamBuilder {
 
     /**
+     * add string value to query if not null value
+     *
+     * @param uriBuilder instance that will get added queryParams
+     * @param key        key of the given value
+     * @param value      value to add to query
+     * @return uriBuilder itself for fluent api
+     */
+    public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, String value) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
+            return uriBuilder;
+        }
+        uriBuilder.queryParam(key, value);
+        return uriBuilder;
+    }
+
+    /**
      * use default keys ("pageSize", "page", "sort") for pageable query
      *
      * @param uriBuilder instance that will get added queryParams
@@ -57,7 +73,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Sort value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         value.iterator()
@@ -78,7 +94,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Number value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, String.valueOf(value));
@@ -95,7 +111,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Boolean value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value ? "true" : "false");
@@ -112,7 +128,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, LocalDate value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, DateTimeFormatter.ISO_LOCAL_DATE.format(value));
@@ -129,7 +145,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, LocalTime value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, DateTimeFormatter.ISO_LOCAL_TIME.format(value));
@@ -146,7 +162,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, LocalDateTime value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, DateTimeFormatter.ISO_LOCAL_DATE_TIME.format(value));
@@ -163,7 +179,7 @@ public final class QueryParamBuilder {
      * @return uriBuilder itself for fluent api
      */
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Instant value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value.toString());
@@ -171,7 +187,7 @@ public final class QueryParamBuilder {
     }
 
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Enum value) {
-        if (!Nulls.noneNullValue(uriBuilder , key , value)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
         uriBuilder.queryParam(key, value.name());
@@ -179,7 +195,7 @@ public final class QueryParamBuilder {
     }
 
     public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Collection<Enum> values) {
-        if (!Nulls.noneNullValue(uriBuilder , key , values)) {
+        if (!Nulls.noneNullValue(uriBuilder, key, values)) {
             return uriBuilder;
         }
         for (Enum v : values) {
