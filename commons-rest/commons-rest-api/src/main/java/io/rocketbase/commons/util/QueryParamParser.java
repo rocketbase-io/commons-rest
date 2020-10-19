@@ -4,6 +4,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -251,6 +252,19 @@ public final class QueryParamParser {
             return result.isEmpty() ? defaultValue : result;
         }
         return defaultValue;
+    }
+
+    public static Map<String, String> parseKeyValue(String key, MultiValueMap<String, String> params) {
+        Map<String, String> result = new HashMap<>();
+        if (params != null && params.containsKey(key)) {
+            for (String kv : params.get(key)) {
+                String[] split = StringUtils.split(kv, ";");
+                if (split != null) {
+                    result.put(split[0], split[1]);
+                }
+            }
+        }
+        return result;
     }
 
 }

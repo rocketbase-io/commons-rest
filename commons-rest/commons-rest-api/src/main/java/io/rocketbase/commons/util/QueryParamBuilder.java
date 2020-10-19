@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Map;
 
 public final class QueryParamBuilder {
 
@@ -200,6 +201,15 @@ public final class QueryParamBuilder {
         }
         for (Enum v : values) {
             appendParams(uriBuilder, key, v);
+        }
+        return uriBuilder;
+    }
+
+    public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Map<String, String> keyValues) {
+        if (uriBuilder != null && key != null && keyValues != null && !keyValues.isEmpty()) {
+            for (Map.Entry<String, String> entry : keyValues.entrySet()) {
+                uriBuilder.queryParam(key, String.format("%s;%s", entry.getKey(), entry.getValue()));
+            }
         }
         return uriBuilder;
     }
