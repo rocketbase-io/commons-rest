@@ -124,6 +124,10 @@ public final class Nulls {
         return notNull(result, fallback);
     }
 
+    public static <SOURCE> String notNull(SOURCE value, PropertyValueProvider<SOURCE, String> provider) {
+        return notNull(value, provider, "");
+    }
+
     public static <SOURCE> String notEmpty(SOURCE value, PropertyValueProvider<SOURCE, String> provider, String fallback) {
         if (value == null) {
             return fallback;
