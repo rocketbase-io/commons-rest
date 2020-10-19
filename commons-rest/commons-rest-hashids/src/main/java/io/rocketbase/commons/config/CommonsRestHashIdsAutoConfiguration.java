@@ -72,17 +72,6 @@ public class CommonsRestHashIdsAutoConfiguration {
         @Getter
         private final boolean invalidAllowed;
 
-        public static final void registerCustomEditor(final WebDataBinder binder, final IdObfuscator obfuscator, final boolean invalidAllowed) {
-            if (binder == null) throw new IllegalArgumentException();
-            if (obfuscator == null) throw new IllegalArgumentException();
-
-            Class<ObfuscatedId> theClazz = ObfuscatedId.class;
-            ObfuscatedIdSupport propertyEditor = new ObfuscatedIdSupport(obfuscator, invalidAllowed);
-
-            binder.registerCustomEditor(theClazz, propertyEditor);
-            log.debug("Registered {} to support parameters of type {}.", propertyEditor, theClazz);
-        }
-
         public String getAsText() {
             if (this.getValue() instanceof ObfuscatedId) {
                 return ((ObfuscatedId) this.getValue()).getObfuscated();
