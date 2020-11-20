@@ -1,10 +1,13 @@
 package io.rocketbase.commons.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.data.annotation.Transient;
 import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
-
+/**
+ * entity/dto has firstName + lastName capability
+ */
 public interface HasFirstAndLastName {
 
     @Nullable
@@ -17,6 +20,7 @@ public interface HasFirstAndLastName {
      * combines first + last name<br>
      * will return null in case firstName & lastName is empty
      */
+    @Transient
     @JsonIgnore
     default String getFullName() {
         boolean emptyFirstName = StringUtils.isEmpty(getFirstName());

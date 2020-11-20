@@ -9,16 +9,25 @@ import org.springframework.lang.Nullable;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
+/**
+ * simple address object
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressDto implements Serializable {
 
+    /**
+     * first address line
+     */
     @Size(max = 40)
     @Nullable
     private String addressLineOne;
 
+    /**
+     * second address line (optional)
+     */
     @Size(max = 40)
     @Nullable
     private String addressLineTwo;

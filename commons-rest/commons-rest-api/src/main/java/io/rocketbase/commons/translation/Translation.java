@@ -1,6 +1,5 @@
 package io.rocketbase.commons.translation;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.rocketbase.commons.util.LocaleFilter;
@@ -8,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
@@ -21,7 +19,7 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor(onConstructor = @_({@JsonCreator, @PersistenceConstructor}))
+@AllArgsConstructor
 @JsonSerialize(using = TranslationSerializer.class)
 @JsonDeserialize(using = TranslationDeserializer.class)
 public class Translation implements Serializable {

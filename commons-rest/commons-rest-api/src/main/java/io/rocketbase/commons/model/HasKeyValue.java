@@ -8,6 +8,9 @@ import org.springframework.lang.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * entity/dto has key value capability
+ */
 public interface HasKeyValue {
 
     /**

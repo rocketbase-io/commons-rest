@@ -10,17 +10,35 @@ import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * wrapping object for paged result lists
+ */
 @Data
 public class PageableResult<E> implements Iterable<E>, Serializable {
 
+    /**
+     * total count of values in database
+     */
     private long totalElements;
 
+    /**
+     * count of pages in total with given pageSize
+     */
     private int totalPages;
 
+    /**
+     * current page (starts by 0)
+     */
     private int page;
 
+    /**
+     * maximum size of content list
+     */
     private int pageSize;
 
+    /**
+     * content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)
+     */
     private List<E> content;
 
     public static <E> PageableResult<E> contentPage(List<E> content, Page page) {

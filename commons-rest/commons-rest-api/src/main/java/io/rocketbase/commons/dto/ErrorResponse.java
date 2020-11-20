@@ -11,14 +11,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * wrapped response in case of errors
+ */
 @Data
 @Builder
 @AllArgsConstructor
 public class ErrorResponse {
 
+    /**
+     * http status code
+     */
     private Integer status;
+
+    /**
+     * user readable error explanation
+     */
     private String message;
 
+    /**
+     * in case of form validations details related to properties
+     */
     @Singular
     @Nullable
     private Map<String, List<String>> fields;
