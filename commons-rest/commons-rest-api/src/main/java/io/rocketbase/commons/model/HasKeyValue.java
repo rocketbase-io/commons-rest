@@ -14,7 +14,7 @@ import java.util.Map;
 public interface HasKeyValue {
 
     /**
-     * @return an immutable map so that changes should only be done by add/remove KeyValue
+     * @return the internal map - changes should only be done by add/remove KeyValue
      */
     @Nullable
     Map<String, String> getKeyValues();

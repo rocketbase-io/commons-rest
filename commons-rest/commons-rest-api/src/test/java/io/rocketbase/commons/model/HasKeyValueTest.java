@@ -52,6 +52,7 @@ public class HasKeyValueTest {
         HasKeyValue value = buildSample("key1", "[23456, 5678]", "key2", "-");
         assertThat(value.getKeyValue("key1", new TypeReference<Collection<Integer>>() {
         }, null), equalTo(Arrays.asList(23456, 5678)));
+        assertThat(value.getKeyValueCollection("key1", Collections.emptyList()), equalTo(Arrays.asList("23456", "5678")));
 
         assertThat(value.getKeyValue("key2", new TypeReference<Collection<Integer>>() {
         }, null), nullValue());
