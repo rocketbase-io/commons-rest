@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
+import java.util.List;
 import java.util.Locale;
 
 @Configuration
@@ -20,12 +21,18 @@ public class CommonsRestAutoConfiguration {
     @Value("${locale.resolver.default:en}")
     private String defaultLocale;
 
+    @Value("${locale.resolver.supported:}")
+    private List<Locale> supportedLocales;
+
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "locale.resolver.enabled", matchIfMissing = true)
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver l = new AcceptHeaderLocaleResolver();
         l.setDefaultLocale(Locale.forLanguageTag(defaultLocale));
+        if (supportedLocales != null && !supportedLocales.isEmpty()) {
+            l.setSupportedLocales(supportedLocales);
+        }
         return l;
     }
 

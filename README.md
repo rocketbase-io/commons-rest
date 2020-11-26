@@ -164,6 +164,7 @@ Nevertheless you can customize the configuration by the following properties
 | ------------------------------ | --------------- | ------------------------------------------------------------ |
 | locale.resolver.enabled        | true            | enable/disable default configuration of the LocaleResolver   |
 | locale.resolver.default        | en              |                                                              |
+| locale.resolver.supported      |                 | you can specify a comma separated list of locales            |
 | handler.badRequest.enabled     | true            | enable/disable ExceptionHandler for BadRequestException      |
 | handler.notFound.enabled       | true            | enable/disable ExceptionHandler for NotFoundException        |
 | handler.beanValidation.enabled | true            | enable/disable ExceptionHandler for MethodArgumentNotValidException (bean validation issues from spring-boot)      |
