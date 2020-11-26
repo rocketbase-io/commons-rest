@@ -1,12 +1,16 @@
 package io.rocketbase.commons.translation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.junit.Test;
+import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Locale;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TranslationDeserializerTest {
@@ -59,6 +63,46 @@ public class TranslationDeserializerTest {
         assertThat(result.getTranslations(), notNullValue());
         assertThat(result.getTranslations().size(), equalTo(1));
         assertThat(result.getTranslations().containsKey(Locale.GERMANY), equalTo(true));
+    }
+
+    @Test
+    public void shouldWorkWithString() throws Exception {
+        // given
+        String value = "{\"id\":\"123\",\"name\":\"Hello\"}";
+
+        // when
+        LocaleContextHolder.setLocale(Locale.ENGLISH);
+        WrappedObject result = mapper.readValue(value, WrappedObject.class);
+
+        // then
+        assertThat(result, notNullValue());
+        assertThat(result.getName().getTranslations(), notNullValue());
+        assertThat(result.getName().getTranslations().size(), equalTo(1));
+        assertThat(result.getName().getTranslations().containsKey(Locale.ENGLISH), equalTo(true));
+        assertThat(result.getName().getTranslations().get(Locale.ENGLISH), equalTo("Hello"));
+    }
+
+    @Test
+    public void shouldWorkWithNull() throws Exception {
+        // given
+        String value = "{\"id\":\"123\",\"name\":null}";
+
+        // when
+        WrappedObject result = mapper.readValue(value, WrappedObject.class);
+
+        // then
+        assertThat(result, notNullValue());
+        assertThat(result.getName(), nullValue());
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class WrappedObject {
+        private String id;
+
+        private Translation name;
     }
 
 }

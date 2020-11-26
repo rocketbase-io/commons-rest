@@ -19,6 +19,9 @@ public class TranslationDeserializer extends JsonDeserializer<Translation> {
 
         String language = null;
         JsonToken currentToken = jsonParser.getCurrentToken();
+        if (currentToken.equals(JsonToken.VALUE_STRING)) {
+            return Translation.translation(jsonParser.getText());
+        }
         while (currentToken != JsonToken.END_OBJECT) {
             currentToken = jsonParser.nextToken();
             if (currentToken == JsonToken.FIELD_NAME) {
