@@ -1,6 +1,6 @@
 package io.rocketbase.commons.translation;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.Locale;

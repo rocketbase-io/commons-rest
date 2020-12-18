@@ -3,7 +3,7 @@ package io.rocketbase.commons.obfuscated;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.BaseTest;
 import lombok.Data;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Resource;
 

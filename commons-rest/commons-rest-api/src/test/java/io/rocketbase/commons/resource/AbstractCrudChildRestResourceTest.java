@@ -2,7 +2,7 @@ package io.rocketbase.commons.resource;
 
 
 import io.rocketbase.commons.dto.PageableResult;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriComponentsBuilder;
 

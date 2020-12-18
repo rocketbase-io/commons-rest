@@ -2,7 +2,7 @@ package io.rocketbase.commons.model;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.*;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;

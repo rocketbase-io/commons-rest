@@ -1,6 +1,6 @@
 package io.rocketbase.commons.util;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.util.LinkedMultiValueMap;
@@ -11,9 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.stream.StreamSupport;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 
 public class QueryParamParserTest {
 

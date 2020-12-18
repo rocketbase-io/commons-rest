@@ -74,17 +74,15 @@ SOFTWARE.
             <artifactId>javax.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -97,12 +95,12 @@ SOFTWARE.
                             <goal>javadoc</goal>
                         </goals>
                         <configuration>
-                            <doclet>com.github.markusbernhardt.xmldoclet.XmlDoclet</doclet>
+                            <doclet>com.github.markusbernhardt.xmldoclet.NewXmlDoclet</doclet>
                             <useStandardDocletOptions>false</useStandardDocletOptions>
                             <docletArtifact>
-                                <groupId>com.github.markusbernhardt</groupId>
+                                <groupId>com.github.vojtechhabarta</groupId>
                                 <artifactId>xml-doclet</artifactId>
-                                <version>1.0.6-SNAPSHOT</version>
+                                <version>rewrite-using-new-javadoc-api-SNAPSHOT</version>
                             </docletArtifact>
                         </configuration>
                     </execution>
@@ -162,7 +160,6 @@ SOFTWARE.
                     <noTslintDisable>true</noTslintDisable>
                 </configuration>
             </plugin>
-            -->
         </plugins>
     </build>
 

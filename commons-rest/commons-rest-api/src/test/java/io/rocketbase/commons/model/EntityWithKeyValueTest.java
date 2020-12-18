@@ -4,12 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EntityWithKeyValueTest {
 
@@ -20,22 +21,28 @@ public class EntityWithKeyValueTest {
         assertThat(entity.getKeyValue("k1"), equalTo("Test"));
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testAddKeyValueStringInvalid() {
-        SampleEntity entity = new SampleEntity();
-        entity.addKeyValue("k1öä:", "Test");
+        assertThrows(IllegalStateException.class, () -> {
+            SampleEntity entity = new SampleEntity();
+            entity.addKeyValue("k1öä:", "Test");
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testAddKeyValueStringTooLong() {
-        SampleEntity entity = new SampleEntity();
-        entity.addKeyValue("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "Test");
+        assertThrows(IllegalStateException.class, () -> {
+            SampleEntity entity = new SampleEntity();
+            entity.addKeyValue("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ", "Test");
+        });
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testAddKeyValueStringTooLongValue() {
-        SampleEntity entity = new SampleEntity();
-        entity.addKeyValue("abc", String.format("%0" + 513 + "d", 0));
+        assertThrows(IllegalStateException.class, () -> {
+            SampleEntity entity = new SampleEntity();
+            entity.addKeyValue("abc", String.format("%0" + 513 + "d", 0));
+        });
     }
 
     @Test
@@ -45,12 +52,14 @@ public class EntityWithKeyValueTest {
         entity.validateKeyValues();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testValidateKeyValuesInvalid() {
-        SampleEntity entity = new SampleEntity();
-        entity.addKeyValue("k1", "Test");
-        entity.getKeyValues().put("k3", String.format("%0" + 513 + "d", 0));
-        entity.validateKeyValues();
+        assertThrows(IllegalStateException.class, () -> {
+            SampleEntity entity = new SampleEntity();
+            entity.addKeyValue("k1", "Test");
+            entity.getKeyValues().put("k3", String.format("%0" + 513 + "d", 0));
+            entity.validateKeyValues();
+        });
     }
 
     @Test

@@ -7,10 +7,9 @@ import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.CompanyEntity;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.server.LocalServerPort;
@@ -20,8 +19,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.web.client.RestTemplate;
 
@@ -33,9 +30,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.verify;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles(profiles = "test")
 public class CompanyResourceTest {
 
     @LocalServerPort
@@ -46,13 +41,13 @@ public class CompanyResourceTest {
     @Resource
     private CompanyRepository companyRepository;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         companyRepository.deleteAll();
         companyResource = new CompanyResource(String.format("http://localhost:%d", randomServerPort));
     }
 
-    @After
+    @AfterEach
     public void cleanup() throws Exception {
         companyRepository.deleteAll();
     }
