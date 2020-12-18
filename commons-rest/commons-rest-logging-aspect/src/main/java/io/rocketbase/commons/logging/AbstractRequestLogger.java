@@ -1,5 +1,10 @@
 package io.rocketbase.commons.logging;
 
+import io.rocketbase.commons.dto.ErrorResponse;
+import io.rocketbase.commons.exception.BadRequestException;
+import io.rocketbase.commons.exception.InsufficientPrivilegesException;
+import io.rocketbase.commons.exception.NotFoundException;
+import io.rocketbase.commons.exception.ObfuscatedDecodeException;
 import io.rocketbase.commons.logging.RequestMappingAnnotationUtil.RequestAnnotation;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -26,7 +31,6 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
 
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{([^}]+)}");
 
-
     @Getter(AccessLevel.PROTECTED)
     private final LoggableConfig config;
 
@@ -38,66 +42,70 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
     /**
      * normal version used within a servlet context
      */
-    protected void afterSuccess(Logger log, ProceedingJoinPoint point, Method method, long start, Object result) {
-        afterSuccess(log, point, method, start, result, null);
+    protected void afterSuccess(Logger log, RequestLoggingInfo info, Method method, Object result) {
+        afterSuccess(log, info, method, result, null);
     }
 
     /**
      * allows to inject current auditor information<br>
      * in flux context the auditAware information is gone (no security context anymore)
      */
-    protected void afterSuccess(Logger log, ProceedingJoinPoint point, Method method, long start, Object result, Optional currentAuditor) {
+    protected void afterSuccess(Logger log, RequestLoggingInfo info, Method method, Object result, Optional currentAuditor) {
         if (isLogEnabled(log, config.getLogLevel())) {
-            StringBuilder msg = new StringBuilder();
 
-            handleLogging(msg, point, method);
-            handleCurrentAuditor(currentAuditor, msg);
-            addDurationWhenEnabled(config, start, msg);
-
-            if (config.isArgs()) {
-                msg.append(ARGS_SIGN).append(toText(config, point));
+            if (!Void.TYPE.equals(method.getReturnType()) && config.isResult()) {
+                info.setResult(objToText(config, result == null ? "null" : result));
             }
 
-            addResultWhenEnabled(method, config, result, msg);
-
-            printLog(log, config.getLogLevel(), msg.toString());
+            printLog(log, config.getLogLevel(), info.toLogMessage());
         }
     }
 
-    protected void handleCurrentAuditor(Optional currentAuditor, StringBuilder msg) {
+    protected void afterFailure(Logger log, RequestLoggingInfo info, ProceedingJoinPoint point, Throwable ex) {
+        if (isLogEnabled(log, config.getErrorLogLevel())) {
+
+            if (ex instanceof NotFoundException) {
+                info.setErrorMessage("NotFoundException");
+            } else if (ex instanceof InsufficientPrivilegesException) {
+                info.setErrorMessage("InsufficientPrivilegesException");
+            } else if (ex instanceof ObfuscatedDecodeException) {
+                info.setErrorMessage("ObfuscatedDecodeException");
+            } else if (ex instanceof BadRequestException) {
+                info.setErrorMessage("BadRequestException");
+                ErrorResponse errorResponse = ((BadRequestException) ex).getErrorResponse();
+                info.setStacktrace(errorResponse != null ? errorResponse.toString() : null);
+            } else {
+                info.setErrorMessage(throwableToText(ex));
+                info.setStacktrace(getStacktraceInfo(ex));
+            }
+
+            printLog(log, config.getErrorLogLevel(), info.toErrorMessage());
+        }
+    }
+
+    protected void handleCurrentAuditor(Optional currentAuditor, RequestLoggingInfo info) {
         if (currentAuditor != null) {
-            if (config.isAudit()) {
-                addUserWhenPossible(currentAuditor, msg);
-            }
+            info.setAuditor(currentAuditor.orElse(null));
         } else {
-            addUserWhenEnabled(config, msg);
+            info.setAuditor(lookupCurrentAuditor().orElse(null));
         }
     }
 
-
-    protected void handleLogging(final StringBuilder msg, ProceedingJoinPoint point, Method method) {
+    protected RequestLoggingInfo extractBase(ProceedingJoinPoint point, Method method) {
         RequestAnnotation methodRequestMapping = RequestMappingAnnotationUtil.getAnnotation(method, null);
         RequestAnnotation classRequestMapping = RequestMappingAnnotationUtil.getAnnotation(null, point);
 
-        msg.append(getHttpMethod(methodRequestMapping, classRequestMapping))
-                .append(" ");
+        RequestLoggingInfo info = new RequestLoggingInfo();
+        info.setMethod(getHttpMethod(methodRequestMapping, classRequestMapping));
 
         RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
         if (requestAttributes instanceof ServletRequestAttributes) {
-            ServletRequestAttributes servletRequestAttributes =
-                    (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-            msg.append(servletRequestAttributes.getRequest()
-                    .getServletPath());
-            String queryString = servletRequestAttributes.getRequest()
-                    .getQueryString();
-            if (config.isQuery() && queryString != null) {
-                msg.append("?")
-                        .append(queryString);
-            }
+            handleRequestInfo((ServletRequestAttributes) requestAttributes, info);
         } else {
             // useful when used with webflux
-            msg.append(getHttpPath(methodRequestMapping, classRequestMapping, point, method));
+            handleFluxRequestInfo(methodRequestMapping, classRequestMapping, point, method, info);
         }
+        return info;
     }
 
     protected String getHttpMethod(RequestAnnotation methodRequestMapping, RequestAnnotation classRequestMapping) {
@@ -110,7 +118,12 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
         return "unkown";
     }
 
-    private String getHttpPath(RequestAnnotation methodRequestMapping, RequestAnnotation classRequestMapping, ProceedingJoinPoint point, Method method) {
+    private void handleRequestInfo(ServletRequestAttributes servletRequestAttributes, RequestLoggingInfo info) {
+        info.setPath(servletRequestAttributes.getRequest().getServletPath());
+        info.setQuery(servletRequestAttributes.getRequest().getQueryString());
+    }
+
+    private void handleFluxRequestInfo(RequestAnnotation methodRequestMapping, RequestAnnotation classRequestMapping, ProceedingJoinPoint point, Method method, RequestLoggingInfo info) {
         StringBuffer sb = new StringBuffer();
         String mappingValue = "unknown";
 
@@ -120,11 +133,8 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
             mappingValue = classRequestMapping.getValue()[0];
         }
         replacePathVariables(method, point, sb, mappingValue);
-        if (config.isQuery()) {
-            appendQueryString(method, point, sb);
-        }
-
-        return sb.toString();
+        info.setPath(sb.toString());
+        info.setQuery(getFluxQueryString(method, point, sb));
     }
 
 
@@ -147,8 +157,8 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
         matcher.appendTail(sb);
     }
 
-    private void appendQueryString(Method method, ProceedingJoinPoint point, StringBuffer sb) {
-        StringBuilder queryString = new StringBuilder("?");
+    private String getFluxQueryString(Method method, ProceedingJoinPoint point, StringBuffer sb) {
+        StringBuilder queryString = new StringBuilder("");
 
         boolean first = true;
         Set<String> params = new HashSet<>();
@@ -190,8 +200,10 @@ public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
             }
 
         }
-        if (queryString.length() > 1) {
-            sb.append(queryString);
+        if (queryString.length() > 0) {
+            return queryString.toString();
+        } else {
+            return null;
         }
     }
 

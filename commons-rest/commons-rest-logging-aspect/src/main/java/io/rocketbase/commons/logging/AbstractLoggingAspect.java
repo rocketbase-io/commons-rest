@@ -116,18 +116,16 @@ public abstract class AbstractLoggingAspect extends LogHelper {
             msg.append(": thrown ");
             msg.append(throwableToText(ex));
 
-            StackTraceElement trace = ex.getStackTrace()[0];
-            msg.append(" @")
-                    .append(trace.getClassName())
-                    .append('#')
-                    .append(trace.getMethodName())
-                    .append(" line: ")
-                    .append(trace.getLineNumber());
-
+            msg.append(" ").append(getStacktraceInfo(ex));
 
             addDurationWhenEnabled(config, start, msg);
             printLog(log, config.getErrorLogLevel(), msg.toString());
         }
+    }
+
+    protected String getStacktraceInfo(Throwable ex) {
+        StackTraceElement trace = ex.getStackTrace()[0];
+        return String.format("@%s#%s line: %s", trace.getClassName(), trace.getMethodName(), trace.getLineNumber());
     }
 
 }

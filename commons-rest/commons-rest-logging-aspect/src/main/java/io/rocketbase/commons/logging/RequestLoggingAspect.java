@@ -12,8 +12,11 @@ import java.lang.reflect.Method;
 @Aspect
 public class RequestLoggingAspect extends AbstractRequestLogger {
 
-    public RequestLoggingAspect(AuditorAware auditorAware, LoggableConfig config) {
+    private final RequestLogginInterceptor requestLogginInterceptor;
+
+    public RequestLoggingAspect(AuditorAware auditorAware, LoggableConfig config, RequestLogginInterceptor requestLogginInterceptor) {
         super(auditorAware, config);
+        this.requestLogginInterceptor = requestLogginInterceptor;
     }
 
     @Around("execution(* *(..)) && (@annotation(org.springframework.web.bind.annotation.RequestMapping) || " +
@@ -25,17 +28,41 @@ public class RequestLoggingAspect extends AbstractRequestLogger {
             "))")
     public Object wrapMethod(ProceedingJoinPoint point) throws Throwable {
         Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
-
         long start = System.currentTimeMillis();
-
         Logger log = getLog(point);
         try {
             Object result = point.proceed();
-            afterSuccess(log, point, method, start, result);
+            RequestLoggingInfo info = extractBaseInfo(point, method, start);
+            afterSuccess(log, info, method, result);
+
+            if (requestLogginInterceptor != null) {
+                requestLogginInterceptor.afterSuccess(info);
+            }
+
             return result;
         } catch (Throwable ex) {
-            logError(point, getConfig(), start, log, ex);
+            RequestLoggingInfo info = extractBaseInfo(point, method, start);
+            afterFailure(log, info, point, ex);
+
+            if (requestLogginInterceptor != null) {
+                requestLogginInterceptor.afterFailure(info, ex);
+            }
+
             throw ex;
         }
+    }
+
+    private RequestLoggingInfo extractBaseInfo(ProceedingJoinPoint point, Method method, long start) {
+        RequestLoggingInfo info = extractBase(point, method);
+        handleCurrentAuditor(null, info);
+
+        if (getConfig().isDuration()) {
+            info.setDuration(System.currentTimeMillis() - start);
+        }
+
+        if (getConfig().isArgs()) {
+            info.setArgs(toText(getConfig(), point));
+        }
+        return info;
     }
 }
