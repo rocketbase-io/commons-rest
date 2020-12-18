@@ -2,6 +2,7 @@ package io.rocketbase.commons.controller.exceptionhandler;
 
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.exception.ErrorCodes;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import javax.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
+@Slf4j
 public class BeanValidationExceptionHandler extends BaseExceptionHandler {
 
 
@@ -36,6 +38,10 @@ public class BeanValidationExceptionHandler extends BaseExceptionHandler {
             String code = fieldError.getCode();
             String defaultMessage = fieldError.getDefaultMessage();
             result.addField(fieldError.getField(), translate(request, "error.form." + code, defaultMessage));
+        }
+
+        if (log.isDebugEnabled()) {
+            log.debug("[{}] {} throws MethodArgumentNotValidException fieldErrors: {}", request.getMethod(), request.getContextPath(), result.getFields());
         }
 
         return result;
