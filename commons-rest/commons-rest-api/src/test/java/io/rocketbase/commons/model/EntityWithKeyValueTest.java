@@ -17,8 +17,8 @@ public class EntityWithKeyValueTest {
     @Test
     public void testAddKeyValueString() {
         SampleEntity entity = new SampleEntity();
-        entity.addKeyValue("k1", "Test");
-        assertThat(entity.getKeyValue("k1"), equalTo("Test"));
+        entity.addKeyValue("k1[0]", "Test");
+        assertThat(entity.getKeyValue("k1[0]"), equalTo("Test"));
     }
 
     @Test
@@ -41,7 +41,7 @@ public class EntityWithKeyValueTest {
     public void testAddKeyValueStringTooLongValue() {
         assertThrows(IllegalStateException.class, () -> {
             SampleEntity entity = new SampleEntity();
-            entity.addKeyValue("abc", String.format("%0" + 513 + "d", 0));
+            entity.addKeyValue("abc", String.format("%0" + 256 + "d", 0));
         });
     }
 
@@ -57,7 +57,7 @@ public class EntityWithKeyValueTest {
         assertThrows(IllegalStateException.class, () -> {
             SampleEntity entity = new SampleEntity();
             entity.addKeyValue("k1", "Test");
-            entity.getKeyValues().put("k3", String.format("%0" + 513 + "d", 0));
+            entity.getKeyValues().put("k3", String.format("%0" + 256 + "d", 0));
             entity.validateKeyValues();
         });
     }

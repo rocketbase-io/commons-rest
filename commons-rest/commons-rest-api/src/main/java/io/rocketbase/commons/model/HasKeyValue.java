@@ -19,6 +19,8 @@ public interface HasKeyValue {
     @Nullable
     Map<String, String> getKeyValues();
 
+    void setKeyValues(Map<String, String> keyValues);
+
     /**
      * checks if user has key
      *

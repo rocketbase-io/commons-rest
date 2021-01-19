@@ -5,17 +5,21 @@ import lombok.SneakyThrows;
 import org.springframework.util.Assert;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 
 public interface EntityWithKeyValue<T> extends HasKeyValue {
 
     /**
      * @param key   max length of 50 characters (Allowed key chars are a-Z, 0-9 and _-.#)<br>
      *              key with _ as prefix will not get displayed in REST_API
-     * @param value max length of 512 characters
+     * @param value max length of 255 characters
      * @return itself for fluent api
      */
     default T addKeyValue(String key, String value) {
         checkKeyValue(key, value);
+        if (getKeyValues() == null) {
+            setKeyValues(new LinkedHashMap<>());
+        }
         getKeyValues().put(key, value);
         return (T) this;
     }
@@ -52,6 +56,9 @@ public interface EntityWithKeyValue<T> extends HasKeyValue {
     }
 
     default void removeKeyValue(String key) {
+        if (getKeyValues() == null) {
+            return;
+        }
         getKeyValues().remove(key);
     }
 
@@ -59,15 +66,15 @@ public interface EntityWithKeyValue<T> extends HasKeyValue {
      * validate key and value
      *
      * @param key   not empty and max 50 chars<br>
-     *              Allowed key chars are a-Z, 0-9 and _-.#
-     * @param value maximum length 512 chars
+     *              Allowed key chars are a-Z, 0-9 and _-.#[]
+     * @param value maximum length 255 chars
      */
     default void checkKeyValue(String key, String value) {
         Assert.hasText(key, "Key must not be empty");
         Assert.state(key.length() <= 50, "Key is too long - at least 50 chars");
-        Assert.state(key.matches("[a-zA-Z0-9_\\-\\.\\#]+"), "Allowed key chars are a-Z, 0-9 and _-.#");
+        Assert.state(key.matches("[a-zA-Z0-9_\\-\\.\\#\\[\\]]+"), "Allowed key chars are a-Z, 0-9 and _-.#[]");
         if (value != null) {
-            Assert.state(value.length() <= 512, "Value is too long - at least 512 chars");
+            Assert.state(value.length() <= 255, "Value is too long - at least 255 chars");
         }
     }
 
@@ -76,6 +83,9 @@ public interface EntityWithKeyValue<T> extends HasKeyValue {
      * should be triggered before storing in database
      */
     default void validateKeyValues() {
+        if (getKeyValues() == null) {
+            return;
+        }
         getKeyValues().forEach(this::checkKeyValue);
     }
 }
