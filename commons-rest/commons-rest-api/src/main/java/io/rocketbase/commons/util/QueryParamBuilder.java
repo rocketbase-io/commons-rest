@@ -98,7 +98,7 @@ public final class QueryParamBuilder {
         if (!Nulls.noneNullValue(uriBuilder, key, value)) {
             return uriBuilder;
         }
-        uriBuilder.queryParam(key, String.valueOf(value));
+        uriBuilder.queryParam(key, value);
         return uriBuilder;
     }
 
@@ -195,11 +195,31 @@ public final class QueryParamBuilder {
         return uriBuilder;
     }
 
-    public static UriComponentsBuilder appendParams(UriComponentsBuilder uriBuilder, String key, Collection<Enum> values) {
+    public static UriComponentsBuilder appendParamEnums(UriComponentsBuilder uriBuilder, String key, Collection<? extends Enum> values) {
         if (!Nulls.noneNullValue(uriBuilder, key, values)) {
             return uriBuilder;
         }
         for (Enum v : values) {
+            appendParams(uriBuilder, key, v);
+        }
+        return uriBuilder;
+    }
+
+    public static UriComponentsBuilder appendParamNumbers(UriComponentsBuilder uriBuilder, String key, Collection<? extends Number> values) {
+        if (!Nulls.noneNullValue(uriBuilder, key, values)) {
+            return uriBuilder;
+        }
+        for (Number v : values) {
+            appendParams(uriBuilder, key, v);
+        }
+        return uriBuilder;
+    }
+
+    public static UriComponentsBuilder appendParamStrings(UriComponentsBuilder uriBuilder, String key, Collection<? extends String> values) {
+        if (!Nulls.noneNullValue(uriBuilder, key, values)) {
+            return uriBuilder;
+        }
+        for (String v : values) {
             appendParams(uriBuilder, key, v);
         }
         return uriBuilder;

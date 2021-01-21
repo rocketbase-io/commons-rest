@@ -107,10 +107,9 @@ public final class QueryParamParser {
         return sort;
     }
 
-    private static String getFirstValue(MultiValueMap<String, String> params, String key) {
+    public static String parseString(MultiValueMap<String, String> params, String key) {
         return params != null && params.containsKey(key) ? params.getFirst(key) : null;
     }
-
 
     public static Integer parseInteger(MultiValueMap<String, String> params, String key, Integer defaultValue) {
         Long value = parseLong(params, key, null);
@@ -129,7 +128,7 @@ public final class QueryParamParser {
     }
 
     public static Long parseLong(MultiValueMap<String, String> params, String key, Long defaultValue) {
-        return parseLong(getFirstValue(params, key), defaultValue);
+        return parseLong(parseString(params, key), defaultValue);
     }
 
     public static Long parseLong(String value, Long defaultValue) {
@@ -143,7 +142,7 @@ public final class QueryParamParser {
     }
 
     public static Boolean parseBoolean(MultiValueMap<String, String> params, String key, Boolean defaultValue) {
-        return parseBoolean(getFirstValue(params, key), defaultValue);
+        return parseBoolean(parseString(params, key), defaultValue);
     }
 
     public static Boolean parseBoolean(String value, Boolean defaultValue) {
@@ -154,7 +153,7 @@ public final class QueryParamParser {
     }
 
     public static LocalDate parseLocalDate(MultiValueMap<String, String> params, String key, LocalDate defaultValue) {
-        return parseLocalDate(getFirstValue(params, key), defaultValue);
+        return parseLocalDate(parseString(params, key), defaultValue);
     }
 
     public static LocalDate parseLocalDate(String value, LocalDate defaultValue) {
@@ -170,7 +169,7 @@ public final class QueryParamParser {
     }
 
     public static LocalTime parseLocalTime(MultiValueMap<String, String> params, String key, LocalTime defaultValue) {
-        return parseLocalTime(getFirstValue(params, key), defaultValue);
+        return parseLocalTime(parseString(params, key), defaultValue);
     }
 
     public static LocalTime parseLocalTime(String value, LocalTime defaultValue) {
@@ -184,7 +183,7 @@ public final class QueryParamParser {
     }
 
     public static LocalDateTime parseLocalDateTime(MultiValueMap<String, String> params, String key, LocalDateTime defaultValue) {
-        return parseLocalDateTime(getFirstValue(params, key), defaultValue);
+        return parseLocalDateTime(parseString(params, key), defaultValue);
     }
 
     public static LocalDateTime parseLocalDateTime(String value, LocalDateTime defaultValue) {
@@ -202,7 +201,7 @@ public final class QueryParamParser {
     }
 
     public static Instant parseInstant(MultiValueMap<String, String> params, String key, Instant defaultValue) {
-        return parseInstant(getFirstValue(params, key), defaultValue);
+        return parseInstant(parseString(params, key), defaultValue);
     }
 
     public static Instant parseInstant(String value, Instant defaultValue) {
@@ -227,7 +226,7 @@ public final class QueryParamParser {
     }
 
     public static <T extends Enum> T parseEnum(MultiValueMap<String, String> params, String key, Class<T> clazz, T defaultValue) {
-        return parseEnum(getFirstValue(params, key), clazz, defaultValue);
+        return parseEnum(parseString(params, key), clazz, defaultValue);
     }
 
     public static <T extends Enum> T parseEnum(String value, Class<T> clazz, T defaultValue) {
