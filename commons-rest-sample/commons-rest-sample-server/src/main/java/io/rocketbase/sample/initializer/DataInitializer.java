@@ -1,20 +1,19 @@
 package io.rocketbase.sample.initializer;
 
-import io.codearte.jfairy.Fairy;
-import io.codearte.jfairy.producer.person.Person;
+import com.devskiller.jfairy.Fairy;
+import com.devskiller.jfairy.producer.company.Company;
+import com.devskiller.jfairy.producer.person.Person;
 import io.rocketbase.sample.model.CompanyEntity;
 import io.rocketbase.sample.model.CustomerEntity;
 import io.rocketbase.sample.model.EmployeeEntity;
-import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import io.rocketbase.sample.repository.jpa.CustomerRepository;
+import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import io.rocketbase.sample.repository.mongo.EmployeeRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -42,7 +41,7 @@ public class DataInitializer {
         if (companyRepository.count() == 0) {
             List<CompanyEntity> companyList = new ArrayList<>();
             for (int count = 0; count < 100; count++) {
-                io.codearte.jfairy.producer.company.Company company = fairy.company();
+                Company company = fairy.company();
                 companyList.add(CompanyEntity.builder()
                         .name(company.getName())
                         .email(company.getEmail())
@@ -53,12 +52,11 @@ public class DataInitializer {
 
             List<EmployeeEntity> personList = new ArrayList<>();
             for (int count = 0; count < 1000; count++) {
-                io.codearte.jfairy.producer.person.Person person = fairy.person();
-                DateTime dateOfBirth = person.getDateOfBirth();
+                Person person = fairy.person();
                 personList.add(EmployeeEntity.builder()
                         .firstName(person.getFirstName())
                         .lastName(person.getLastName())
-                        .dateOfBirth(LocalDate.of(dateOfBirth.getYear(), dateOfBirth.getMonthOfYear(), dateOfBirth.getDayOfMonth()))
+                        .dateOfBirth(person.getDateOfBirth())
                         .female(person.getSex().equals(Person.Sex.FEMALE))
                         .email(person.getEmail())
                         .company(companyList.get(ThreadLocalRandom.current().nextInt(0, companyList.size())))
@@ -70,7 +68,7 @@ public class DataInitializer {
         if (customerRepository.count() == 0) {
             List<CustomerEntity> customerList = new ArrayList<>();
             for (int count = 0; count < 100; count++) {
-                io.codearte.jfairy.producer.person.Person person = fairy.person();
+                Person person = fairy.person();
                 customerList.add(CustomerEntity.builder()
                         .name(fairy.person().getFullName())
                         .build());

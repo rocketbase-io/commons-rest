@@ -12,9 +12,6 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-  data:
-    mongodb:
-      database: commons-rest-sample
   # json configuration
   jackson:
     serialization:

@@ -46,15 +46,20 @@
 
         <!-- demo-data-generator -->
         <dependency>
-            <groupId>io.codearte.jfairy</groupId>
+            <groupId>com.devskiller</groupId>
             <artifactId>jfairy</artifactId>
-            <version>0.5.9</version>
+            <version>0.6.4</version>
         </dependency>
 
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.flapdoodle.embed</groupId>
+            <artifactId>de.flapdoodle.embed.mongo</artifactId>
             <scope>test</scope>
         </dependency>
 

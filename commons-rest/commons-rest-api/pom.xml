@@ -83,11 +83,11 @@ SOFTWARE.
 
     <build>
         <plugins>
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
-                <!--
                 <executions>
                     <execution>
                         <id>xml-doclet</id>
@@ -106,10 +106,8 @@ SOFTWARE.
                         </configuration>
                     </execution>
                 </executions>
-                -->
             </plugin>
 
-            <!--
             <plugin>
                 <groupId>cz.habarta.typescript-generator</groupId>
                 <artifactId>typescript-generator-maven-plugin</artifactId>

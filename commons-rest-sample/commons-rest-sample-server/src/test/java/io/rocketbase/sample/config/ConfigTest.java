@@ -24,7 +24,7 @@ public class ConfigTest {
     private LocaleResolver localeResolver;
 
     @Test
-    public void shouldGetCompany() throws Exception {
+    public void shouldGetSupportedLocales() throws Exception {
         // configuration is set in project:
         // locale.resolver:
         //     default: de
