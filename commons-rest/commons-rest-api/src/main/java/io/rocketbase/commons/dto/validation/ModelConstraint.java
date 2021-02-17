@@ -1,4 +1,4 @@
-package io.rocketbase.commons.validation;
+package io.rocketbase.commons.dto.validation;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,7 +49,7 @@ import java.util.Map;
  * }
  * </pre>
  *
- * @see io.rocketbase.commons.validation.ValidationConstraint
+ * @see ValidationConstraint
  */
 @Data
 @EqualsAndHashCode(of = "model")
@@ -64,7 +64,7 @@ public class ModelConstraint {
     /**
      * Map of all validation constraints on each model property
      *
-     * @see io.rocketbase.commons.validation.ValidationConstraint
+     * @see ValidationConstraint
      */
     private Map<String, List<ValidationConstraint>> constraints;
 

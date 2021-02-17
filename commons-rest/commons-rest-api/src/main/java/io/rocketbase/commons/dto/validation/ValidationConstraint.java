@@ -1,4 +1,4 @@
-package io.rocketbase.commons.validation;
+package io.rocketbase.commons.dto.validation;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;

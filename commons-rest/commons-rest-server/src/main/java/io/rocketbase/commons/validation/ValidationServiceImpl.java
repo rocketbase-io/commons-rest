@@ -1,5 +1,8 @@
 package io.rocketbase.commons.validation;
 
+import io.rocketbase.commons.dto.validation.ModelConstraint;
+import io.rocketbase.commons.dto.validation.ValidationConstraint;
+
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
@@ -64,7 +67,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     /**
-     * Build a complete map of object property / list of {@link io.rocketbase.commons.validation.ValidationConstraint}
+     * Build a complete map of object property / list of {@link ValidationConstraint}
      * from a given {@link BeanDescriptor} <tt>bd</tt> instance and a given {@link Locale}
      * <tt>locale</tt>
      */
@@ -82,7 +85,7 @@ public class ValidationServiceImpl implements ValidationService {
     }
 
     /**
-     * Build a list of {@link io.rocketbase.commons.validation.ValidationConstraint} associated to a given
+     * Build a list of {@link ValidationConstraint} associated to a given
      * {@link PropertyDescriptor} <tt>pd</tt> instance and a given {@link Locale}
      * <tt>locale</tt>
      */

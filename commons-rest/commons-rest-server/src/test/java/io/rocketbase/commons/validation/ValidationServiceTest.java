@@ -1,6 +1,7 @@
 package io.rocketbase.commons.validation;
 
 import io.rocketbase.commons.dto.address.ContactDto;
+import io.rocketbase.commons.dto.validation.ModelConstraint;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
