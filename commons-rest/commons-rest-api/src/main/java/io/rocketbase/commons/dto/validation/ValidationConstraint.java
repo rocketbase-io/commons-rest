@@ -2,8 +2,7 @@ package io.rocketbase.commons.dto.validation;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 import org.springframework.lang.Nullable;
 
 import java.util.HashMap;
@@ -30,6 +29,9 @@ import java.util.Map;
  * </pre>
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 @EqualsAndHashCode(of = {"type", "message"})
 public class ValidationConstraint {
 
