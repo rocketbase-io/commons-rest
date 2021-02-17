@@ -25,6 +25,10 @@ public class ContactDto implements Serializable, HasFirstAndLastName {
 
     @Size(max = 10)
     @Nullable
+    private String salutation;
+
+    @Size(max = 10)
+    @Nullable
     private String title;
 
     @Size(max = 100)
