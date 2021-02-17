@@ -332,9 +332,9 @@ public class QueryParamParserTest {
         map.add("invalid", "invalid-text");
 
         // when
-        TestSample value = QueryParamParser.parseEnum(map, "valid",  TestSample.class, null);
-        TestSample lower = QueryParamParser.parseEnum(map, "lower",  TestSample.class, null);
-        TestSample invalid = QueryParamParser.parseEnum(map, "invalid",  TestSample.class, null);
+        TestSample value = QueryParamParser.parseEnum(map, "valid", TestSample.class, null);
+        TestSample lower = QueryParamParser.parseEnum(map, "lower", TestSample.class, null);
+        TestSample invalid = QueryParamParser.parseEnum(map, "invalid", TestSample.class, null);
 
         // then
         assertThat(value, equalTo(TestSample.GOOD));

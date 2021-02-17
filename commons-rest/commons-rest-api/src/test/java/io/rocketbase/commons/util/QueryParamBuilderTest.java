@@ -39,8 +39,8 @@ class QueryParamBuilderTest {
         UriComponentsBuilder builderThree = UriComponentsBuilder.fromUriString("http://localhost");
         Pageable value = null;
         // when
-        QueryParamBuilder.appendParams(builderOne, PageRequest.of(0,10));
-        QueryParamBuilder.appendParams(builderTwo, PageRequest.of(0,10, Sort.by("id").descending()));
+        QueryParamBuilder.appendParams(builderOne, PageRequest.of(0, 10));
+        QueryParamBuilder.appendParams(builderTwo, PageRequest.of(0, 10, Sort.by("id").descending()));
         QueryParamBuilder.appendParams(builderThree, value);
         // then
         assertThat(builderOne.toUriString(), equalTo("http://localhost?page=0&pageSize=10"));
@@ -56,9 +56,9 @@ class QueryParamBuilderTest {
         UriComponentsBuilder builderThree = UriComponentsBuilder.fromUriString("http://localhost");
         Pageable value = null;
         // when
-        QueryParamBuilder.appendParams(builderOne, "s", "p",  "o", PageRequest.of(0,10));
-        QueryParamBuilder.appendParams(builderTwo, "s", "p", "o", PageRequest.of(0,10, Sort.by("id").descending()));
-        QueryParamBuilder.appendParams(builderThree, "s", "p",  "o", value);
+        QueryParamBuilder.appendParams(builderOne, "s", "p", "o", PageRequest.of(0, 10));
+        QueryParamBuilder.appendParams(builderTwo, "s", "p", "o", PageRequest.of(0, 10, Sort.by("id").descending()));
+        QueryParamBuilder.appendParams(builderThree, "s", "p", "o", value);
         // then
         assertThat(builderOne.toUriString(), equalTo("http://localhost?p=0&s=10"));
         assertThat(builderTwo.toUriString(), equalTo("http://localhost?p=0&s=10&o=id,desc"));
@@ -114,7 +114,7 @@ class QueryParamBuilderTest {
         UriComponentsBuilder builderTwo = UriComponentsBuilder.fromUriString("http://localhost");
         LocalTime value = null;
         // when
-        QueryParamBuilder.appendParams(builderOne, "test", LocalTime.of(12,0));
+        QueryParamBuilder.appendParams(builderOne, "test", LocalTime.of(12, 0));
         QueryParamBuilder.appendParams(builderTwo, "test", value);
         // then
         assertThat(builderOne.toUriString(), equalTo("http://localhost?test=12:00:00"));
@@ -128,7 +128,7 @@ class QueryParamBuilderTest {
         UriComponentsBuilder builderTwo = UriComponentsBuilder.fromUriString("http://localhost");
         LocalDateTime value = null;
         // when
-        QueryParamBuilder.appendParams(builderOne, "test", LocalDateTime.of(1970,1,1,12,15,30));
+        QueryParamBuilder.appendParams(builderOne, "test", LocalDateTime.of(1970, 1, 1, 12, 15, 30));
         QueryParamBuilder.appendParams(builderTwo, "test", value);
         // then
         assertThat(builderOne.toUriString(), equalTo("http://localhost?test=1970-01-01T12:15:30"));

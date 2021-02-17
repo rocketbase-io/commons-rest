@@ -89,7 +89,7 @@ public class EntityWithKeyValueTest {
     @Test
     public void testAddKeyValueCollectionInteger() {
         SampleEntity entity = new SampleEntity();
-        entity.addKeyValue("k1", Arrays.asList(1L,2L));
+        entity.addKeyValue("k1", Arrays.asList(1L, 2L));
         assertThat(entity.getKeyValue("k1"), equalTo("[1,2]"));
         assertThat(entity.getKeyValueCollection("k1", Collections.emptyList()), equalTo(Arrays.asList("1", "2")));
         assertThat(entity.getKeyValue("k1", new TypeReference<Collection<Integer>>() {

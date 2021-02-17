@@ -51,7 +51,7 @@ public interface BaseController {
      * @return an unsorted Sort in case of empty param or filled one
      */
     default Sort parseSort(MultiValueMap<String, String> params, String key) {
-        return QueryParamParser.parseSort(params,key);
+        return QueryParamParser.parseSort(params, key);
     }
 
     /**

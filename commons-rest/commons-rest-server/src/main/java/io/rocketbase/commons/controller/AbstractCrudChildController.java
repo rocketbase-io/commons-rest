@@ -25,7 +25,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  *
  * @param <Entity>    database entity
  * @param <Read>      response data object
- * @param <Write>      object with all properties that are changeable
+ * @param <Write>     object with all properties that are changeable
  * @param <ID>        class of the identifier
  * @param <Converter> interface that allows converting between Entity, Read and Write
  */

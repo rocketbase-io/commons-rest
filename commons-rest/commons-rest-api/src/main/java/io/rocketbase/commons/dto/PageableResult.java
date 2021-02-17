@@ -79,7 +79,7 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
 
     @JsonIgnore
     public boolean hasNextPage() {
-        return page < (totalPages-1);
+        return page < (totalPages - 1);
     }
 
     @JsonIgnore

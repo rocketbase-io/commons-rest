@@ -31,6 +31,7 @@ public class StringShortenTest {
         assertThat(result, notNullValue());
         assertThat(result, equalTo(value));
     }
+
     @Test
     public void leftTooLong() {
         // given
@@ -70,6 +71,7 @@ public class StringShortenTest {
         assertThat(result.length(), equalTo(5));
         assertThat(result, equalTo(value));
     }
+
     @Test
     public void rightTooLong() {
         // given
