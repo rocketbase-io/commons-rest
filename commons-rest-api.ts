@@ -32,6 +32,7 @@ export interface AddressDto {
 
 export interface ContactDto extends HasFirstAndLastName {
     gender?: Gender;
+    salutation?: string;
     title?: string;
     email?: string;
     landline?: string;
