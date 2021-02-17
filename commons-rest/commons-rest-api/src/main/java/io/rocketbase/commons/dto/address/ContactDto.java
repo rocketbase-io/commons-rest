@@ -39,7 +39,7 @@ public class ContactDto implements Serializable, HasFirstAndLastName {
     @Nullable
     private String lastName;
 
-    @Size(max = 100)
+    @Size(max = 255)
     @Email
     @Nullable
     private String email;
