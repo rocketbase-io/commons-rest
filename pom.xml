@@ -33,6 +33,7 @@
     <modules>
         <module>commons-rest</module>
         <module>commons-rest-sample</module>
+        <module>coverage</module>
     </modules>
 
 </project>
