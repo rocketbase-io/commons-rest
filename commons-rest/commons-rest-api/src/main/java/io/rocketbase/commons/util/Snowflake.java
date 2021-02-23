@@ -24,7 +24,7 @@ public class Snowflake {
     public static final long maxSequence = (1L << SEQUENCE_BITS) - 1;
 
     // Custom Epoch (January 1, 2020 Midnight UTC = 2020-01-01T00:00:00Z)
-    public static final long DEFAULT_CUSTOM_EPOCH = 1577836800L;
+    public static final long DEFAULT_CUSTOM_EPOCH = 1577836800000L;
 
     private final long nodeId;
     private final long customEpoch;
