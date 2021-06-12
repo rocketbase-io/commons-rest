@@ -34,11 +34,11 @@ public class ErrorResponse {
     private String message;
 
     /**
-     * in case of form validations details related to properties
+     * in case of form validations details related to properties. key is the filed value list of related errors
      */
     @Singular
     @Nullable
-    @Schema(description = "in case of form validations details related to properties", example = "[\"status\": [\"not empty\"]]")
+    @Schema(description = "in case of form validations details related to properties. key is the filed value list of related errors", example = "[\"status\": [\"not empty\"]]")
     private Map<String, List<String>> fields;
 
     public ErrorResponse() {
