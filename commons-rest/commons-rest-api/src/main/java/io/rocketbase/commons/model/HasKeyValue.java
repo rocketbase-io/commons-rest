@@ -3,20 +3,23 @@ package io.rocketbase.commons.model;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.lang.Nullable;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 /**
  * entity/dto has key value capability
  */
+@Schema(description = "entity/dto has key value capability")
 public interface HasKeyValue {
 
     /**
      * @return the internal map - changes should only be done by add/remove KeyValue
      */
     @Nullable
+    @Schema(description = "the internal map - changes should only be done by add/remove KeyValue")
     Map<String, String> getKeyValues();
 
     void setKeyValues(Map<String, String> keyValues);

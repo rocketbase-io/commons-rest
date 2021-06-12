@@ -2,9 +2,10 @@ package io.rocketbase.commons.dto.validation;
 
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.springframework.lang.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +26,7 @@ import java.util.Map;
  *              "message": "not a well-formed email address",
  *              "flags": [],
  *              "regexp": ".*"
- *          }],
+ *          }]
  * </pre>
  */
 @Data
@@ -33,22 +34,38 @@ import java.util.Map;
 @NoArgsConstructor
 @Builder
 @EqualsAndHashCode(of = {"type", "message"})
+@Schema(example = "{\"lastName\": [{\n" +
+        "    \"type\": \"NotBlank\",\n" +
+        "    \"message\": \"may not be empty\"\n" +
+        "}],\n" +
+        "\"email\": [{\n" +
+        "    \"type\": \"NotNull\",\n" +
+        "    \"message\": \"may not be null\"\n" +
+        " }, {\n" +
+        "    \"type\": \"Email\",\n" +
+        "    \"message\": \"not a well-formed email address\",\n" +
+        "    \"flags\": [],\n" +
+        "    \"regexp\": \".*\"\n" +
+        "}]}")
 public class ValidationConstraint {
 
     /**
      * Constraint type
      */
+    @Schema(description = "Constraint type", example = "NotNull")
     private String type;
 
     /**
      * Associated constraint message
      */
+    @Schema(description = "Associated constraint message", example = "may not be null")
     private String message;
 
     /**
      * Optional constraints attributes
      */
     @Nullable
+    @Schema(description = "Optional constraints attributes")
     private Map<String, Object> attributes;
     
     @JsonAnyGetter

@@ -1,6 +1,7 @@
 package io.rocketbase.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -14,31 +15,37 @@ import java.util.List;
  * wrapping object for paged result lists
  */
 @Data
+@Schema(description = "wrapping object for paged result lists")
 public class PageableResult<E> implements Iterable<E>, Serializable {
 
     /**
      * total count of values in database
      */
+    @Schema(description = "total count of values in database")
     private long totalElements;
 
     /**
      * count of pages in total with given pageSize
      */
+    @Schema(description = "count of pages in total with given pageSize")
     private int totalPages;
 
     /**
      * current page (starts by 0)
      */
+    @Schema(description = "current page (starts by 0)")
     private int page;
 
     /**
      * maximum size of content list
      */
+    @Schema(description = "maximum size of content list")
     private int pageSize;
 
     /**
      * content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)
      */
+    @Schema(description = "content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)")
     private List<E> content;
 
     public static <E> PageableResult<E> contentPage(List<E> content, Page page) {
@@ -80,6 +87,11 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     @JsonIgnore
     public boolean hasNextPage() {
         return page < (totalPages - 1);
+    }
+
+    @JsonIgnore
+    public boolean hasPreviousPage() {
+        return page > 0;
     }
 
     @JsonIgnore

@@ -1,8 +1,9 @@
 package io.rocketbase.commons.model;
 
-import org.springframework.lang.Nullable;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.util.StringUtils;
 
+import javax.annotation.Nullable;
 import java.beans.Transient;
 
 /**
@@ -22,6 +23,7 @@ public interface HasFirstAndLastName {
      */
     @Transient
     @Nullable
+    @Schema(example = "combines first + last name")
     default String getFullName() {
         boolean emptyFirstName = !StringUtils.hasText(getFirstName());
         boolean emptyLastName = !StringUtils.hasText(getLastName());

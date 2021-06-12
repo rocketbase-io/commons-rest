@@ -1,11 +1,12 @@
 package io.rocketbase.commons.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
-import org.springframework.lang.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -17,16 +18,19 @@ import java.util.Map;
 @Data
 @Builder
 @AllArgsConstructor
+@Schema(description = "wrapped response in case of errors")
 public class ErrorResponse {
 
     /**
      * http status code
      */
+    @Schema(description = "http status code", example = "400")
     private Integer status;
 
     /**
      * user readable error explanation
      */
+    @Schema(description = "user readable error explanation", example = "bean validation exception")
     private String message;
 
     /**
@@ -34,6 +38,7 @@ public class ErrorResponse {
      */
     @Singular
     @Nullable
+    @Schema(description = "in case of form validations details related to properties", example = "[\"status\": [\"not empty\"]]")
     private Map<String, List<String>> fields;
 
     public ErrorResponse() {
