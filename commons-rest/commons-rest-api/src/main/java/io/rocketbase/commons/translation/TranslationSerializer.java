@@ -63,7 +63,7 @@ public class TranslationSerializer extends JsonSerializer<Translation> implement
             Translated annotation = beanProperty.getAnnotation(Translated.class);
             if (annotation != null) {
                 TranslationSerializerConfig config = new TranslationSerializerConfig(true);
-                if (!StringUtils.isEmpty(annotation.value())) {
+                if (StringUtils.hasText(annotation.value())) {
                     config.setLocale(Locale.forLanguageTag(annotation.value()));
                 }
                 return new TranslationSerializer(config);

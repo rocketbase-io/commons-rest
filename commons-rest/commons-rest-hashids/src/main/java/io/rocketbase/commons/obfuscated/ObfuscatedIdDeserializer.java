@@ -26,7 +26,7 @@ public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
     @Override
     public ObfuscatedId deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
         String value = jsonParser.getValueAsString();
-        if (!StringUtils.isEmpty(value)) {
+        if (StringUtils.hasText(value)) {
             try {
                 return idObfuscator.decode(value);
             } catch (ObfuscatedDecodeException ignore) {

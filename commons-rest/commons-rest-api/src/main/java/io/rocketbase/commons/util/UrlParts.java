@@ -11,7 +11,7 @@ public final class UrlParts {
         if (parts != null) {
             for (Object p : parts) {
                 String str = String.valueOf(p);
-                if (p != null && !StringUtils.isEmpty(str)) {
+                if (p != null && StringUtils.hasText(str)) {
                     if (result.length() > 0 && !str.startsWith("/") && !result.endsWith("/")) {
                         result += "/";
                     }

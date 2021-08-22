@@ -46,10 +46,10 @@ public abstract class LocaleFilter {
                 // exact match
                 return new AbstractMap.SimpleEntry<>(filter, values.get(filter));
             }
-            if (!StringUtils.isEmpty(filter.getLanguage())) {
+            if (StringUtils.hasText(filter.getLanguage())) {
                 Locale language = Locale.forLanguageTag(filter.getLanguage());
 
-                if (!StringUtils.isEmpty(filter.getCountry())) {
+                if (StringUtils.hasText(filter.getCountry())) {
                     if (values.containsKey(language)) {
                         // match by language - map contains value without country but same language
                         return new AbstractMap.SimpleEntry<>(language, values.get(language));
@@ -72,7 +72,7 @@ public abstract class LocaleFilter {
     protected static Optional<Entry<Locale, Locale>> transformMapFilterByLanguage(Map<Locale, ?> values, Locale language) {
         return values.keySet()
                 .stream()
-                .filter(l -> !StringUtils.isEmpty(l.getLanguage()))
+                .filter(l -> StringUtils.hasText(l.getLanguage()))
                 .map(l -> (Entry<Locale, Locale>) new AbstractMap.SimpleEntry<>(l, Locale.forLanguageTag(l.getLanguage())))
                 .filter(l -> l.getValue().equals(language)).findFirst();
     }
