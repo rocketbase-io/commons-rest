@@ -2,8 +2,8 @@ package io.rocketbase.commons.config;
 
 import io.rocketbase.commons.logging.LoggableConfig;
 import io.rocketbase.commons.logging.MethodLogger;
-import io.rocketbase.commons.logging.RequestLogginInterceptor;
 import io.rocketbase.commons.logging.RequestLoggingAspect;
+import io.rocketbase.commons.logging.RequestLoggingInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -33,8 +33,8 @@ public class CommonsRestLoggingAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @ConditionalOnProperty(name = "commons.logging.mvc.enabled", matchIfMissing = true)
-    public RequestLoggingAspect requestLoggingAspect(@Autowired ApplicationContext applicationContext, @Autowired(required = false) RequestLogginInterceptor requestLogginInterceptor) {
-        return new RequestLoggingAspect(getAuditorAware(applicationContext), new LoggableConfig(logAspectConfig), requestLogginInterceptor);
+    public RequestLoggingAspect requestLoggingAspect(@Autowired ApplicationContext applicationContext, @Autowired(required = false) RequestLoggingInterceptor requestLoggingInterceptor) {
+        return new RequestLoggingAspect(getAuditorAware(applicationContext), new LoggableConfig(logAspectConfig), requestLoggingInterceptor);
     }
 
     @Bean

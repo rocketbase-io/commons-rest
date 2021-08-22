@@ -1,6 +1,6 @@
 package io.rocketbase.commons.logging;
 
-public interface RequestLogginInterceptor {
+public interface RequestLoggingInterceptor {
 
     void afterSuccess(RequestLoggingInfo info);
 

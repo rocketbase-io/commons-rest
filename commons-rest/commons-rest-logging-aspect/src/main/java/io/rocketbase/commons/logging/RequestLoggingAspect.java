@@ -12,11 +12,11 @@ import java.lang.reflect.Method;
 @Aspect
 public class RequestLoggingAspect extends AbstractRequestLogger {
 
-    private final RequestLogginInterceptor requestLogginInterceptor;
+    private final RequestLoggingInterceptor requestLoggingInterceptor;
 
-    public RequestLoggingAspect(AuditorAware auditorAware, LoggableConfig config, RequestLogginInterceptor requestLogginInterceptor) {
+    public RequestLoggingAspect(AuditorAware auditorAware, LoggableConfig config, RequestLoggingInterceptor requestLoggingInterceptor) {
         super(auditorAware, config);
-        this.requestLogginInterceptor = requestLogginInterceptor;
+        this.requestLoggingInterceptor = requestLoggingInterceptor;
     }
 
     @Around("execution(* *(..)) && (@annotation(org.springframework.web.bind.annotation.RequestMapping) || " +
@@ -35,8 +35,8 @@ public class RequestLoggingAspect extends AbstractRequestLogger {
             RequestLoggingInfo info = extractBaseInfo(point, method, start);
             afterSuccess(log, info, method, result);
 
-            if (requestLogginInterceptor != null) {
-                requestLogginInterceptor.afterSuccess(info);
+            if (requestLoggingInterceptor != null) {
+                requestLoggingInterceptor.afterSuccess(info);
             }
 
             return result;
@@ -44,8 +44,8 @@ public class RequestLoggingAspect extends AbstractRequestLogger {
             RequestLoggingInfo info = extractBaseInfo(point, method, start);
             afterFailure(log, info, point, ex);
 
-            if (requestLogginInterceptor != null) {
-                requestLogginInterceptor.afterFailure(info, ex);
+            if (requestLoggingInterceptor != null) {
+                requestLoggingInterceptor.afterFailure(info, ex);
             }
 
             throw ex;
