@@ -3,13 +3,17 @@ package io.rocketbase.commons.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.Assert;
 
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * wrapping object for paged result lists
@@ -99,5 +103,21 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
         return new PageImpl<>(getContent(), PageRequest.of(page, pageSize), totalElements);
     }
 
+    /**
+     * Returns a new {@link PageableResult} with the content of the current one mapped by the given {@link Converter}.
+     *
+     * @param converter must not be {@literal null}.
+     */
+    public <U> PageableResult<U> map(Function<? super E, ? extends U> converter) {
+        Assert.notNull(converter, "Function must not be null!");
+
+        PageableResult<U> result = new PageableResult<>();
+        result.setContent(getContent().stream().map(converter::apply).collect(Collectors.toList()));
+        result.setTotalPages(getTotalPages());
+        result.setTotalElements(getTotalElements());
+        result.setPage(getPage());
+        result.setPageSize(getPageSize());
+        return result;
+    }
 
 }
