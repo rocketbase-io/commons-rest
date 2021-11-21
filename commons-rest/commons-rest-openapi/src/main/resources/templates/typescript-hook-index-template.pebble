@@ -1,0 +1,6 @@
+/* eslint-disable no-use-before-define */
+// generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
+
+{% for c in controllers %}
+export * from "./{{c.filename}}";
+{% endfor %}

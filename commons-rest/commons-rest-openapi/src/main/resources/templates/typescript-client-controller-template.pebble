@@ -1,0 +1,84 @@
+/* eslint-disable no-use-before-define */
+// generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
+
+import { buildRequestorFactory, RequestorBuilder, PageableResult, PageableRequest } from "@rocketbase/commons-core";
+import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
+import { AxiosRequestConfig } from "axios";
+
+
+{% for method in controller.methods %}
+{% if method.fields is not empty %}
+{% if method.hasRequiredFields and method.hasOptionalFields %}
+export interface {{ method.shortInputType }}Optional {% if method.fieldsExtendsPaging %} extends PageableRequest {% endif %} {
+{% for field in method.fields %}{% if not field.required %}{% if field.description is not empty %}
+  /*
+   * {{ field.description }}
+
+   */
+{% endif %}  {{ field.name }}?: {{ field.type }};
+{% endif %}
+{% endfor %}
+}
+
+export interface {{ method.shortInputType }} extends {{ method.shortInputType }}Optional {
+{% for field in method.fields %}{% if field.required %}{% if field.description is not empty %}
+  /*
+   * {{ field.description }}
+
+   */
+{% endif %}  {{ field.name }}: {{ field.type }};
+{% endif %}
+{% endfor %}
+}
+
+{% else %}
+export interface {{ method.shortInputType }} {% if method.fieldsExtendsPaging %} extends PageableRequest {% endif %} {
+{% for field in method.fields %}{% if field.description is not empty %}
+  /*
+   * {{ field.description }}
+
+   */
+{% endif %}  {{ field.name }}{% if not field.required %}?{% endif %}: {{ field.type }};
+{% endfor %}
+}
+{% endif %}
+{% endif %}
+{% endfor %}
+
+
+export interface {{ controller.shortName -}}Api {
+{% for method in controller.methods %}{% if method.description is not empty %}
+  /*
+   * {{ method.description }}
+
+  */
+{% endif %}
+  {{ method.methodName }}: RequestorBuilder<{% if method.fields is not empty %}{{ method.shortInputType}}{% elseif method.fieldsExtendsPaging %}PageableRequest{% else %}unknown{% endif %}, {{ method.shortReturnType }}>;
+{% endfor %}
+}
+
+
+export function create{{- controller.shortName -}}Api(cf?: AxiosRequestConfig): {{ controller.shortName -}}Api {
+  const builder = buildRequestorFactory(cf, {
+    baseURL: `${cf?.baseURL ?? ""}{{ baseUrl }}`,
+  });
+
+{% for method in controller.methods %}
+  const {{ method.methodName }}: {{ controller.shortName -}}Api["{{- method.methodName -}}"] = builder({
+    method: "{{- method.httpMethod | lower -}}",
+    url: {% if method.pathFields is not empty %}
+({ {% for f in method.pathFields %}{{f}}{% if not loop.last %}, {% endif %}{% endfor %} }) => `{{ method.pathJs }}`{% else %}
+`{{ method.pathJs }}`{% endif %}{% if method.queryFields is not empty %},
+    params: ({ {% for f in method.queryFields %}{{f}}{% if not loop.last %}, {% endif %}{% endfor %} }) => ({ {% for f in method.queryFields %}{{f}}{% if not loop.last %}, {% endif %}{% endfor %} }){% endif %}{% if method.hasBody %},
+    body: ({ body }) => body{% endif %}
+
+   });
+{% endfor %}
+
+  return {
+{% for method in controller.methods %}
+    {{ method.methodName }}{% if not loop.last %}, {% endif %}
+
+{% endfor %}
+  };
+}

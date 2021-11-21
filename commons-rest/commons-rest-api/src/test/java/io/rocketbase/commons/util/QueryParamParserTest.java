@@ -294,6 +294,7 @@ public class QueryParamParserTest {
 
         map.add("v1", String.valueOf(instant.getEpochSecond()));
         map.add("invalid", "121234");
+        map.add("second", "1632992080");
         map.add("millisTooOld", "912380400000");
         Instant _2005 = Instant.ofEpochSecond(1104537600L);
         _2005 = _2005.minusNanos(_2005.getNano());
@@ -307,6 +308,7 @@ public class QueryParamParserTest {
         Instant millisTooOld = QueryParamParser.parseInstant(map, "millisTooOld", null);
         Instant millisTooOldWithDefault = QueryParamParser.parseInstant(map, "millisTooOld", defaultValue);
         Instant secs = QueryParamParser.parseInstant(map, "secs", defaultValue);
+        Instant second = QueryParamParser.parseInstant(map, "second", defaultValue);
 
 
         // then

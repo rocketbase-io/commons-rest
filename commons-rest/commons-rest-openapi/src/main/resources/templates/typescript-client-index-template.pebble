@@ -1,0 +1,32 @@
+/* eslint-disable no-use-before-define */
+// generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
+
+import { AxiosRequestConfig } from "axios";
+
+{% for c in controllers %}
+import { {{ c.shortName -}}Api, create{{- c.shortName -}}Api  } from "./{{- c.fileName -}}";
+{% endfor %}
+
+{% for c in controllers %}
+export * from "./{{- c.fileName -}}";
+{% endfor %}
+
+
+export interface {{ groupName }} {
+{% for c in controllers %}
+  {{ c.fieldName -}}: {{ c.shortName -}}Api;
+{% endfor %}
+}
+
+export function create{{ groupName -}}(cf?: AxiosRequestConfig): {{ groupName }} {
+{% for c in controllers %}
+  const {{ c.fieldName -}} = create{{- c.shortName -}}Api(cf);
+{% endfor %}
+
+  return {
+{% for c in controllers %}
+    {{ c.fieldName }}{% if not loop.last %}, {% endif %}
+
+{% endfor %}
+  };
+}
