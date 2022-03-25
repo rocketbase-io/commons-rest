@@ -11,10 +11,6 @@
 
     <artifactId>commons-rest-openapi</artifactId>
 
-    <properties>
-        <springdoc-openapi.version>1.5.12</springdoc-openapi.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.rocketbase.commons</groupId>
@@ -22,16 +18,15 @@
             <version>${project.version}</version>
         </dependency>
 
-
         <dependency>
             <groupId>io.pebbletemplates</groupId>
             <artifactId>pebble</artifactId>
-            <version>3.1.5</version>
+            <version>${pebble.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>31.0.1-jre</version>
+            <version>${guava.version}</version>
         </dependency>
 
         <dependency>

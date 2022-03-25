@@ -1,16 +1,19 @@
-package io.rocketbase.commons.openapi;
+package io.rocketbase.commons.openapi.model;
 
+import io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
-public class OpenApiController {
+public class OpenApiController implements Serializable {
+
     private String controllerBean;
     private List<OpenApiControllerMethodExtraction> methods;
 

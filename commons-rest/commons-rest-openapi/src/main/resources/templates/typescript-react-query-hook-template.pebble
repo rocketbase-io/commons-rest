@@ -1,40 +1,41 @@
 /* eslint-disable no-use-before-define */
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
-import { {{configuredGroupVar}}{% for method in controller.methods %}{% if method.hasRequiredFields or method.hasOptionalFields %}, {{ method.shortInputType }}{% endif %}{% endfor %} } from "../../rest-client";
+import { {{configuredGroupVar}}{% for method in controller.methods %}{% if method.hasRequiredFields or method.hasOptionalFields %}, {{ method.shortInputType }}{% endif %}{% endfor %} } from "../../{{- generatorConfig.clientFolder -}}";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "react-query";
-import { PageableResult, PageableRequest, createCancellablePromise, createInfiniteOptions } from "@rocketbase/commons-core";
-import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
+import { PageableResult, PageableRequest, createInfiniteOptions } from "@rocketbase/commons-core";
+import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.modelPath -}}";
 import { AxiosError, AxiosResponse } from "axios";
 
 
 {% for method in controller.methods %}
 {% if method.isValidForHook %}
 export function {{ method.hookName -}}(
-  {% if method.hookType equals "QUERY" %}{% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError>, "queryFn" | "queryKey"> = {}) {
+  {% if method.hookType equals "query" %}{% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError>, "queryFn" | "queryKey"> = {}) {
   return useQuery<{{ method.shortReturnType }}, AxiosError>(
-    [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
-    () => createCancellablePromise({{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({% if method.hasRequiredFields or method.hasOptionalFields %}filter{% else %}{}{% endif %})),
+    [{% if method.cacheKeysPrepared('filter.') is not empty %}{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
+    ({ signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter,{% endif %} overrides: { signal }}),
     { staleTime: {{ method.staleTime }} * 1000, ...options }
   );
-  {% elseif method.hookType equals "MUTATION" %} options: UseMutationOptions<AxiosResponse<{{ method.shortReturnType }}>, AxiosError, {{ method.shortInputType }}> = {}) {
+  {% elseif method.hookType equals "mutation" %} {onSuccess, ...options}: UseMutationOptions<AxiosResponse<{{ method.shortReturnType }}>, AxiosError, {{ method.shortInputType }}> = {}) {
   const queryClient = useQueryClient();
   return useMutation<AxiosResponse<{{ method.shortReturnType }}>, AxiosError, {{ method.shortInputType }}>((content) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}(content), {
     {% if method.invalidateKeysPrepared('content.', 'data.') is not empty %}
-    onSuccess: ({data}, content) => {
-        return Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}
+    onSuccess: async (data, content) => {
+        await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.data.') %}
           queryClient.invalidateQueries([{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]){% if not loop.last %}, {% endif %}
 
-{% endfor %}]);
+        {% endfor %}]);
+        if (onSuccess) { onSuccess(data, content, undefined); }
     },
     {% endif %}
     ...options
   });
-  {% elseif method.hookType equals "INFINITE" %}{% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
+  {% elseif method.hookType equals "infinite" %}{% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
   return useInfiniteQuery<{{ method.shortReturnType }}, AxiosError>(
     [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
-    ({ pageParam }) => createCancellablePromise({{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}page: pageParam })),
-    createInfiniteOptions({ staleTime: {{ method.staleTime }} * 1000, ...options })
+    ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}page: pageParam, overrides: { signal } }),
+    {{  infiniteOptions | method.shortReturnType.trim() }}
   );
   {% endif %}
 }

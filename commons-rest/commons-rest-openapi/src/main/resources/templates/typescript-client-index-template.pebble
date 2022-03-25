@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
-import { AxiosRequestConfig } from "axios";
+import { AxiosInstance, AxiosRequestConfig } from "axios";
 
 {% for c in controllers %}
 import { {{ c.shortName -}}Api, create{{- c.shortName -}}Api  } from "./{{- c.fileName -}}";
@@ -18,9 +18,9 @@ export interface {{ groupName }} {
 {% endfor %}
 }
 
-export function create{{ groupName -}}(cf?: AxiosRequestConfig): {{ groupName }} {
+export function create{{ groupName -}}(client?: AxiosInstance, cf?: AxiosRequestConfig): {{ groupName }} {
 {% for c in controllers %}
-  const {{ c.fieldName -}} = create{{- c.shortName -}}Api(cf);
+  const {{ c.fieldName -}} = create{{- c.shortName -}}Api(client, cf);
 {% endfor %}
 
   return {
