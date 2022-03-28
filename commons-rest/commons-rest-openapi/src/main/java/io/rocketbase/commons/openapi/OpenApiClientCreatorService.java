@@ -2,7 +2,6 @@ package io.rocketbase.commons.openapi;
 
 import com.google.common.collect.Sets;
 import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.error.PebbleException;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
 import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
@@ -25,6 +24,7 @@ import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.beans.Introspector;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.time.Instant;
@@ -59,7 +59,6 @@ public class OpenApiClientCreatorService {
         return remapped.entrySet().stream().map(e -> new OpenApiController(e.getKey(), e.getValue())).collect(Collectors.toList());
     }
 
-    @SneakyThrows
     public void getTypescriptClients(HttpServletRequest request, HttpServletResponse response, String baseUrl, String groupName, String filename) {
 
         response.setContentType("application/octet-stream");
@@ -69,7 +68,6 @@ public class OpenApiClientCreatorService {
         List<OpenApiController> controllers = getControllers(request);
 
         try (ZipOutputStream zippedOut = new ZipOutputStream(response.getOutputStream())) {
-
             Map<String, Object> context = new HashMap<>();
             context.put("controllers", controllers);
             context.put("baseUrl", baseUrl);
@@ -77,43 +75,13 @@ public class OpenApiClientCreatorService {
             context.put("configuredGroupVar", Introspector.decapitalize(groupName));
             context.put("timestamp", Instant.now());
             context.put("generatorConfig", openApiGeneratorProperties);
+            context.put("springDataWebConfig", springDataWebProperties);
 
-            Writer writer;
-
-            zippedOut.putNextEntry(new ZipEntry("rest/"));
-
-            for (OpenApiController c : controllers) {
-                zippedOut.putNextEntry(new ZipEntry("rest/" + c.getFilename() + ".ts"));
-                writer = new StringWriter();
-
-                context.put("controller", c);
-                getCompiledTemplate("typescript-client-controller-template").evaluate(writer, context);
-                zippedOut.write(writer.toString().getBytes("UTF-8"));
-                zippedOut.closeEntry();
+            if (openApiGeneratorProperties.isModelCreate()) {
+                generateModels(zippedOut, context);
             }
-            zippedOut.putNextEntry(new ZipEntry("rest/index.ts"));
-            writer = new StringWriter();
-            getCompiledTemplate("typescript-client-index-template").evaluate(writer, context);
-            zippedOut.write(writer.toString().getBytes("UTF-8"));
-            zippedOut.closeEntry();
-
-
-            zippedOut.putNextEntry(new ZipEntry("hook/"));
-            for (OpenApiController c : controllers) {
-                zippedOut.putNextEntry(new ZipEntry("hook/" + c.getFilename() + ".ts"));
-
-                writer = new StringWriter();
-                context.put("controller", c);
-                getCompiledTemplate("typescript-react-query-hook-template").evaluate(writer, context);
-                zippedOut.write(writer.toString().getBytes("UTF-8"));
-                zippedOut.closeEntry();
-            }
-
-            zippedOut.putNextEntry(new ZipEntry("hook/index.ts"));
-            writer = new StringWriter();
-            getCompiledTemplate("typescript-hook-index-template").evaluate(writer, context);
-            zippedOut.write(writer.toString().getBytes("UTF-8"));
-            zippedOut.closeEntry();
+            generateClients(controllers, zippedOut, context);
+            generateHooks(controllers, zippedOut, context);
 
 
             zippedOut.finish();
@@ -121,6 +89,69 @@ public class OpenApiClientCreatorService {
             // Exception handling goes here
             log.error("write zip: {}", e.getMessage(), e);
         }
+    }
+
+    private void generateModels(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+        Writer writer;
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/"));
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/commons-rest-api.ts"));
+        getCompiledTemplate("model/commons-rest-api").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/index.ts"));
+        getCompiledTemplate("model/index").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/request.ts"));
+        getCompiledTemplate("model/request").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+    }
+
+    private void generateClients(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+        Writer writer;
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/"));
+        for (OpenApiController c : controllers) {
+            zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/" + c.getFilename() + ".ts"));
+            writer = new StringWriter();
+
+            context.put("controller", c);
+            getCompiledTemplate("typescript-client-controller-template").evaluate(writer, context);
+            zippedOut.write(writer.toString().getBytes("UTF-8"));
+            zippedOut.closeEntry();
+        }
+
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/index.ts"));
+        writer = new StringWriter();
+        getCompiledTemplate("typescript-client-index-template").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+    }
+
+    private void generateHooks(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+        Writer writer;
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/"));
+        for (OpenApiController c : controllers) {
+            zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/" + c.getFilename() + ".ts"));
+
+            writer = new StringWriter();
+            context.put("controller", c);
+            getCompiledTemplate("typescript-react-query-hook-template").evaluate(writer, context);
+            zippedOut.write(writer.toString().getBytes("UTF-8"));
+            zippedOut.closeEntry();
+        }
+
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/index.ts"));
+        writer = new StringWriter();
+        getCompiledTemplate("typescript-hook-index-template").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
     }
 
     protected PebbleTemplate getCompiledTemplate(String keyName) {
@@ -134,7 +165,7 @@ public class OpenApiClientCreatorService {
                     .autoEscaping(false)
                     .extension(new AbstractExtension() {
                         @Override
-                        public Map<String, Filter> getFilters() {
+                        public Map<String, Function> getFunctions() {
                             return Map.of("infiniteOptions", new InfiniteOptions());
                         }
                     })
@@ -144,16 +175,22 @@ public class OpenApiClientCreatorService {
         return compiledTemplateMap.get(keyName);
     }
 
-    public class InfiniteOptions implements Filter {
+    public class InfiniteOptions implements Function {
 
         @Override
-        public Object apply(Object o, Map<String, Object> map, PebbleTemplate pebbleTemplate, EvaluationContext evaluationContext, int i) throws PebbleException {
-            return templateBuilder.buildQueryOptions(String.valueOf(o));
+        public Object execute(Map<String, Object> map, PebbleTemplate pebbleTemplate, EvaluationContext evaluationContext, int i) {
+            Object parameter = map.getOrDefault("method", null);
+            if (parameter instanceof OpenApiControllerMethodExtraction) {
+                return templateBuilder.buildQueryOptions((OpenApiControllerMethodExtraction) parameter);
+            } else {
+                log.error("parameter not correctly used for inifinite template");
+                return "";
+            }
         }
 
         @Override
         public List<String> getArgumentNames() {
-            return null;
+            return List.of("method");
         }
     }
 
@@ -164,8 +201,11 @@ public class OpenApiClientCreatorService {
     protected void addOperation(Map<String, List<OpenApiControllerMethodExtraction>> map, PathItem.HttpMethod httpMethod, String path, Operation operation) {
         if (operation != null && operation.getExtensions() != null) {
             String controllerBean = (String) operation.getExtensions().get(OpenApiCustomExtractor.CONTROLLER_BEAN);
-            map.putIfAbsent(controllerBean, new ArrayList<>());
-            map.get(controllerBean).add(new OpenApiControllerMethodExtraction(new OpenApiControllerMethodExtraction.ExtractorConfig(pageParams(), typescriptConverter, httpMethod, path, operation)));
+            boolean disabled = (Boolean) operation.getExtensions().getOrDefault(OpenApiCustomExtractor.DISABLED, false);
+            if (!disabled) {
+                map.putIfAbsent(controllerBean, new ArrayList<>());
+                map.get(controllerBean).add(new OpenApiControllerMethodExtraction(new OpenApiControllerMethodExtraction.ExtractorConfig(pageParams(), typescriptConverter, httpMethod, path, operation)));
+            }
         }
     }
 }

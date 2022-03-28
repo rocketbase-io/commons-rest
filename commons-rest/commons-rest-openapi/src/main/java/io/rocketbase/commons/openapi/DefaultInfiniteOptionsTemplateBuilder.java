@@ -1,8 +1,14 @@
 package io.rocketbase.commons.openapi;
 
-public class DefaultInfiniteOptionsTemplateBuilder implements InfiniteOptionsTemplateBuilder{
+import io.rocketbase.commons.util.Nulls;
+
+public class DefaultInfiniteOptionsTemplateBuilder implements InfiniteOptionsTemplateBuilder {
+
     @Override
-    public String buildQueryOptions(String returnType) {
-        return "createInfiniteOptions({ staleTime: {{ method.staleTime }} * 1000, ...options })";
+    public String buildQueryOptions(OpenApiControllerMethodExtraction method) {
+        if (Nulls.notNull(method.getStaleTime(), 0) > 0) {
+            return String.format("createInfiniteOptions({ staleTime: %d * 1000, ...options })", method.getStaleTime());
+        }
+        return "createInfiniteOptions({ options })";
     }
 }

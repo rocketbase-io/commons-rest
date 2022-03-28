@@ -16,9 +16,12 @@ public @interface ClientModule {
     /**
      * name of module that used as functional object with all it's controllers methods/hooks<br>
      * when not set use simple class name
-     *
-     * @return
      */
     String value() default "";
+
+    /**
+     * disable generation at all for this class/interface
+     */
+    boolean disable() default false;
 
 }

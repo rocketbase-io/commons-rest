@@ -2,11 +2,14 @@
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
 import { buildRequestorFactory, RequestorBuilder, PageableResult, PageableRequest } from "@rocketbase/commons-core";
+{% if controller.importTypes is not empty %}
 import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.modelFolder -}}";
+{% endif %}
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 
 
 {% for method in controller.methods %}
+{% if method.isValid %}
 {% if method.fields is not empty %}
 {% if method.hasRequiredFields and method.hasOptionalFields %}
 export interface {{ method.shortInputType }}Optional {% if method.fieldsExtendsPaging %} extends PageableRequest {% endif %} {
@@ -43,17 +46,21 @@ export interface {{ method.shortInputType }} {% if method.fieldsExtendsPaging %}
 }
 {% endif %}
 {% endif %}
+{% endif %}
 {% endfor %}
 
 
 export interface {{ controller.shortName -}}Api {
-{% for method in controller.methods %}{% if method.description is not empty %}
+{% for method in controller.methods %}
+{% if method.isValid %}
+{% if method.description is not empty %}
   /*
    * {{ method.description }}
 
   */
 {% endif %}
   {{ method.methodName }}: RequestorBuilder<{% if method.fields is not empty %}{{ method.shortInputType}}{% elseif method.fieldsExtendsPaging %}PageableRequest{% else %}unknown{% endif %}, {{ method.shortReturnType }}>;
+{% endif %}
 {% endfor %}
 }
 
@@ -64,8 +71,9 @@ export function create{{- controller.shortName -}}Api(client?: AxiosInstance, cf
   });
 
 {% for method in controller.methods %}
-  const {{ method.methodName }}: {{ controller.shortName -}}Api["{{- method.methodName -}}"] = builder({
-    method: "{{- method.httpMethod | lower -}}",
+{% if method.isValid %}
+    const {{ method.methodName }}: {{ controller.shortName -}}Api["{{- method.methodName -}}"] = builder({
+    method: "{{- method.config.httpMethod | lower -}}",
     url: {% if method.pathFields is not empty %}
 ({ {% for f in method.pathFields %}{{f}}{% if not loop.last %}, {% endif %}{% endfor %} }) => `{{ method.pathJs }}`{% else %}
 `{{ method.pathJs }}`{% endif %}{% if method.queryFields is not empty %},
@@ -73,12 +81,15 @@ export function create{{- controller.shortName -}}Api(client?: AxiosInstance, cf
     body: ({ body }) => body{% endif %}
 
    });
+{% endif %}
 {% endfor %}
 
   return {
 {% for method in controller.methods %}
+{% if method.isValid %}
     {{ method.methodName }}{% if not loop.last %}, {% endif %}
 
+{% endif %}
 {% endfor %}
   };
 }

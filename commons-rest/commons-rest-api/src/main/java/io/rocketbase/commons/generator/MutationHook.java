@@ -15,16 +15,12 @@ public @interface MutationHook {
 
     /**
      * name of the method/operation within generated axios-client
-     *
-     * @return
      */
-    String value();
+    String value() default "";
 
     /**
      * layout variable ${varInput} @{varResponse} separation by ,<br>
      * one invalidation per string (multiple parameters need to be separated by ,
-     *
-     * @return
      */
     String[] invalidateKeys() default {};
 }

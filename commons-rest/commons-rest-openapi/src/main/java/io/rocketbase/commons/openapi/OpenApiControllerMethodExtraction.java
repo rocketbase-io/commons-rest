@@ -27,21 +27,19 @@ import java.util.stream.Collectors;
 public class OpenApiControllerMethodExtraction {
 
     @JsonIgnore
-    private OpenApiController controller;
+    protected OpenApiController controller;
 
-    private String hookType;
-    private PathItem.HttpMethod httpMethod;
-    private String path;
-    private String methodName;
+    protected String hookType;
+    protected String methodName;
+    protected Integer staleTime;
 
-    private List<String> cacheKeys;
-    private List<List<String>> invalidateKeys;
-    private Integer staleTime;
+    protected List<String> cacheKeys;
+    protected List<List<String>> invalidateKeys;
 
-    private String genericReturnType;
-    private List<String> parameterTypes;
+    protected String genericReturnType;
+    protected List<String> parameterTypes;
 
-    private final ExtractorConfig config;
+    protected final ExtractorConfig config;
 
     @Data
     @AllArgsConstructor
@@ -55,6 +53,14 @@ public class OpenApiControllerMethodExtraction {
         private Operation operation;
     }
 
+    public String getHookType() {
+        return hookType;
+    }
+
+    public boolean isValid() {
+        return hookType != null && methodName != null;
+    }
+
     public OpenApiControllerMethodExtraction(ExtractorConfig config) {
         this.config = config;
 
@@ -63,10 +69,7 @@ public class OpenApiControllerMethodExtraction {
             this.methodName = (String) operation.getExtensions().get(OpenApiCustomExtractor.METHOD_NAME);
             this.genericReturnType = (String) operation.getExtensions().get(OpenApiCustomExtractor.GENERIC_RETURN_TYPE);
             this.parameterTypes = (List) operation.getExtensions().get(OpenApiCustomExtractor.PARAMETER_TYPES);
-
-            if (operation.getExtensions().get(OpenApiCustomExtractor.HOOK_TYPE) != null) {
-                this.hookType = String.valueOf(operation.getExtensions().get(OpenApiCustomExtractor.HOOK_TYPE));
-            }
+            this.hookType = String.valueOf(operation.getExtensions().get(OpenApiCustomExtractor.HOOK_TYPE));
             Object cK = operation.getExtensions().get(OpenApiCustomExtractor.CACHE_KEYS);
             if (cK instanceof String && !((String) cK).isEmpty()) {
                 cacheKeys = splitString((String) cK);
@@ -81,7 +84,7 @@ public class OpenApiControllerMethodExtraction {
                 }
                 invalidateKeys = values;
             }
-            Object st = operation.getExtensions().get(OpenApiCustomExtractor.STALE_TIME);
+            Object st = operation.getExtensions().getOrDefault(OpenApiCustomExtractor.STALE_TIME, null);
             if (st instanceof Number) {
                 this.staleTime = ((Number) st).intValue();
             }
@@ -133,7 +136,7 @@ public class OpenApiControllerMethodExtraction {
     }
 
     public String getPathJs() {
-        return getPath().replace("{", "${");
+        return config.getPath().replace("{", "${");
     }
 
     public List<String> getPathFields() {
@@ -162,6 +165,10 @@ public class OpenApiControllerMethodExtraction {
         return result.isEmpty() ? null : result;
     }
 
+    public boolean getFieldsExtendsPaging() {
+        return parameterTypes.contains("org.springframework.data.domain.Pageable");
+    }
+
     public boolean hasBody() {
         return config.getOperation().getRequestBody() != null;
     }
@@ -184,11 +191,16 @@ public class OpenApiControllerMethodExtraction {
         if (invalidateKeys == null) {
             return null;
         }
-        return invalidateKeys.stream().map(e -> e.stream().map(v ->
-                        v.startsWith("${") ? v.replace("${", "${" + inputPrefix) : (
-                                v.startsWith("@{") ? v.replace("@{", "${" + responsePrefix) : v
-                        ))
-                .collect(Collectors.toList())).collect(Collectors.toList());
+        return invalidateKeys.stream()
+                .filter(Objects::nonNull)
+                .map(e -> e.stream()
+                        .filter(Objects::nonNull)
+                        .map(v ->
+                                v.startsWith("${") ? v.replace("${", "${" + inputPrefix) : (
+                                        v.startsWith("@{") ? v.replace("@{", "${" + responsePrefix) : v
+                                ))
+                        .collect(Collectors.toList()))
+                .collect(Collectors.toList());
     }
 
     public Set<String> getImportTypes() {
@@ -196,8 +208,15 @@ public class OpenApiControllerMethodExtraction {
         if (genericReturnType != null) {
             types.add(genericReturnType);
         }
-        types.addAll(Nulls.notNull(getFields().stream().map(TypescriptApiField::getType).collect(Collectors.toSet())));
+        types.addAll(Nulls.notNull(getFields()).stream()
+                .filter(Objects::nonNull)
+                .map(TypescriptApiField::getType)
+                .collect(Collectors.toSet()));
         return config.getTypescriptConverter().getImportTypes(types);
+    }
+
+    public String getShortReturnType() {
+        return config.getTypescriptConverter().getReturnType(genericReturnType);
     }
 
     protected Schema getRequestBodySchema(RequestBody body) {

@@ -1,15 +1,13 @@
 package io.rocketbase.commons.openapi;
 
 import io.rocketbase.commons.util.Nulls;
-import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
-import io.swagger.v3.oas.models.parameters.Parameter;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DefaultOpenApiConverter implements OpenApiConverter {
 
@@ -18,26 +16,29 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if (genericReturnType == null) {
             return "any";
         }
-        String name = genericReturnType.replace("io.rocketbase.commons.dto.PageableResult", "PageableResult");
+        if (genericReturnType.equalsIgnoreCase("java.lang.void")) {
+            return "void";
+        }
+        String name = convertInfiniteReturnTypes(genericReturnType);
         // array check
         Optional<String> arrayType = getListTypes().stream().filter(v -> genericReturnType.startsWith(v)).findFirst();
         if (arrayType.isPresent()) {
             for (String l : getListTypes()) {
-                name = name.replace(l, "");
+                if (name.startsWith(l)) {
+                    name = name.replace(l + "<", "").replaceAll("[\\>]$", "");
+                    break;
+                }
             }
         }
         if (name.contains("<")) {
             String genericCenter = name.substring(name.lastIndexOf("<") + 1).replace(">", "");
-            if (name.startsWith("PageableResult")) {
-                name = "PageableResult<" + removePackage(genericCenter) + ">";
-            } else {
-                name = removePackage(genericCenter);
-            }
-        }
-        if (name.equalsIgnoreCase("java.lang.Void")) {
-            return "void";
+            name = name.replace(genericCenter, removePackage(genericCenter));
         }
         return removePackage(name) + (arrayType.isPresent() ? "[]" : "");
+    }
+
+    protected String convertInfiniteReturnTypes(String genericReturnType) {
+        return genericReturnType.replace("io.rocketbase.commons.dto.PageableResult", "PageableResult");
     }
 
     @Override
@@ -53,7 +54,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if ("Void".equalsIgnoreCase(type)) {
             type = "void";
         }
-        if ("Integer".equalsIgnoreCase(type) || "Long".equalsIgnoreCase(type)) {
+        if ("Integer".equalsIgnoreCase(type) || "Long".equalsIgnoreCase(type) || "Double".equalsIgnoreCase(type) || "Float".equalsIgnoreCase(type) || "BigDecimal".equalsIgnoreCase(type)) {
             type = "number";
         }
         if ("InputStreamResource".equalsIgnoreCase(type)) {
@@ -65,17 +66,20 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
     @Override
     public Set<String> getImportTypes(Set<String> allTypes) {
         Set<String> result = new HashSet<>();
-
-        for(String t : Nulls.notNull(allTypes)) {
-            String type =  t.replace("[]", "");
-            if (t.startsWith("PageableResult")) {
-                type = t.replace("PageableResult<", "").replace(">", "");
-            }
-            if (!getNativeTypes().contains(type.toLowerCase())) {
-                result.add(type);
-            }
+        for (String t : Nulls.notNull(allTypes)) {
+            String type = convertInfiniteImportTypes(t.replace("[]", ""), result);
+            result.add(removePackage(type).replace("<", "").replace(">", ""));
         }
-        return result;
+        return result.stream()
+                .filter(v -> !getNativeTypes().contains(v.toLowerCase()))
+                .collect(Collectors.toSet());
+    }
+
+    protected String convertInfiniteImportTypes(String type, Set<String> importTypes) {
+        if (type.startsWith("PageableResult")) {
+            return type.replace("PageableResult<", "").replace(">", "");
+        }
+        return type;
     }
 
 }

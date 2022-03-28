@@ -15,10 +15,8 @@ public @interface QueryHook {
 
     /**
      * name of the method/operation within generated axios-client
-     *
-     * @return
      */
-    String value();
+    String value() default "";
 
     /**
      * layout pathVariable  ${variableName} separation by ,
@@ -29,8 +27,6 @@ public @interface QueryHook {
 
     /**
      * stale time for key-access in seconds
-     *
-     * @return
      */
     int staleTime() default 2;
 }

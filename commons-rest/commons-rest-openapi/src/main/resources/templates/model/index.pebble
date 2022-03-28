@@ -1,0 +1,7 @@
+export * from './commons-rest-api';
+{% if generatorConfig.modelImports is not empty %}
+{% for i in generatorConfig.modelImports %}
+export * from '{{- i -}}';
+{% endfor %}
+{% endif %}
+export * from './request';

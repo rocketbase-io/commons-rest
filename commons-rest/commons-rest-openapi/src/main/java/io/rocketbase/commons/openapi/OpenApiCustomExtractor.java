@@ -5,9 +5,11 @@ import io.rocketbase.commons.generator.InfiniteHook;
 import io.rocketbase.commons.generator.MutationHook;
 import io.rocketbase.commons.generator.QueryHook;
 import io.swagger.v3.oas.models.Operation;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springdoc.core.customizers.OperationCustomizer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.method.HandlerMethod;
 
@@ -25,6 +27,7 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
     public static final String GENERIC_RETURN_TYPE = "genericReturnType";
     public static final String PARAMETER_TYPES = "parameterTypes";
     public static final String CONTROLLER_BEAN = "controllerBean";
+    public static final String DISABLED = "disabled";
     public static final String METHOD_NAME = "methodName";
     public static final String HOOK_TYPE = "hookType";
     public static final String CACHE_KEYS = "cacheKeys";
@@ -46,7 +49,9 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
             extensions.put(PARAMETER_TYPES, Arrays.stream(handlerMethod.getMethod().getGenericParameterTypes()).map(v -> v.getTypeName()).collect(Collectors.toList()));
         }
 
-        extensions.put(CONTROLLER_BEAN, extractControllerBean(handlerMethod));
+        ClientModuleParams beanParams = extractControllerBean(handlerMethod);
+        extensions.put(CONTROLLER_BEAN, beanParams.getName());
+        extensions.put(DISABLED, beanParams.isDisabled());
 
         if (handlerMethod.hasMethodAnnotation(InfiniteHook.class)) {
             InfiniteHook annotation = handlerMethod.getMethodAnnotation(InfiniteHook.class);
@@ -75,15 +80,24 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
         return operation;
     }
 
-    private String extractControllerBean(HandlerMethod handlerMethod) {
-        String controllerBean = handlerMethod.getBeanType().getName();
+    private ClientModuleParams extractControllerBean(HandlerMethod handlerMethod) {
+        ClientModuleParams result = new ClientModuleParams(handlerMethod.getBeanType().getName(), false);
         if (handlerMethod.getBeanType().isAnnotationPresent(ClientModule.class)) {
-            String clientModuleCustomName = handlerMethod.getBeanType().getAnnotation(ClientModule.class).value();
-            if (StringUtils.hasText(clientModuleCustomName)) {
-                controllerBean = clientModuleCustomName;
+            ClientModule annotation = handlerMethod.getBeanType().getAnnotation(ClientModule.class);
+            result.setDisabled(annotation.disable());
+            if (StringUtils.hasText(annotation.value())) {
+                result.setName(annotation.value());
             }
         }
-        return controllerBean;
+        return result;
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    protected static class ClientModuleParams {
+        private String name;
+        private boolean disabled;
     }
 
     protected String extractMethodName(String configuredValue, HandlerMethod handlerMethod) {

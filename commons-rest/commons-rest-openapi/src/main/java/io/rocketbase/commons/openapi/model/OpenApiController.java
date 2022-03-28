@@ -1,6 +1,7 @@
 package io.rocketbase.commons.openapi.model;
 
 import io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction;
+import io.rocketbase.commons.util.Nulls;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -32,13 +33,14 @@ public class OpenApiController implements Serializable {
 
     public Set<String> getImportTypes() {
         Set<String> result = new HashSet<>();
-        for (OpenApiControllerMethodExtraction m : methods) {
+        for (OpenApiControllerMethodExtraction m : Nulls.notNull(methods)) {
             if (m != null && m.getImportTypes() != null) {
                 result.addAll(m.getImportTypes());
             }
         }
         return result;
     }
+
     protected String toKebabCase(String input) {
         return input
                 .replaceAll("([a-z0-9])([A-Z])", "$1-$2")

@@ -16,22 +16,16 @@ public @interface InfiniteHook {
     /**
      * name of the method/operation within generated axios-client<br>
      * when not set use method name
-     *
-     * @return
      */
     String value() default "";
 
     /**
      * layout pathVariable  ${variableName} separation by ,
-     *
-     * @return
      */
     String cacheKeys();
 
     /**
      * stale time for key-access in seconds
-     *
-     * @return
      */
     int staleTime() default 2;
 }
