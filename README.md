@@ -42,6 +42,20 @@ Containing ExceptionHandlers for common errors like BeanValidationExceptions or 
 
 Simple designed error pages for 400, 401, 403, 404 and 500 error-codes.
 
+### commons-rest-openapi
+
+Library to build rest-clients + react-query hooks with custom annotations and converts.
+
+| property                                | default   | explanation                                           |
+|-----------------------------------------|-----------|-------------------------------------------------------|
+| commons.openapi.generator.base-url      | /api      | used as prefix for alle urls                          |
+| commons.openapi.generator.group-name    | ModuleApi | client generator added all "methods" within one group |
+| commons.openapi.generator.hook-folder   | hooks     | folder within zip                                     |
+| commons.openapi.generator.client-folder | clients   | folder within zip                                     |
+| commons.openapi.generator.model-folder  | model     | folder within zip                                     |
+| commons.openapi.generator.model-create  | true      | should models get generated                           |
+| commons.openapi.generator.model-imports | _unset_   | list that will get added to model/index.ts            |
+
 ### commons-rest-hashids
 
 Implementation for obfuscatedId interface introduced within the api. Uses [hashids](https://hashids.org/java/) as library to obfuscate long ids.
