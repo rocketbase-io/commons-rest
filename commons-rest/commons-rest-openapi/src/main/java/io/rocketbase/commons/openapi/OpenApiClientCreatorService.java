@@ -82,6 +82,7 @@ public class OpenApiClientCreatorService {
             }
             generateClients(controllers, zippedOut, context);
             generateHooks(controllers, zippedOut, context);
+            generateUtil(zippedOut, context);
 
 
             zippedOut.finish();
@@ -114,6 +115,35 @@ public class OpenApiClientCreatorService {
         zippedOut.closeEntry();
     }
 
+    private void generateUtil(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+        Writer writer;
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/"));
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/index.ts"));
+        getCompiledTemplate("util/index").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/infinite-options.ts"));
+        getCompiledTemplate("util/infinite-options").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/requestor.ts"));
+        getCompiledTemplate("util/requestor").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/total-elements.ts"));
+        getCompiledTemplate("util/total-elements").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+    }
+
     private void generateClients(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
         zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/"));
@@ -122,14 +152,14 @@ public class OpenApiClientCreatorService {
             writer = new StringWriter();
 
             context.put("controller", c);
-            getCompiledTemplate("typescript-client-controller-template").evaluate(writer, context);
+            getCompiledTemplate("client/controller-template").evaluate(writer, context);
             zippedOut.write(writer.toString().getBytes("UTF-8"));
             zippedOut.closeEntry();
         }
 
         zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/index.ts"));
         writer = new StringWriter();
-        getCompiledTemplate("typescript-client-index-template").evaluate(writer, context);
+        getCompiledTemplate("client/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
     }
@@ -142,14 +172,14 @@ public class OpenApiClientCreatorService {
 
             writer = new StringWriter();
             context.put("controller", c);
-            getCompiledTemplate("typescript-react-query-hook-template").evaluate(writer, context);
+            getCompiledTemplate("hook/hook-template").evaluate(writer, context);
             zippedOut.write(writer.toString().getBytes("UTF-8"));
             zippedOut.closeEntry();
         }
 
         zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/index.ts"));
         writer = new StringWriter();
-        getCompiledTemplate("typescript-hook-index-template").evaluate(writer, context);
+        getCompiledTemplate("hook/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
     }
@@ -166,7 +196,8 @@ public class OpenApiClientCreatorService {
                     .extension(new AbstractExtension() {
                         @Override
                         public Map<String, Function> getFunctions() {
-                            return Map.of("infiniteOptions", new InfiniteOptions());
+                            return Map.of("infiniteOptions", new InfiniteOptions(),
+                                    "infiniteParams", new InfiniteParams());
                         }
                     })
                     .build();
@@ -183,7 +214,26 @@ public class OpenApiClientCreatorService {
             if (parameter instanceof OpenApiControllerMethodExtraction) {
                 return templateBuilder.buildQueryOptions((OpenApiControllerMethodExtraction) parameter);
             } else {
-                log.error("parameter not correctly used for inifinite template");
+                log.error("parameter not correctly used for infinite options template");
+                return "";
+            }
+        }
+
+        @Override
+        public List<String> getArgumentNames() {
+            return List.of("method");
+        }
+    }
+
+    public class InfiniteParams implements Function {
+
+        @Override
+        public Object execute(Map<String, Object> map, PebbleTemplate pebbleTemplate, EvaluationContext evaluationContext, int i) {
+            Object parameter = map.getOrDefault("method", null);
+            if (parameter instanceof OpenApiControllerMethodExtraction) {
+                return templateBuilder.buildQueryParams((OpenApiControllerMethodExtraction) parameter);
+            } else {
+                log.error("parameter not correctly used for infinite params template");
                 return "";
             }
         }

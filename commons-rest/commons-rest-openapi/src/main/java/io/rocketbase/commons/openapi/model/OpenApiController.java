@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -46,6 +47,10 @@ public class OpenApiController implements Serializable {
                 .replaceAll("([a-z0-9])([A-Z])", "$1-$2")
                 .replaceAll("([A-Z])([A-Z])(?=[a-z])", "$1-$2")
                 .toLowerCase();
+    }
+
+    public Set<String> getFieldImports() {
+        return methods.stream().filter(m -> m.hasOptionalFields() || m.hasRequiredFields()).map(OpenApiControllerMethodExtraction::getShortInputType).collect(Collectors.toSet());
     }
 
     public String getFilename() {

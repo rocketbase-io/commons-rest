@@ -14,7 +14,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
     @Override
     public String getReturnType(String genericReturnType) {
         if (genericReturnType == null) {
-            return "any";
+            return "unknown";
         }
         if (genericReturnType.equalsIgnoreCase("java.lang.void")) {
             return "void";
@@ -34,7 +34,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
             String genericCenter = name.substring(name.lastIndexOf("<") + 1).replace(">", "");
             name = name.replace(genericCenter, removePackage(genericCenter));
         }
-        return removePackage(name) + (arrayType.isPresent() ? "[]" : "");
+        return convertType(removePackage(name)) + (arrayType.isPresent() ? "[]" : "");
     }
 
     protected String convertInfiniteReturnTypes(String genericReturnType) {
@@ -44,12 +44,23 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
     @Override
     public String convertType(Schema schema) {
         if (schema == null) {
-            return "any";
+            return "unknown";
         }
         String type = schema.get$ref() != null ? removeRefPath(schema.get$ref()) : schema.getType();
         if (schema instanceof ArraySchema) {
             Schema<?> item = ((ArraySchema) schema).getItems();
             type = item.getType() != null ? item.getType() : removeRefPath(item.get$ref()) + "[]";
+        }
+        type = convertType(type);
+        return type;
+    }
+
+    protected String convertType(String type) {
+        if (type == null) {
+            return null;
+        }
+        if (getNativeTypes().contains(type.toLowerCase())) {
+            type = type.toLowerCase();
         }
         if ("Void".equalsIgnoreCase(type)) {
             type = "void";
@@ -58,7 +69,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
             type = "number";
         }
         if ("InputStreamResource".equalsIgnoreCase(type)) {
-            type = "any";
+            type = "unknown";
         }
         return type;
     }
@@ -71,6 +82,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
             result.add(removePackage(type).replace("<", "").replace(">", ""));
         }
         return result.stream()
+                .map(v -> convertType(v))
                 .filter(v -> !getNativeTypes().contains(v.toLowerCase()))
                 .collect(Collectors.toSet());
     }

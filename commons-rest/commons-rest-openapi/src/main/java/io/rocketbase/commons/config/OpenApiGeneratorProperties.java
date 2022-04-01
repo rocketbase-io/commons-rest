@@ -16,6 +16,8 @@ public class OpenApiGeneratorProperties {
     private String hookFolder = "hooks";
     private String clientFolder = "clients";
 
+    private String utilFolder = "util";
+
     private String modelFolder = "model";
     private boolean modelCreate = true;
     private List<String> modelImports = new ArrayList<>();

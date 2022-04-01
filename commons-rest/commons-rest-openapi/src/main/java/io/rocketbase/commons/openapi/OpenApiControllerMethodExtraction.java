@@ -128,7 +128,14 @@ public class OpenApiControllerMethodExtraction {
     }
 
     public String getShortInputType() {
+        if (isVoidShortInputType()) {
+            return "void";
+        }
         return getController().getShortName() + StringUtils.capitalize(methodName);
+    }
+
+    public boolean isVoidShortInputType() {
+        return !hasRequiredFields() && !hasOptionalFields() && !hasBody();
     }
 
     public String getDescription() {
@@ -177,7 +184,13 @@ public class OpenApiControllerMethodExtraction {
         if (hookType == null) {
             return null;
         }
-        return "use" + StringUtils.capitalize(hookType) + getShortInputType();
+        String result = "use" + StringUtils.capitalize(hookType);
+        if (getShortInputType().equalsIgnoreCase("void")) {
+            result += StringUtils.capitalize(getController().getShortName()) + StringUtils.capitalize(getMethodName());
+        } else {
+            result += StringUtils.capitalize(getShortInputType());
+        }
+        return result;
     }
 
     public List<String> getCacheKeysPrepared(String prefix) {

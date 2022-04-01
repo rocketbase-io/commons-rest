@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
-import { buildRequestorFactory, RequestorBuilder, PageableResult, PageableRequest } from "@rocketbase/commons-core";
+import { buildRequestorFactory, RequestorBuilder, PageableResult, PageableRequest } from "../../";
 {% if controller.importTypes is not empty %}
 import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.modelFolder -}}";
 {% endif %}

@@ -11,4 +11,9 @@ public class DefaultInfiniteOptionsTemplateBuilder implements InfiniteOptionsTem
         }
         return "createInfiniteOptions({ options })";
     }
+
+    @Override
+    public String buildQueryParams(OpenApiControllerMethodExtraction method) {
+        return "page: pageParam";
+    }
 }
