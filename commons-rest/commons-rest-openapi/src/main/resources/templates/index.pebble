@@ -1,0 +1,24 @@
+import { create{{ groupName -}} } from "./{{- generatorConfig.clientFolder -}}";
+import * as React from "react";
+import { useAuth } from "@rocketbase/commons-core";
+
+export * from "./{{- generatorConfig.clientFolder -}}";
+{% if generatorConfig.modelCreate %}export * from "./{{- generatorConfig.modelFolder -}}";{% endif %}
+export * from "./{{- generatorConfig.hookFolder -}}";
+
+const removeLeadingSlash = (string: string) => {
+if (string && string.charAt(string.length - 1) == "/") return string.substr(0, string.length - 1);
+else return string;
+};
+
+export const useApi = () => {
+const { axiosClient} = useAuth();
+
+return React.useMemo(
+() => ({
+{{ configuredGroupVar -}}: create{{ groupName -}}(axiosClient, { baseURL: 'http://localhost:8080/' })
+}),
+[axiosClient]
+);
+};
+

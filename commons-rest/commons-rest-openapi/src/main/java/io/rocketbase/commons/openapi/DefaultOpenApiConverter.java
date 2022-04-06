@@ -78,8 +78,10 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
     public Set<String> getImportTypes(Set<String> allTypes) {
         Set<String> result = new HashSet<>();
         for (String t : Nulls.notNull(allTypes)) {
-            String type = convertInfiniteImportTypes(t.replace("[]", ""), result);
-            result.add(removePackage(type).replace("<", "").replace(">", ""));
+            if (t != null) {
+                String type = convertInfiniteImportTypes(t.replace("[]", ""), result);
+                result.add(removePackage(type).replace("<", "").replace(">", ""));
+            }
         }
         return result.stream()
                 .map(v -> convertType(v))

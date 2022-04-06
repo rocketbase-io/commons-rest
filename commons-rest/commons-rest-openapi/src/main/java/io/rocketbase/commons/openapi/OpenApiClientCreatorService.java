@@ -83,6 +83,7 @@ public class OpenApiClientCreatorService {
             generateClients(controllers, zippedOut, context);
             generateHooks(controllers, zippedOut, context);
             generateUtil(zippedOut, context);
+            generateIndex(zippedOut, context);
 
 
             zippedOut.finish();
@@ -140,6 +141,17 @@ public class OpenApiClientCreatorService {
         writer = new StringWriter();
         zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/total-elements.ts"));
         getCompiledTemplate("util/total-elements").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+    }
+
+    private void generateIndex(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+        Writer writer;
+        zippedOut.putNextEntry(new ZipEntry("/"));
+
+        writer = new StringWriter();
+        zippedOut.putNextEntry(new ZipEntry("/index.ts"));
+        getCompiledTemplate("index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
     }
