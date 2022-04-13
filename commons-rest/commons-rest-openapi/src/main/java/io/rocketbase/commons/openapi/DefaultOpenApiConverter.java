@@ -2,6 +2,7 @@ package io.rocketbase.commons.openapi;
 
 import io.rocketbase.commons.util.Nulls;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.HashSet;
@@ -32,7 +33,11 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         }
         if (name.contains("<")) {
             String genericCenter = name.substring(name.lastIndexOf("<") + 1).replace(">", "");
-            name = name.replace(genericCenter, removePackage(genericCenter));
+            if (genericCenter.equals("?")) {
+                name = name.replace(genericCenter, "any");
+            } else {
+                name = name.replace(genericCenter, removePackage(genericCenter));
+            }
         }
         return convertType(removePackage(name)) + (arrayType.isPresent() ? "[]" : "");
     }
@@ -45,6 +50,8 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
     public String convertType(Schema schema) {
         if (schema == null) {
             return "unknown";
+        }
+        if (schema instanceof ComposedSchema) {
         }
         String type = schema.get$ref() != null ? removeRefPath(schema.get$ref()) : schema.getType();
         if (schema instanceof ArraySchema) {
@@ -79,8 +86,9 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         Set<String> result = new HashSet<>();
         for (String t : Nulls.notNull(allTypes)) {
             if (t != null) {
-                String type = convertInfiniteImportTypes(t.replace("[]", ""), result);
-                result.add(removePackage(type).replace("<", "").replace(">", ""));
+                String type = convertImportWrappers(t.replace("[]", ""), result);
+
+                result.add(removePackage(type).replaceAll("<.*>", ""));
             }
         }
         return result.stream()
@@ -89,9 +97,14 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
                 .collect(Collectors.toSet());
     }
 
-    protected String convertInfiniteImportTypes(String type, Set<String> importTypes) {
-        if (type.startsWith("PageableResult")) {
-            return type.replace("PageableResult<", "").replace(">", "");
+    protected String convertImportWrappers(String type, Set<String> importTypes) {
+        for (String t : getListTypes()) {
+            if (type.startsWith(t + "<")) {
+                return type.replace(t + "<", "").replace(">", "");
+            }
+        }
+        if (type.startsWith("io.rocketbase.commons.dto.PageableResult<")) {
+            return type.replace("io.rocketbase.commons.dto.PageableResult<", "").replace(">", "");
         }
         return type;
     }

@@ -32,6 +32,7 @@ public class OpenApiControllerMethodExtraction {
     protected String hookType;
     protected String methodName;
     protected Integer staleTime;
+    protected String requestBodyType;
 
     protected List<String> cacheKeys;
     protected List<List<String>> invalidateKeys;
@@ -70,6 +71,9 @@ public class OpenApiControllerMethodExtraction {
             this.genericReturnType = (String) operation.getExtensions().get(OpenApiCustomExtractor.GENERIC_RETURN_TYPE);
             this.parameterTypes = (List) operation.getExtensions().get(OpenApiCustomExtractor.PARAMETER_TYPES);
             this.hookType = String.valueOf(operation.getExtensions().get(OpenApiCustomExtractor.HOOK_TYPE));
+            if (operation.getExtensions().containsKey(OpenApiCustomExtractor.REQUEST_BODY_TYPE_NAME)) {
+                this.requestBodyType = String.valueOf(operation.getExtensions().get(OpenApiCustomExtractor.REQUEST_BODY_TYPE_NAME));
+            }
             Object cK = operation.getExtensions().get(OpenApiCustomExtractor.CACHE_KEYS);
             if (cK instanceof String && !((String) cK).isEmpty()) {
                 cacheKeys = splitString((String) cK);
@@ -105,7 +109,11 @@ public class OpenApiControllerMethodExtraction {
         }
         Schema requestBodySchema = getRequestBodySchema(operation.getRequestBody());
         if (requestBodySchema != null) {
-            result.add(new TypescriptApiField("body", true, config.getTypescriptConverter().convertType(requestBodySchema),
+            String type = config.getTypescriptConverter().convertType(requestBodySchema);
+            if (type == null && requestBodyType != null) {
+                type = config.getTypescriptConverter().getReturnType(requestBodyType);
+            }
+            result.add(new TypescriptApiField("body", true, type,
                     false, operation.getRequestBody().getDescription()));
         }
         return result.isEmpty() ? null : result;

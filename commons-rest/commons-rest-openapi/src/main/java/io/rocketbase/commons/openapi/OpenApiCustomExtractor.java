@@ -4,15 +4,19 @@ import io.rocketbase.commons.generator.ClientModule;
 import io.rocketbase.commons.generator.InfiniteHook;
 import io.rocketbase.commons.generator.MutationHook;
 import io.rocketbase.commons.generator.QueryHook;
+import io.rocketbase.commons.util.Nulls;
 import io.swagger.v3.oas.models.Operation;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springdoc.core.customizers.OperationCustomizer;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.method.HandlerMethod;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -33,6 +37,7 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
     public static final String CACHE_KEYS = "cacheKeys";
     public static final String INVALIDATE_KEYS = "invalidateKeys";
     public static final String STALE_TIME = "staleTime";
+    public static final String REQUEST_BODY_TYPE_NAME = "requestBodyTypeName";
 
     @Override
     public Operation customize(Operation operation, HandlerMethod handlerMethod) {
@@ -70,6 +75,15 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
             extensions.put(METHOD_NAME, extractMethodName(annotation.value(), handlerMethod));
             extensions.put(HOOK_TYPE, "mutation");
             extensions.put(INVALIDATE_KEYS, annotation.invalidateKeys());
+
+            for (MethodParameter p : Nulls.notNull(handlerMethod.getMethodParameters(), new MethodParameter[]{})) {
+                for (Annotation pA : Nulls.notNull(p.getParameterAnnotations(), new Annotation[]{})) {
+                    if (pA instanceof RequestBody || pA instanceof io.swagger.v3.oas.annotations.parameters.RequestBody) {
+                        extensions.put(REQUEST_BODY_TYPE_NAME, p.getParameter().getParameterizedType().getTypeName());
+                    }
+                }
+            }
+
         }
 
         if (operation.getExtensions() == null) {

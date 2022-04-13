@@ -12,13 +12,10 @@ import java.util.List;
 public class OpenApiGeneratorProperties {
 
     private String baseUrl = "/api";
+    private String packageName = "openapi-module";
     private String groupName = "ModuleApi";
     private String hookFolder = "hooks";
     private String clientFolder = "clients";
 
-    private String utilFolder = "util";
-
-    private String modelFolder = "model";
-    private boolean modelCreate = true;
     private List<String> modelImports = new ArrayList<>();
 }

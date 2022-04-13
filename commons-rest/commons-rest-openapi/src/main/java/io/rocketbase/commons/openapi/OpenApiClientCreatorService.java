@@ -3,7 +3,6 @@ package io.rocketbase.commons.openapi;
 import com.google.common.collect.Sets;
 import com.mitchellbosecke.pebble.PebbleEngine;
 import com.mitchellbosecke.pebble.extension.AbstractExtension;
-import com.mitchellbosecke.pebble.extension.Filter;
 import com.mitchellbosecke.pebble.extension.Function;
 import com.mitchellbosecke.pebble.loader.ClasspathLoader;
 import com.mitchellbosecke.pebble.template.EvaluationContext;
@@ -77,13 +76,10 @@ public class OpenApiClientCreatorService {
             context.put("generatorConfig", openApiGeneratorProperties);
             context.put("springDataWebConfig", springDataWebProperties);
 
-            if (openApiGeneratorProperties.isModelCreate()) {
-                generateModels(zippedOut, context);
-            }
+            generateModels(zippedOut, context);
             generateClients(controllers, zippedOut, context);
             generateHooks(controllers, zippedOut, context);
-            generateUtil(zippedOut, context);
-            generateIndex(zippedOut, context);
+            generateIndexAndPackageJson(zippedOut, context);
 
 
             zippedOut.finish();
@@ -95,62 +91,33 @@ public class OpenApiClientCreatorService {
 
     private void generateModels(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/"));
+        zippedOut.putNextEntry(new ZipEntry("src/model/"));
 
         writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/commons-rest-api.ts"));
-        getCompiledTemplate("model/commons-rest-api").evaluate(writer, context);
-        zippedOut.write(writer.toString().getBytes("UTF-8"));
-        zippedOut.closeEntry();
-
-        writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/index.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/model/index.ts"));
         getCompiledTemplate("model/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
 
         writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getModelFolder() + "/request.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/model/request.ts"));
         getCompiledTemplate("model/request").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
     }
 
-    private void generateUtil(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+    private void generateIndexAndPackageJson(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/"));
+        zippedOut.putNextEntry(new ZipEntry("src/"));
 
         writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/index.ts"));
-        getCompiledTemplate("util/index").evaluate(writer, context);
+        zippedOut.putNextEntry(new ZipEntry("package.json"));
+        getCompiledTemplate("package").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
 
         writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/infinite-options.ts"));
-        getCompiledTemplate("util/infinite-options").evaluate(writer, context);
-        zippedOut.write(writer.toString().getBytes("UTF-8"));
-        zippedOut.closeEntry();
-
-        writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/requestor.ts"));
-        getCompiledTemplate("util/requestor").evaluate(writer, context);
-        zippedOut.write(writer.toString().getBytes("UTF-8"));
-        zippedOut.closeEntry();
-
-        writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getUtilFolder() + "/total-elements.ts"));
-        getCompiledTemplate("util/total-elements").evaluate(writer, context);
-        zippedOut.write(writer.toString().getBytes("UTF-8"));
-        zippedOut.closeEntry();
-    }
-
-    private void generateIndex(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
-        Writer writer;
-        zippedOut.putNextEntry(new ZipEntry("/"));
-
-        writer = new StringWriter();
-        zippedOut.putNextEntry(new ZipEntry("/index.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/index.ts"));
         getCompiledTemplate("index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
@@ -158,9 +125,9 @@ public class OpenApiClientCreatorService {
 
     private void generateClients(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/"));
+        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getClientFolder() + "/"));
         for (OpenApiController c : controllers) {
-            zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/" + c.getFilename() + ".ts"));
+            zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getClientFolder() + "/" + c.getFilename() + ".ts"));
             writer = new StringWriter();
 
             context.put("controller", c);
@@ -169,7 +136,7 @@ public class OpenApiClientCreatorService {
             zippedOut.closeEntry();
         }
 
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getClientFolder() + "/index.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getClientFolder() + "/index.ts"));
         writer = new StringWriter();
         getCompiledTemplate("client/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
@@ -178,9 +145,9 @@ public class OpenApiClientCreatorService {
 
     private void generateHooks(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/"));
+        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getHookFolder() + "/"));
         for (OpenApiController c : controllers) {
-            zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/" + c.getFilename() + ".ts"));
+            zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getHookFolder() + "/" + c.getFilename() + ".ts"));
 
             writer = new StringWriter();
             context.put("controller", c);
@@ -189,7 +156,7 @@ public class OpenApiClientCreatorService {
             zippedOut.closeEntry();
         }
 
-        zippedOut.putNextEntry(new ZipEntry(openApiGeneratorProperties.getHookFolder() + "/index.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getHookFolder() + "/index.ts"));
         writer = new StringWriter();
         getCompiledTemplate("hook/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));

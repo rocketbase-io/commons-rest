@@ -1,9 +1,10 @@
 /* eslint-disable no-use-before-define */
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
-import { buildRequestorFactory, RequestorBuilder, PageableResult, PageableRequest } from "../../";
+import { buildRequestorFactory, RequestorBuilder, PageableResult } from "@rocketbase/commons-core";
+import { PageableRequest } from "../..";
 {% if controller.importTypes is not empty %}
-import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.modelFolder -}}";
+import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
 {% endif %}
 import { AxiosInstance, AxiosRequestConfig } from "axios";
 

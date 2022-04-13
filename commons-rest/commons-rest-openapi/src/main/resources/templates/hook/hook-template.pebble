@@ -4,9 +4,10 @@
 {% if controller.fieldImports is not empty %}import { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.clientFolder -}}";
 {% endif %}
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "react-query";
-import { PageableResult, PageableRequest, createInfiniteOptions, useApi } from "../../";
+import { PageableResult, createInfiniteOptions } from "@rocketbase/commons-core";
+import { PageableRequest, useApi } from "../..";
 {% if controller.importTypes is not empty %}
-import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.modelFolder -}}";
+import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
 {% endif %}
 import { AxiosError } from "axios";
 
