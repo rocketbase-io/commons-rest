@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @RequiredArgsConstructor
 @EnableConfigurationProperties({SpringDataWebProperties.class, OpenApiGeneratorProperties.class})
-public class CommonsRestAutoConfiguration {
+public class CommonsRestOpenApiAutoConfiguration {
 
     private final SpringDataWebProperties springDataWebProperties;
     private final OpenApiGeneratorProperties openApiGeneratorProperties;

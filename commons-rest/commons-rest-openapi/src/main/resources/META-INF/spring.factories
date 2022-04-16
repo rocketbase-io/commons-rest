@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.rocketbase.commons.config.CommonsRestAutoConfiguration
+io.rocketbase.commons.config.CommonsRestOpenApiAutoConfiguration
