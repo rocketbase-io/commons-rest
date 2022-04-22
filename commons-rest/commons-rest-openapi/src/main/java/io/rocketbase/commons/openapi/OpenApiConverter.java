@@ -43,7 +43,7 @@ public interface OpenApiConverter {
     }
 
     default Set<String> getNativeTypes() {
-        return Sets.newHashSet("string", "boolean", "long", "void", "any", "unknown", "integer", "number");
+        return Sets.newHashSet("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object");
     }
 
     default boolean hasPageableParameter(List<String> parameterTypes) {

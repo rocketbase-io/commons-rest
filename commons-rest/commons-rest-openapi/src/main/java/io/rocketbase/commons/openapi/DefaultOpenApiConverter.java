@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction.MULTIPART_TYPESCRIPT;
+
 public class DefaultOpenApiConverter implements OpenApiConverter {
 
     @Override
@@ -19,6 +21,9 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         }
         if (genericReturnType.equalsIgnoreCase("java.lang.void")) {
             return "void";
+        }
+        if (genericReturnType.equalsIgnoreCase("java.lang.object")) {
+            return "any";
         }
         String name = convertInfiniteReturnTypes(genericReturnType);
         // array check
@@ -78,6 +83,9 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if ("InputStreamResource".equalsIgnoreCase(type)) {
             type = "unknown";
         }
+        if ("Object".equalsIgnoreCase(type)) {
+            type = "any";
+        }
         return type;
     }
 
@@ -94,6 +102,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         return result.stream()
                 .map(v -> convertType(v))
                 .filter(v -> !getNativeTypes().contains(v.toLowerCase()))
+                .filter(v -> !MULTIPART_TYPESCRIPT.equalsIgnoreCase(v))
                 .collect(Collectors.toSet());
     }
 

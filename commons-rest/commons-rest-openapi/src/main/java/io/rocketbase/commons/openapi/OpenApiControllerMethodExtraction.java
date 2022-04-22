@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 @Data
 public class OpenApiControllerMethodExtraction {
 
+    public static String MULTIPART_TYPESCRIPT = "string | File | Blob";
+
     @JsonIgnore
     protected OpenApiController controller;
 
@@ -110,7 +112,9 @@ public class OpenApiControllerMethodExtraction {
         Schema requestBodySchema = getRequestBodySchema(operation.getRequestBody());
         if (requestBodySchema != null) {
             String type = config.getTypescriptConverter().convertType(requestBodySchema);
-            if (type == null && requestBodyType != null) {
+            if (requestBodyType != null && requestBodyType.toLowerCase().contains("multipart")) {
+                type = MULTIPART_TYPESCRIPT;
+            } else if (type == null && requestBodyType != null) {
                 type = config.getTypescriptConverter().getReturnType(requestBodyType);
             }
             result.add(new TypescriptApiField("body", true, type,
