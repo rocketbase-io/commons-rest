@@ -2,7 +2,6 @@ package io.rocketbase.commons.openapi;
 
 import io.rocketbase.commons.util.Nulls;
 import io.swagger.v3.oas.models.media.ArraySchema;
-import io.swagger.v3.oas.models.media.ComposedSchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.HashSet;
@@ -56,12 +55,10 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if (schema == null) {
             return "unknown";
         }
-        if (schema instanceof ComposedSchema) {
-        }
         String type = schema.get$ref() != null ? removeRefPath(schema.get$ref()) : schema.getType();
         if (schema instanceof ArraySchema) {
             Schema<?> item = ((ArraySchema) schema).getItems();
-            type = item.getType() != null ? item.getType() : removeRefPath(item.get$ref()) + "[]";
+            type = (item.getType() != null ? item.getType() : removeRefPath(item.get$ref())) + "[]";
         }
         type = convertType(type);
         return type;
