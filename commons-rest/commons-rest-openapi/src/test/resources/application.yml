@@ -1,0 +1,42 @@
+server:
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+    min-response-size: 1024
+  http2:
+    enabled: true
+
+spring:
+  data:
+    web:
+      pageable:
+        default-page-size: 50
+        max-page-size: 250
+        one-indexed-parameters: false
+        size-parameter: pageSize
+        page-parameter: page
+      sort:
+        sort-parameter: sort
+
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    display-request-duration: true
+    operationsSorter: method
+    disable-swagger-default-url: true
+    use-root-path: true
+
+info:
+  version:
+    maven: "@project.version@"
+    spring-boot: "@spring-boot.version@"
+    spring-doc: "@springdoc-openapi.version@"
+    commons-rest: "@commons-rest.version@"
+    commons-auth: "@commons-auth.version@"
+    commons-asset: "@commons-asset.version@"
+
+commons.openapi.generator:
+  base-url: "/test"
+  group-name: TestModuleApi
