@@ -30,11 +30,15 @@ export function {{ method.hookName -}}(
   return useMutation<{{ method.shortReturnType }}, AxiosError, {{ method.shortInputType }}>(({% if not method.isVoidShortInputType %}content{% endif %}) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({% if method.isVoidShortInputType %} {} {% else %} content {% endif %}), {
     {% if method.invalidateKeysPrepared('content.', 'data.') is not empty %}
     onSuccess: async (data, content) => {
-        await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}
-          queryClient.invalidateQueries([{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]){% if not loop.last %}, {% endif %}
+        const invalide = async () => await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}queryClient.invalidateQueries([{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]){% if not loop.last %}, {% endif %}{% endfor %}]);
 
-        {% endfor %}]);
-        if (onSuccess) { onSuccess(data, content, undefined); }
+        if (onSuccess) {
+          const result = onSuccess(data, content, undefined);
+          if (!!result && typeof result.then === 'function') {
+            return invalide();
+          }
+        }
+        return invalide();
     },
     {% endif %}
     ...options
