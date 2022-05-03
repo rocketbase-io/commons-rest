@@ -35,6 +35,7 @@ export function {{ method.hookName -}}(
         if (onSuccess) {
           const result = onSuccess(data, content, undefined);
           if (!!result && typeof result.then === 'function') {
+            await result;
             return invalide();
           }
         }
