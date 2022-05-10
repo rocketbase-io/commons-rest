@@ -43,7 +43,11 @@ public interface OpenApiConverter {
     }
 
     default Set<String> getNativeTypes() {
-        return Sets.newHashSet("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object");
+        return Sets.newHashSet("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object", "File", "Blob");
+    }
+
+    default Set<String> getJavaToUnknowns() {
+        return Sets.newHashSet("InputStreamResource", "InputStream", "Resource", "byte", "byte[]", "OutputStream", "Object");
     }
 
     default boolean hasPageableParameter(List<String> parameterTypes) {

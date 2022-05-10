@@ -77,11 +77,10 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if ("Integer".equalsIgnoreCase(type) || "Long".equalsIgnoreCase(type) || "Double".equalsIgnoreCase(type) || "Float".equalsIgnoreCase(type) || "BigDecimal".equalsIgnoreCase(type)) {
             type = "number";
         }
-        if ("InputStreamResource".equalsIgnoreCase(type)) {
-            type = "unknown";
-        }
-        if ("Object".equalsIgnoreCase(type)) {
-            type = "any";
+        for (String java : getJavaToUnknowns()) {
+            if (java.equalsIgnoreCase(type)) {
+                return "unknown";
+            }
         }
         return type;
     }

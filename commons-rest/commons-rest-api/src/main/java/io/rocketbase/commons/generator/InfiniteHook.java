@@ -25,7 +25,8 @@ public @interface InfiniteHook {
     String cacheKeys();
 
     /**
-     * stale time for key-access in seconds
+     * stale time for key-access in seconds<br>
+     * 0 or less means disabled staleTime
      */
     int staleTime() default 2;
 }
