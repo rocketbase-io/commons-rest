@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.util.Assert;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
@@ -53,8 +54,23 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     private List<E> content;
 
     public static <E> PageableResult<E> contentPage(List<E> content, Page page) {
+        Assert.notNull(page, "page is null - not allowed");
+
         PageableResult result = new PageableResult();
-        result.setContent(content);
+        result.setContent(content != null ? content : Collections.emptyList());
+        result.setTotalPages(page.getTotalPages());
+        result.setTotalElements(page.getTotalElements());
+        result.setPage(page.getNumber());
+        result.setPageSize(page.getSize());
+        return result;
+    }
+
+    public static <T, E> PageableResult<E> page(Page<T> page, Function<T, E> converter) {
+        Assert.notNull(page, "page is null - not allowed");
+        Assert.notNull(converter, "converter not defined");
+
+        PageableResult result = new PageableResult();
+        result.setContent(page.getContent().stream().map(converter).collect(Collectors.toList()));
         result.setTotalPages(page.getTotalPages());
         result.setTotalElements(page.getTotalElements());
         result.setPage(page.getNumber());
@@ -63,6 +79,8 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     }
 
     public static <E> PageableResult<E> page(Page<E> page) {
+        Assert.notNull(page, "page is null - not allowed");
+
         PageableResult result = new PageableResult();
         result.setContent(page.getContent());
         result.setTotalPages(page.getTotalPages());
@@ -73,6 +91,8 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     }
 
     public static <E> PageableResult<E> content(List<E> content) {
+        Assert.notNull(content, "content is null - not allowed");
+
         PageableResult result = new PageableResult();
         result.setContent(content);
         result.setTotalPages(1);
