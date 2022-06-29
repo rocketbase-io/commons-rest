@@ -41,7 +41,10 @@ public class StopwatchParts {
     }
 
     @Getter(AccessLevel.PACKAGE)
-    static class StopwatchPartitionedConfig {
+    public static class StopwatchPartitionedConfig {
+
+        StopwatchPartitionedConfig() {
+        }
 
         private String printPrefix = "⏱ ";
         private PartOrdering partOrdering = TIME_DESC;
@@ -52,42 +55,42 @@ public class StopwatchParts {
         private boolean skippedSummary = true;
         private String skippedPartName = "\"other\"";
 
-        StopwatchPartitionedConfig withPrefix(String printPrefix) {
+        public StopwatchPartitionedConfig withPrefix(String printPrefix) {
             this.printPrefix = printPrefix;
             return this;
         }
 
-        StopwatchPartitionedConfig withOrdered(PartOrdering partOrdering) {
+        public StopwatchPartitionedConfig withOrdered(PartOrdering partOrdering) {
             this.partOrdering = partOrdering;
             return this;
         }
 
-        StopwatchPartitionedConfig withPercentage(boolean partPercentage) {
+        public StopwatchPartitionedConfig withPercentage(boolean partPercentage) {
             this.partPercentage = partPercentage;
             return this;
         }
 
-        StopwatchPartitionedConfig withTimings(boolean partTimings) {
+        public StopwatchPartitionedConfig withTimings(boolean partTimings) {
             this.partTimings = partTimings;
             return this;
         }
 
-        StopwatchPartitionedConfig limitParts(int limitParts) {
+        public StopwatchPartitionedConfig limitParts(int limitParts) {
             this.limitParts = limitParts;
             return this;
         }
 
-        StopwatchPartitionedConfig skippedPartName(String skippedPartName) {
+        public StopwatchPartitionedConfig skippedPartName(String skippedPartName) {
             this.skippedPartName = skippedPartName;
             return this;
         }
 
-        StopwatchPartitionedConfig withSkippedSummary(boolean skippedSummary) {
+        public StopwatchPartitionedConfig withSkippedSummary(boolean skippedSummary) {
             this.skippedSummary = skippedSummary;
             return this;
         }
 
-        StopwatchParts start() {
+        public StopwatchParts start() {
             return new StopwatchParts(this);
         }
 
