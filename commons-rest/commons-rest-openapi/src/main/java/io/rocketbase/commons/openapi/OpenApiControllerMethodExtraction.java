@@ -104,7 +104,7 @@ public class OpenApiControllerMethodExtraction {
         if (operation.getParameters() != null) {
             for (Parameter p : operation.getParameters()) {
                 if (!(config.getTypescriptConverter().hasPageableParameter(parameterTypes)
-                        && config.getPageableParams().contains(p.getName()))) {
+                        && Nulls.notNull(config.getPageableParams()).contains(p.getName()))) {
                     result.add(convert(p));
                 }
             }
@@ -185,7 +185,7 @@ public class OpenApiControllerMethodExtraction {
     }
 
     public boolean getFieldsExtendsPaging() {
-        return parameterTypes.contains("org.springframework.data.domain.Pageable");
+        return parameterTypes != null && parameterTypes.contains("org.springframework.data.domain.Pageable");
     }
 
     public boolean hasBody() {
@@ -247,6 +247,9 @@ public class OpenApiControllerMethodExtraction {
     protected Schema getRequestBodySchema(RequestBody body) {
         if (body != null) {
             Content content = body.getContent();
+            if (content == null || content.keySet() == null) {
+                return null;
+            }
             if (content.keySet().contains("application/json")) {
                 Schema schema = content.get("application/json").getSchema();
                 return schema;

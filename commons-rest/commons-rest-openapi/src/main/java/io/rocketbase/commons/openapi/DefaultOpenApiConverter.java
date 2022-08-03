@@ -35,7 +35,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
                 }
             }
         }
-        if (name.contains("<")) {
+        if (name != null && name.contains("<")) {
             String genericCenter = name.substring(name.lastIndexOf("<") + 1).replace(">", "");
             if (genericCenter.equals("?")) {
                 name = name.replace(genericCenter, "any");
