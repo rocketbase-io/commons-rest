@@ -6,9 +6,6 @@ jdk:
 before_install:
   - echo $GPG_SECRET_KEYS | base64 --decode | $GPG_EXECUTABLE --import
   - echo $GPG_OWNERTRUST | base64 --decode | $GPG_EXECUTABLE --import-ownertrust
-
-# code climate configure
-before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
@@ -18,9 +15,9 @@ before_script:
   - sudo apt-get -y -o Dpkg::Options::="--force-confnew" install docker-ce
 
 ## default build
-script: mvn --settings .travis/settings.xml -U clean install
+install: mvn --settings .travis/settings.xml -U clean install
 # code climate upload coverage
-after_script:
+after_install:
   - ".travis/coverage.sh"
 ## release on tag
 deploy:
