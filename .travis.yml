@@ -1,4 +1,4 @@
-sudo: true
+sudo: required
 language: java
 jdk:
   - openjdk11
@@ -12,6 +12,11 @@ before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
   - chmod +x ./cc-test-reporter
   - ./cc-test-reporter before-build
+  - sudo rm /usr/local/bin/docker-compose
+  - curl -L https://github.com/docker/compose/releases/download/v2.10.2/docker-compose-linux-x86_64 > docker-compose
+  - chmod +x docker-compose
+  - sudo mv docker-compose /usr/local/bin
+
 ## default build
 script: mvn --settings .travis/settings.xml -U clean install
 # code climate upload coverage
