@@ -24,7 +24,7 @@ public abstract class BaseIntegrationTest {
     protected int randomServerPort;
 
     @Container
-    protected static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo"));
+    protected static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:latest"));
 
     @DynamicPropertySource
     static void initTestContainerProperties(DynamicPropertyRegistry registry) {
