@@ -27,7 +27,8 @@ public @interface QueryHook {
 
     /**
      * stale time for key-access in seconds<br>
-     * 0 or less means disabled staleTime
+     * 0 or less means disabled staleTime<br>
+     * default value could get configured via properties (-1 is use default)
      */
-    int staleTime() default 2;
+    int staleTime() default -1;
 }

@@ -1,6 +1,10 @@
 resource:
   base.api.url:
 
+spring:
+  data:
+    mongodb.database: test
+    
 locale.resolver:
   default: de
   supported: de, EN_us

@@ -16,6 +16,7 @@ public class OpenApiGeneratorProperties {
     private String groupName = "ModuleApi";
     private String hookFolder = "hooks";
     private String clientFolder = "clients";
+    private int defaultStaleTime = 2;
 
     private List<String> modelImports = new ArrayList<>();
 }

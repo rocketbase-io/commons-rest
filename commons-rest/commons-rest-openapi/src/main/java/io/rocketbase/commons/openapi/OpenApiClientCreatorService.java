@@ -125,9 +125,9 @@ public class OpenApiClientCreatorService {
 
     private void generateClients(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
-        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getClientFolder() + "/"));
+        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getClientFolder() + "/"));
         for (OpenApiController c : controllers) {
-            zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getClientFolder() + "/" + c.getFilename() + ".ts"));
+            zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getClientFolder() + "/" + c.getFilename() + ".ts"));
             writer = new StringWriter();
 
             context.put("controller", c);
@@ -136,7 +136,7 @@ public class OpenApiClientCreatorService {
             zippedOut.closeEntry();
         }
 
-        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getClientFolder() + "/index.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getClientFolder() + "/index.ts"));
         writer = new StringWriter();
         getCompiledTemplate("client/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
@@ -145,9 +145,9 @@ public class OpenApiClientCreatorService {
 
     private void generateHooks(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
-        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getHookFolder() + "/"));
+        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/"));
         for (OpenApiController c : controllers) {
-            zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getHookFolder() + "/" + c.getFilename() + ".ts"));
+            zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/" + c.getFilename() + ".ts"));
 
             writer = new StringWriter();
             context.put("controller", c);
@@ -156,7 +156,7 @@ public class OpenApiClientCreatorService {
             zippedOut.closeEntry();
         }
 
-        zippedOut.putNextEntry(new ZipEntry("src/"+openApiGeneratorProperties.getHookFolder() + "/index.ts"));
+        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/index.ts"));
         writer = new StringWriter();
         getCompiledTemplate("hook/index").evaluate(writer, context);
         zippedOut.write(writer.toString().getBytes("UTF-8"));
@@ -233,7 +233,7 @@ public class OpenApiClientCreatorService {
             boolean disabled = (Boolean) operation.getExtensions().getOrDefault(OpenApiCustomExtractor.DISABLED, false);
             if (!disabled) {
                 map.putIfAbsent(controllerBean, new ArrayList<>());
-                map.get(controllerBean).add(new OpenApiControllerMethodExtraction(new OpenApiControllerMethodExtraction.ExtractorConfig(pageParams(), typescriptConverter, httpMethod, path, operation)));
+                map.get(controllerBean).add(new OpenApiControllerMethodExtraction(new OpenApiControllerMethodExtraction.ExtractorConfig(pageParams(), typescriptConverter, httpMethod, path, operation, openApiGeneratorProperties.getDefaultStaleTime())));
             }
         }
     }

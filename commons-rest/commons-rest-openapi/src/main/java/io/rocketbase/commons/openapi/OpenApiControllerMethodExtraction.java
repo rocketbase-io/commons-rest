@@ -54,6 +54,7 @@ public class OpenApiControllerMethodExtraction {
         private PathItem.HttpMethod httpMethod;
         private String path;
         private Operation operation;
+        private Integer defaultStaleTime;
     }
 
     public String getHookType() {
@@ -93,6 +94,10 @@ public class OpenApiControllerMethodExtraction {
             Object st = operation.getExtensions().getOrDefault(OpenApiCustomExtractor.STALE_TIME, null);
             if (st instanceof Number) {
                 this.staleTime = ((Number) st).intValue();
+                // annotation value -1 means use
+                if (this.staleTime == -1) {
+                    this.staleTime = config.getDefaultStaleTime();
+                }
             }
         }
     }

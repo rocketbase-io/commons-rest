@@ -1,8 +1,7 @@
 package io.rocketbase.sample.config;
 
+import io.rocketbase.sample.resource.BaseIntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
@@ -13,12 +12,8 @@ import java.util.Locale;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class ConfigTest {
-
-    @LocalServerPort
-    int randomServerPort;
+public class ConfigTest extends BaseIntegrationTest {
 
     @Resource
     private LocaleResolver localeResolver;

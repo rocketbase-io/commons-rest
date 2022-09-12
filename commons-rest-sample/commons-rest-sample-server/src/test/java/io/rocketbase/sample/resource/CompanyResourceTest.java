@@ -11,8 +11,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
@@ -30,16 +28,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.verify;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class CompanyResourceTest {
+public class CompanyResourceTest extends BaseIntegrationTest {
 
-    @LocalServerPort
-    int randomServerPort;
 
     private CompanyResource companyResource;
 
     @Resource
     private CompanyRepository companyRepository;
+
 
     @BeforeEach
     public void setup() throws Exception {
