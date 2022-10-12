@@ -1,5 +1,7 @@
 package io.rocketbase.commons.openapi;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.rocketbase.commons.util.Nulls;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
@@ -40,10 +42,27 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
             if (genericCenter.equals("?")) {
                 name = name.replace(genericCenter, "any");
             } else {
-                name = name.replace(genericCenter, removePackage(genericCenter));
+
+                name = name.replace(genericCenter, removePackage(checkAndAddUnionType(genericCenter)));
             }
         }
-        return convertType(removePackage(name)) + (arrayType.isPresent() ? "[]" : "");
+        return convertType(removePackage(checkAndAddUnionType(name))) + (arrayType.isPresent() ? "[]" : "");
+    }
+
+    /**
+     * checks if given className is an unionType typescript related...
+     */
+    protected String checkAndAddUnionType(String name) {
+        if (name != null && !name.contains("<")) {
+            try {
+                Class clazz = Class.forName(name);
+                if ((clazz.isAnnotationPresent(JsonSubTypes.class) && clazz.isAnnotationPresent(JsonTypeInfo.class))) {
+                    return name + "Union";
+                }
+            } catch (ClassNotFoundException cnf) {
+            }
+        }
+        return name;
     }
 
     protected String convertInfiniteReturnTypes(String genericReturnType) {
@@ -93,6 +112,8 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
                 String type = convertImportWrappers(t.replace("[]", ""), result);
 
                 result.add(removePackage(type).replaceAll("<.*>", ""));
+                // add possibly union types
+                result.add(removePackage(checkAndAddUnionType(type)).replaceAll("<.*>", ""));
             }
         }
         return result.stream()

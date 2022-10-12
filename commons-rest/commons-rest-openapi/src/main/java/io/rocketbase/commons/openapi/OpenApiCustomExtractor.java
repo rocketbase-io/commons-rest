@@ -18,6 +18,7 @@ import org.springframework.web.method.HandlerMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,11 +47,13 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
         if (handlerMethod.getMethod().getGenericReturnType() instanceof ParameterizedType) {
             ParameterizedType type = (ParameterizedType) handlerMethod.getMethod().getGenericReturnType();
 
+            Type actualTypeArgument;
             if (type.getRawType().equals(ResponseEntity.class)) {
-                extensions.put(GENERIC_RETURN_TYPE, type.getActualTypeArguments()[0].getTypeName());
+                actualTypeArgument = type.getActualTypeArguments()[0];
             } else {
-                extensions.put(GENERIC_RETURN_TYPE, type.getTypeName());
+                actualTypeArgument = type;
             }
+            extensions.put(GENERIC_RETURN_TYPE, actualTypeArgument.getTypeName());
             extensions.put(PARAMETER_TYPES, Arrays.stream(handlerMethod.getMethod().getGenericParameterTypes()).map(v -> v.getTypeName()).collect(Collectors.toList()));
         }
 
