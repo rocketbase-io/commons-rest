@@ -17,7 +17,7 @@
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
         <!-- dep versions -->
-        <spring-boot.version>2.7.3</spring-boot.version>
+        <spring-boot.version>2.7.4</spring-boot.version>
 
         <mapstruct.version>1.4.2.Final</mapstruct.version>
         <lombok.version>1.18.24</lombok.version>
