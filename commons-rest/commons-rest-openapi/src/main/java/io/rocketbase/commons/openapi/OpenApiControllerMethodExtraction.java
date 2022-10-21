@@ -145,7 +145,7 @@ public class OpenApiControllerMethodExtraction {
     }
 
     public String getShortInputType() {
-        if (isVoidShortInputType()) {
+        if (isVoidShortInputType() || methodName == null) {
             return "void";
         }
         return getController().getShortName() + StringUtils.capitalize(methodName);

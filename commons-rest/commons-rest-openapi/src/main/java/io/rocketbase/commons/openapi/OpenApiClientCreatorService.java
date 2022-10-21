@@ -9,6 +9,7 @@ import com.mitchellbosecke.pebble.template.EvaluationContext;
 import com.mitchellbosecke.pebble.template.PebbleTemplate;
 import io.rocketbase.commons.config.OpenApiGeneratorProperties;
 import io.rocketbase.commons.openapi.model.OpenApiController;
+import io.rocketbase.commons.openapi.model.ReactQueryVersion;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
@@ -58,7 +59,7 @@ public class OpenApiClientCreatorService {
         return remapped.entrySet().stream().map(e -> new OpenApiController(e.getKey(), e.getValue())).collect(Collectors.toList());
     }
 
-    public void getTypescriptClients(HttpServletRequest request, HttpServletResponse response, String baseUrl, String groupName, String filename) {
+    public void getTypescriptClients(ReactQueryVersion reactQueryVersion, HttpServletRequest request, HttpServletResponse response, String baseUrl, String groupName, String filename) {
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
@@ -78,7 +79,7 @@ public class OpenApiClientCreatorService {
 
             generateModels(zippedOut, context);
             generateClients(controllers, zippedOut, context);
-            generateHooks(controllers, zippedOut, context);
+            generateHooks(reactQueryVersion, controllers, zippedOut, context);
             generateIndexAndPackageJson(zippedOut, context);
 
 
@@ -143,7 +144,7 @@ public class OpenApiClientCreatorService {
         zippedOut.closeEntry();
     }
 
-    private void generateHooks(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+    private void generateHooks(ReactQueryVersion reactQueryVersion, List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
         zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/"));
         for (OpenApiController c : controllers) {
@@ -151,7 +152,7 @@ public class OpenApiClientCreatorService {
 
             writer = new StringWriter();
             context.put("controller", c);
-            getCompiledTemplate("hook/hook-template").evaluate(writer, context);
+            getCompiledTemplate("hook/hook-template-" + reactQueryVersion.name()).evaluate(writer, context);
             zippedOut.write(writer.toString().getBytes("UTF-8"));
             zippedOut.closeEntry();
         }

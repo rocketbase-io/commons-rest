@@ -50,7 +50,9 @@ public class OpenApiController implements Serializable {
     }
 
     public Set<String> getFieldImports() {
-        return methods.stream().filter(m -> m.hasOptionalFields() || m.hasRequiredFields()).map(OpenApiControllerMethodExtraction::getShortInputType).collect(Collectors.toSet());
+        return methods.stream().filter(m -> m.hasOptionalFields() || m.hasRequiredFields())
+                .map(OpenApiControllerMethodExtraction::getShortInputType)
+                .collect(Collectors.toSet());
     }
 
     public String getFilename() {

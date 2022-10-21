@@ -1,0 +1,63 @@
+/* eslint-disable no-use-before-define */
+// generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
+
+{% if controller.fieldImports is not empty %}import { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.clientFolder -}}";
+{% endif %}
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "@tanstack/react-query";
+import { PageableResult, createInfiniteOptions } from "@rocketbase/commons-core";
+import { PageableRequest, useApi } from "../..";
+{% if controller.importTypes is not empty %}
+import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
+{% endif %}
+import { AxiosError } from "axios";
+
+
+{% for method in controller.methods %}
+{% if method.isValid %}
+/**
+  * [{{config.httpMethod}}] {{config.path}}{% if description is not empty %}
+  * {{description}}
+
+{% endif %}
+  */
+  {% if method.hookType equals "query" %}
+export function <TData = {{ method.shortReturnType }}>{{ method.hookName -}}({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"> = {}) {
+  const { {{ configuredGroupVar }} } = useApi();
+  return useQuery<TData, AxiosError>(
+    [{% if method.cacheKeysPrepared('filter.') is not empty %}{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
+    ({ signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter,{% endif %} overrides: { signal }}),
+    { {% if method.staleTime is not null and method.staleTime > 0 %}staleTime: {{ method.staleTime }} * 1000, {% endif %}...options }
+  );
+  {% elseif method.hookType equals "mutation" %}
+export function {{ method.hookName -}}({onSuccess, ...options}: UseMutationOptions<{{ method.shortReturnType }}, AxiosError, {{ method.shortInputType }}> = {}) {
+  const queryClient = useQueryClient();
+  const { {{ configuredGroupVar }} } = useApi();
+  return useMutation<{{ method.shortReturnType }}, AxiosError, {{ method.shortInputType }}>(({% if not method.isVoidShortInputType %}content{% endif %}) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({% if method.isVoidShortInputType %} {} {% else %} content {% endif %}), {
+    {% if method.invalidateKeysPrepared('content.', 'data.') is not empty %}
+    onSuccess: async (data, content) => {
+        const invalide = async () => await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}queryClient.invalidateQueries([{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]){% if not loop.last %}, {% endif %}{% endfor %}]);
+
+        if (onSuccess) {
+          const result = onSuccess(data, content, undefined);
+          if (!!result && typeof result.then === 'function') {
+            await result;
+            return invalide();
+          }
+        }
+        return invalide();
+    },
+    {% endif %}
+    ...options
+  });
+  {% elseif method.hookType equals "infinite" %}
+export function <TData = {{ method.shortReturnType }}>{{ method.hookName -}}({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
+  const { {{ configuredGroupVar }} } = useApi();
+  return useInfiniteQuery<TData, AxiosError>(
+    [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
+    ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}{{  infiniteParams( method ) }}, overrides: { signal } }),
+    {{  infiniteOptions( method ) }}
+  );
+  {% endif %}
+}
+{% endif %}
+{% endfor %}
