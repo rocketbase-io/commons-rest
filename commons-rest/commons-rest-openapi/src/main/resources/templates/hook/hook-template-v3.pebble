@@ -14,14 +14,15 @@ import { AxiosError } from "axios";
 
 {% for method in controller.methods %}
 {% if method.isValid %}
-/**
-  * [{{config.httpMethod}}] {{config.path}}{% if description is not empty %}
-  * {{description}}
 
+/**
+  * [{{method.config.httpMethod}}] {{method.config.path}}{% if method.description is not empty %}
+  * {{method.description}}
 {% endif %}
+
   */
   {% if method.hookType equals "query" %}
-export function <TData = {{ method.shortReturnType }}>{{ method.hookName -}}({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"> = {}) {
+export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useQuery<TData, AxiosError>(
     [{% if method.cacheKeysPrepared('filter.') is not empty %}{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
@@ -50,7 +51,7 @@ export function {{ method.hookName -}}({onSuccess, ...options}: UseMutationOptio
     ...options
   });
   {% elseif method.hookType equals "infinite" %}
-export function <TData = {{ method.shortReturnType }}>{{ method.hookName -}}({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
+export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useInfiniteQuery<TData, AxiosError>(
     [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
