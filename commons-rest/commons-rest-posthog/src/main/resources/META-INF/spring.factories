@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-io.rocketbase.commons.config.CommonsRestPosthogAutoConfiguration
+io.rocketbase.commons.config.CommonsRestPostHogAutoConfiguration

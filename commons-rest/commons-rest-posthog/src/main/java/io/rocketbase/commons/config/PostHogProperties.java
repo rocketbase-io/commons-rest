@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 @Data
 @Validated
 @ConfigurationProperties(prefix = "commons.posthog")
-public class PosthogProperties {
+public class PostHogProperties {
 
 
     @NotNull
@@ -19,5 +19,13 @@ public class PosthogProperties {
     private String host = "https://app.posthog.com";
 
     private boolean captureWithDuration = true;
+
+    @NotNull
+    private PostHogClientType clientType = PostHogClientType.HTTP;
+
+    public enum PostHogClientType {
+        HTTP,
+        LOG;
+    }
 
 }

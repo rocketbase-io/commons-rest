@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Slf4j
-public class HttpSender implements Sender {
+public class HttpSender {
     private String apiKey;
     private String host;
     private RestTemplate restTemplate;

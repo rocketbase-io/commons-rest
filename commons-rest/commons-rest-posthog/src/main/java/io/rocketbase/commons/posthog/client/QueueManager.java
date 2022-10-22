@@ -49,21 +49,19 @@ public class QueueManager implements Runnable {
     private volatile boolean stop = false;
     private Instant sendAfter;
     // builder inputs
-    private Sender sender;
+    private HttpSender sender;
     private int maxQueueSize;
     private Duration maxTimeInQueue;
     private int sleepMs;
 
     public static class Builder {
-        // required
-        private final Sender sender;
+        private final HttpSender sender;
 
-        // optional
         private int maxQueueSize = 50; // if more than this many items in queue trigger a send
         private Duration maxTimeInQueue = Duration.ofSeconds(1); // if more than this time in queue send trigger a send
         private int sleepMs = 100; // how long do we sleep between checking the above conditions
 
-        public Builder(Sender sender) {
+        public Builder(HttpSender sender) {
             this.sender = sender;
         }
 

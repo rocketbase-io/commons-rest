@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-public class PostHog {
+public class PostHogClientHttp implements PostHogClient {
     private QueueManager queueManager;
     private Thread queueManagerThread;
 
@@ -33,10 +33,10 @@ public class PostHog {
             return this;
         }
 
-        public PostHog build() {
-            Sender sender = new HttpSender.Builder(apiKey).host(host).build();
+        public PostHogClient build() {
+            HttpSender sender = new HttpSender.Builder(apiKey).host(host).build();
             this.queueManager = new QueueManager.Builder(sender).build();
-            return new PostHog(this);
+            return new PostHogClientHttp(this);
         }
     }
 
@@ -46,12 +46,12 @@ public class PostHog {
             this.queueManager = queueManager;
         }
 
-        public PostHog build() {
-            return new PostHog(this);
+        public PostHogClient build() {
+            return new PostHogClientHttp(this);
         }
     }
 
-    private PostHog(BuilderBase builder) {
+    private PostHogClientHttp(BuilderBase builder) {
         this.queueManager = builder.queueManager;
         startQueueManager();
     }
@@ -83,6 +83,7 @@ public class PostHog {
      * @param event      name of the event. Must not be null or empty.
      * @param properties an array with any event properties you'd like to set.
      */
+    @Override
     public void capture(String distinctId, String event, Map<String, Object> properties) {
         enqueue(distinctId, event, properties);
     }
@@ -92,6 +93,7 @@ public class PostHog {
      *                   not be null or empty.
      * @param event      name of the event. Must not be null or empty.
      */
+    @Override
     public void capture(String distinctId, String event) {
         enqueue(distinctId, event, null);
     }
@@ -104,6 +106,7 @@ public class PostHog {
      * @param propertiesSetOnce an array with any person properties you'd like to
      *                          set without overwriting previous values.
      */
+    @Override
     public void identify(String distinctId, Map<String, Object> properties, Map<String, Object> propertiesSetOnce) {
         Map<String, Object> props = new HashMap<String, Object>();
         if (properties != null) {
@@ -120,6 +123,7 @@ public class PostHog {
      *                   not be null or empty.
      * @param properties an array with any person properties you'd like to set.
      */
+    @Override
     public void identify(String distinctId, Map<String, Object> properties) {
         identify(distinctId, properties, null);
     }
@@ -132,6 +136,7 @@ public class PostHog {
      *                   there is a conflict, the properties of this person will be
      *                   overriden.
      */
+    @Override
     public void alias(String distinctId, String alias) {
         Map<String, Object> props = new HashMap<String, Object>() {
             {
@@ -147,6 +152,7 @@ public class PostHog {
      *                   not be null or empty.
      * @param properties an array with any person properties you'd like to set.
      */
+    @Override
     public void set(String distinctId, Map<String, Object> properties) {
         Map<String, Object> props = new HashMap<String, Object>() {
             {
@@ -162,6 +168,7 @@ public class PostHog {
      * @param properties an array with any person properties you'd like to set.
      *                   Previous values will not be overwritten.
      */
+    @Override
     public void setOnce(String distinctId, Map<String, Object> properties) {
         Map<String, Object> props = new HashMap<String, Object>() {
             {

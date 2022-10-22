@@ -1,6 +1,6 @@
 package io.rocketbase.commons.posthog;
 
-import io.rocketbase.commons.config.PosthogProperties;
+import io.rocketbase.commons.config.PostHogProperties;
 import io.rocketbase.commons.util.Nulls;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,8 +19,8 @@ import java.util.Map;
 @Slf4j
 public class PostHogCaptureApect {
 
-    public final PostHogWrapper postHogWrapper;
-    public final PosthogProperties config;
+    public final PostHogService postHogService;
+    public final PostHogProperties config;
 
     @Around("execution(* *(..)) && @annotation(io.rocketbase.commons.posthog.PostHogCapture)")
     public Object wrapMethod(ProceedingJoinPoint point) throws Throwable {
@@ -51,7 +51,7 @@ public class PostHogCaptureApect {
             properties.put("duration-ms", System.currentTimeMillis() - start);
         }
         try {
-            postHogWrapper.capture(Nulls.notEmpty(capture.name(), method.getName()));
+            postHogService.current().capture(Nulls.notEmpty(capture.name(), method.getName()));
         } catch (Exception e) {
             log.warn("couldn't capture {}, {}", method.getName(), e.getMessage());
         }

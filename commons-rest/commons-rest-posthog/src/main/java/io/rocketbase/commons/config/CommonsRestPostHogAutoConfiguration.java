@@ -1,10 +1,12 @@
 package io.rocketbase.commons.config;
 
-import io.rocketbase.commons.posthog.DefaultPostHogWrapper;
+import io.rocketbase.commons.posthog.DefaultPostHogService;
 import io.rocketbase.commons.posthog.PostHogCaptureApect;
+import io.rocketbase.commons.posthog.PostHogService;
 import io.rocketbase.commons.posthog.PostHogUserIdProvider;
-import io.rocketbase.commons.posthog.PostHogWrapper;
-import io.rocketbase.commons.posthog.client.PostHog;
+import io.rocketbase.commons.posthog.client.PostHogClient;
+import io.rocketbase.commons.posthog.client.PostHogClientHttp;
+import io.rocketbase.commons.posthog.client.PostHogClientLog;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -19,28 +21,33 @@ import org.springframework.data.domain.AuditorAware;
 
 import java.util.Optional;
 
+import static io.rocketbase.commons.config.PostHogProperties.PostHogClientType.HTTP;
+
 @Slf4j
 @Configuration
 @EnableAspectJAutoProxy
-@EnableConfigurationProperties({PosthogProperties.class})
+@EnableConfigurationProperties({PostHogProperties.class})
 @RequiredArgsConstructor
-public class CommonsRestPosthogAutoConfiguration {
+public class CommonsRestPostHogAutoConfiguration {
 
-    private final PosthogProperties posthogConfig;
+    private final PostHogProperties posthogConfig;
 
     @Bean
     @ConditionalOnMissingBean
-    public PostHogWrapper postHogWrapper(@Autowired ApplicationContext applicationContext) {
+    public PostHogService postHogService(@Autowired ApplicationContext applicationContext) {
         PostHogUserIdProvider userIdProvider = getBean(applicationContext, PostHogUserIdProvider.class, null);
         AuditorAware auditorAware = getBean(applicationContext, AuditorAware.class, () -> Optional.empty());
 
-        return new DefaultPostHogWrapper(new PostHog.Builder(posthogConfig.getApikey()).host(posthogConfig.getHost()).build(), userIdProvider, auditorAware);
+        PostHogClient postHogClient = HTTP.equals(posthogConfig.getClientType()) ?
+                new PostHogClientHttp.Builder(posthogConfig.getApikey()).host(posthogConfig.getHost()).build() :
+                new PostHogClientLog();
+        return new DefaultPostHogService(postHogClient, userIdProvider, auditorAware);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public PostHogCaptureApect postHogCaptureApect(@Autowired PostHogWrapper postHogWrapper) {
-        return new PostHogCaptureApect(postHogWrapper, posthogConfig);
+    public PostHogCaptureApect postHogCaptureApect(@Autowired PostHogService postHogService) {
+        return new PostHogCaptureApect(postHogService, posthogConfig);
     }
 
     protected <T> T getBean(ApplicationContext applicationContext, Class<T> clazz, T fallback) {
