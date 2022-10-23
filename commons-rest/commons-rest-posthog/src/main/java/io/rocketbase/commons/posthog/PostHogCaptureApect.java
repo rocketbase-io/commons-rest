@@ -27,22 +27,24 @@ public class PostHogCaptureApect {
         Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
 
         Class<?> targetClass = point.getTarget().getClass();
+
         Method targetMethod = targetClass.getMethod(method.getName(), method.getParameterTypes());
-
         PostHogCapture capture = targetMethod.getAnnotation(PostHogCapture.class);
-
-        Object[] args = point.getArgs();
-        Annotation[][] parameterAnnotations = method.getParameterAnnotations();
-        assert args.length == parameterAnnotations.length;
         Map<String, Object> properties = new HashMap<>();
 
-        for (int argIndex = 0; argIndex < args.length; argIndex++) {
-            for (Annotation annotation : parameterAnnotations[argIndex]) {
-                if (!(annotation instanceof PostHogProperty))
-                    continue;
-                PostHogProperty postHogProperty = (PostHogProperty) annotation;
-                properties.put(postHogProperty.name(), args[argIndex]);
+        try {
+            Object[] args = point.getArgs();
+            Annotation[][] parameterAnnotations = method.getParameterAnnotations();
+            for (int argIndex = 0; argIndex < args.length; argIndex++) {
+                for (Annotation annotation : parameterAnnotations[argIndex]) {
+                    if (!(annotation instanceof PostHogProperty))
+                        continue;
+                    PostHogProperty postHogProperty = (PostHogProperty) annotation;
+                    properties.put(postHogProperty.name(), args[argIndex]);
+                }
             }
+        } catch (Exception e) {
+            log.warn("parsing properties for method {} got errors: {}", method.getName(), e.getMessage());
         }
 
         long start = System.currentTimeMillis();
