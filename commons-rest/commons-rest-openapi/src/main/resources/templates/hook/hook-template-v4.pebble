@@ -24,7 +24,7 @@ import { AxiosError } from "axios";
   {% if method.hookType equals "query" %}
 export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
-  return useQuery<TData, AxiosError>(
+  return useQuery<{{ method.shortReturnType }}, AxiosError, TData>(
     [{% if method.cacheKeysPrepared('filter.') is not empty %}{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
     ({ signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter,{% endif %} overrides: { signal }}),
     { {% if method.staleTime is not null and method.staleTime > 0 %}staleTime: {{ method.staleTime }} * 1000, {% endif %}...options }
@@ -53,7 +53,7 @@ export function {{ method.hookName -}}({onSuccess, ...options}: UseMutationOptio
   {% elseif method.hookType equals "infinite" %}
 export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
-  return useInfiniteQuery<TData, AxiosError>(
+  return useInfiniteQuery<{{ method.shortReturnType }}, AxiosError, TData>(
     [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
     ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}{{  infiniteParams( method ) }}, overrides: { signal } }),
     {{  infiniteOptions( method ) }}
