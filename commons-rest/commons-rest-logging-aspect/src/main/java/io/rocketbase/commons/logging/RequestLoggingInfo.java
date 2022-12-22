@@ -50,7 +50,7 @@ public class RequestLoggingInfo {
             str.append(AbstractLoggingAspect.USER_SIGN).append(auditor);
         }
         if (duration != null) {
-            str.append(AbstractLoggingAspect.TIME_SIGN).append(TimeUtil.convertMillisToMinSecFormat(duration));
+            str.append(AbstractLoggingAspect.TIME_SIGN).append(TimeUtil.convertMillisToFormatted(duration));
         }
         if (args != null) {
             str.append(AbstractLoggingAspect.ARGS_SIGN).append(args);
@@ -78,7 +78,7 @@ public class RequestLoggingInfo {
         }
 
         if (duration != null) {
-            str.append(AbstractLoggingAspect.TIME_SIGN).append(TimeUtil.convertMillisToMinSecFormat(duration));
+            str.append(AbstractLoggingAspect.TIME_SIGN).append(TimeUtil.convertMillisToFormatted(duration));
         }
         if (args != null) {
             str.append(AbstractLoggingAspect.ARGS_SIGN).append(args);

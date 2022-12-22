@@ -97,7 +97,7 @@ public abstract class AbstractLoggingAspect extends LogHelper {
     protected void addDurationWhenEnabled(LoggableConfig config, long start, StringBuilder append) {
         if (config.isDuration()) {
             append.append(TIME_SIGN)
-                    .append(TimeUtil.convertMillisToMinSecFormat(System.currentTimeMillis() - start));
+                    .append(TimeUtil.convertMillisToFormatted(System.currentTimeMillis() - start));
         }
     }
 

@@ -102,5 +102,18 @@ public class TimeUtilTest {
         assertThat(TimeUtil.convertMillisToMinSecFormat(100), equalTo("100 ms"));
         assertThat(TimeUtil.convertMillisToMinSecFormat(1010), equalTo("1 sec 10 ms"));
         assertThat(TimeUtil.convertMillisToMinSecFormat(60010), equalTo("1 min 0 sec 10 ms"));
+        assertThat(TimeUtil.convertMillisToMinSecFormat(60010 * 60), equalTo("60 min 0 sec 600 ms"));
+        assertThat(TimeUtil.convertMillisToMinSecFormat(60010 * 60 * 10), equalTo("600 min 6 sec 0 ms"));
+        assertThat(TimeUtil.convertMillisToMinSecFormat(60010 * 60 * 25), equalTo("1500 min 15 sec 0 ms"));
+    }
+
+    @Test
+    public void convertMillisToFormatted() {
+        assertThat(TimeUtil.convertMillisToFormatted(100), equalTo("100 ms"));
+        assertThat(TimeUtil.convertMillisToFormatted(1010), equalTo("1 sec 10 ms"));
+        assertThat(TimeUtil.convertMillisToFormatted(60010), equalTo("1 min 0 sec 10 ms"));
+        assertThat(TimeUtil.convertMillisToFormatted(60010 * 60), equalTo("1 hour 0 min 0 sec 600 ms"));
+        assertThat(TimeUtil.convertMillisToFormatted(60010 * 60 * 10), equalTo("10 hour 0 min 6 sec 0 ms"));
+        assertThat(TimeUtil.convertMillisToFormatted(60010 * 60 * 25), equalTo("1 day 25 hour 0 min 15 sec 0 ms"));
     }
 }

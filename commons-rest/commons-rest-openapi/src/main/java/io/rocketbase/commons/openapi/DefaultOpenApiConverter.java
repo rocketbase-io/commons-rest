@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Schema;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -118,6 +119,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         }
         return result.stream()
                 .map(v -> convertType(v))
+                .filter(Objects::nonNull)
                 .filter(v -> !getNativeTypes().contains(v.toLowerCase()))
                 .filter(v -> !MULTIPART_TYPESCRIPT.equalsIgnoreCase(v))
                 .collect(Collectors.toSet());

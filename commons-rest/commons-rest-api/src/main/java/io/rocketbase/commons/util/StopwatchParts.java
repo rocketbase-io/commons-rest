@@ -151,7 +151,7 @@ public class StopwatchParts {
         }
         builder.append(part);
         if (config.isPartTimings()) {
-            builder.append(": ").append(TimeUtil.convertMillisToMinSecFormat(time));
+            builder.append(": ").append(TimeUtil.convertMillisToFormatted(time));
         }
     }
 
