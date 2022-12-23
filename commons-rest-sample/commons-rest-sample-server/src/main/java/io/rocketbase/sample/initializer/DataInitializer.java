@@ -9,11 +9,11 @@ import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.repository.jpa.CustomerRepository;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import io.rocketbase.sample.repository.mongo.EmployeeRepository;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;

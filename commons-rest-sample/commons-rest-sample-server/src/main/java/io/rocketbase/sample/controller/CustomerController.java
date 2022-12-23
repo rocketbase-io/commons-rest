@@ -1,6 +1,5 @@
 package io.rocketbase.sample.controller;
 
-import io.rocketbase.commons.controller.AbstractCrudObfuscatedController;
 import io.rocketbase.sample.converter.CustomerConverter;
 import io.rocketbase.sample.dto.customer.CustomerRead;
 import io.rocketbase.sample.dto.customer.CustomerWrite;

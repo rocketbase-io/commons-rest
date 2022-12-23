@@ -1,13 +1,13 @@
 package io.rocketbase.commons.dto.address;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**

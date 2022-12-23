@@ -2,6 +2,7 @@ package io.rocketbase.commons.controller.exceptionhandler;
 
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.exception.ErrorCodes;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 @Slf4j

@@ -1,9 +1,9 @@
 package io.rocketbase.commons.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.lang.Nullable;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.Nullable;
 import java.beans.Transient;
 
 /**

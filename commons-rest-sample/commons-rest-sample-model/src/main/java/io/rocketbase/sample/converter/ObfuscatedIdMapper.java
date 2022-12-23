@@ -2,9 +2,9 @@ package io.rocketbase.sample.converter;
 
 import io.rocketbase.commons.obfuscated.IdObfuscator;
 import io.rocketbase.commons.obfuscated.ObfuscatedId;
+import jakarta.annotation.Resource;
 import org.mapstruct.Mapper;
 
-import javax.annotation.Resource;
 
 @Mapper(componentModel = "spring")
 public abstract class ObfuscatedIdMapper {

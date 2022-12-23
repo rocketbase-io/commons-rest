@@ -1,8 +1,8 @@
 package io.rocketbase.commons.util;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.util.StringUtils;
 
-import javax.servlet.http.HttpServletRequest;
 
 public final class UrlParts {
 

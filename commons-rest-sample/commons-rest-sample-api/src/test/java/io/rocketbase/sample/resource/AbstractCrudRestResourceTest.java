@@ -1,13 +1,11 @@
-package io.rocketbase.commons.resource;
+package io.rocketbase.sample.resource;
 
 import io.rocketbase.commons.dto.PageableResult;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AbstractCrudRestResourceTest {
 
@@ -20,8 +18,8 @@ public class AbstractCrudRestResourceTest {
         UriComponentsBuilder builder = resoure.buildBaseUriBuilder();
 
         // then
-        assertThat(builder, notNullValue());
-        assertThat(builder.toUriString(), equalTo(TestWithoutSlashCrudRestResource.BASE_PARENT_API_URL + "/"));
+        MatcherAssert.assertThat(builder, CoreMatchers.notNullValue());
+        MatcherAssert.assertThat(builder.toUriString(), CoreMatchers.equalTo(TestWithoutSlashCrudRestResource.BASE_PARENT_API_URL + "/"));
     }
 
     private class TestWithoutSlashCrudRestResource extends AbstractCrudRestResource<Object, Object, String> {

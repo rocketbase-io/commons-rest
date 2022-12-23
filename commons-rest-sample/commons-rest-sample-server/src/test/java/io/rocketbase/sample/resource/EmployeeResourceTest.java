@@ -9,6 +9,7 @@ import io.rocketbase.sample.model.CompanyEntity;
 import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import io.rocketbase.sample.repository.mongo.EmployeeRepository;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import org.springframework.test.util.AssertionErrors;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.util.Optional;
 

@@ -1,17 +1,16 @@
 package io.rocketbase.commons.dto.address;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.rocketbase.commons.model.HasFirstAndLastName;
 import io.rocketbase.commons.util.Nulls;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Transient;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @Data
@@ -56,7 +55,6 @@ public class ContactDto implements Serializable, HasFirstAndLastName {
      * similar to getFullName but has email as fallback
      */
     @Transient
-    @JsonIgnore
     public String getDisplayName() {
         return Nulls.notEmpty(getFullName(), email);
     }

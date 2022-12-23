@@ -1,14 +1,14 @@
-package io.rocketbase.commons.resource;
+package io.rocketbase.sample.resource;
 
 
 import io.rocketbase.commons.dto.PageableResult;
+import io.rocketbase.sample.resource.AbstractCrudChildRestResource;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class AbstractCrudChildRestResourceTest {
 
@@ -21,8 +21,8 @@ public class AbstractCrudChildRestResourceTest {
         UriComponentsBuilder builder = resoure.buildBaseUriBuilder("123");
 
         // then
-        assertThat(builder, notNullValue());
-        assertThat(builder.toUriString(), equalTo(TestWithoutSlashCrudChildRestResource.BASE_PARENT_API_URL + "/123/child/"));
+        MatcherAssert.assertThat(builder, CoreMatchers.notNullValue());
+        MatcherAssert.assertThat(builder.toUriString(), CoreMatchers.equalTo(TestWithoutSlashCrudChildRestResource.BASE_PARENT_API_URL + "/123/child/"));
     }
 
     @Test
@@ -34,8 +34,8 @@ public class AbstractCrudChildRestResourceTest {
         UriComponentsBuilder builder = resoure.buildBaseUriBuilder("123");
 
         // then
-        assertThat(builder, notNullValue());
-        assertThat(builder.toUriString(), equalTo("https://localhost:8080/api/parent/123/child/"));
+        MatcherAssert.assertThat(builder, CoreMatchers.notNullValue());
+        MatcherAssert.assertThat(builder.toUriString(), CoreMatchers.equalTo("https://localhost:8080/api/parent/123/child/"));
     }
 
     private class TestWithoutSlashCrudChildRestResource extends AbstractCrudChildRestResource<Object, Object, String> {

@@ -1,10 +1,10 @@
 package io.rocketbase.commons.controller.exceptionhandler;
 
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.web.servlet.LocaleResolver;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
 
 public class BaseExceptionHandler {

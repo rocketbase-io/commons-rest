@@ -2,10 +2,9 @@ package io.rocketbase.commons.obfuscated;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.BaseTest;
+import jakarta.annotation.Resource;
 import lombok.Data;
 import org.junit.jupiter.api.Test;
-
-import javax.annotation.Resource;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.media.Schema;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -58,7 +58,7 @@ public interface HasKeyValue {
             return fallback;
         }
         try {
-            return new ObjectMapper().readValue(value, reference);
+            return new ObjectMapper().findAndRegisterModules().readValue(value, reference);
         } catch (JsonProcessingException e) {
             return fallback;
         }

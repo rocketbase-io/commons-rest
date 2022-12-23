@@ -1,4 +1,4 @@
-package io.rocketbase.commons.resource;
+package io.rocketbase.sample.resource;
 
 import io.rocketbase.commons.dto.PageableResult;
 import lombok.extern.slf4j.Slf4j;

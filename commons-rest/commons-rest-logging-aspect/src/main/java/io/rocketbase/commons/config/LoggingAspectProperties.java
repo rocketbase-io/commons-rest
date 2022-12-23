@@ -1,9 +1,9 @@
 package io.rocketbase.commons.config;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import javax.validation.constraints.NotNull;
 
 @Data
 @ConfigurationProperties(prefix = "commons.logging")

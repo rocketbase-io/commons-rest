@@ -2,13 +2,13 @@ package io.rocketbase.commons.validation;
 
 import io.rocketbase.commons.dto.validation.ModelConstraint;
 import io.rocketbase.commons.dto.validation.ValidationConstraint;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import jakarta.validation.metadata.BeanDescriptor;
+import jakarta.validation.metadata.ConstraintDescriptor;
+import jakarta.validation.metadata.PropertyDescriptor;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import javax.validation.metadata.BeanDescriptor;
-import javax.validation.metadata.ConstraintDescriptor;
-import javax.validation.metadata.PropertyDescriptor;
 import java.lang.reflect.Modifier;
 import java.util.*;
 

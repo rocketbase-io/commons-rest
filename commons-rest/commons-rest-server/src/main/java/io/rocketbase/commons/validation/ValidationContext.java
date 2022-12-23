@@ -1,11 +1,11 @@
 package io.rocketbase.commons.validation;
 
+import jakarta.validation.MessageInterpolator;
+import jakarta.validation.ValidationException;
+import jakarta.validation.metadata.ConstraintDescriptor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import javax.validation.MessageInterpolator;
-import javax.validation.ValidationException;
-import javax.validation.metadata.ConstraintDescriptor;
 
 /**
  * Specific interpolation context management for resthub validation utilities

@@ -1,7 +1,9 @@
-package io.rocketbase.commons.resource;
+package io.rocketbase.sample.resource;
 
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
+import io.rocketbase.commons.resource.BaseRestResource;
+import io.rocketbase.commons.resource.BasicResponseErrorHandler;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;

@@ -1,9 +1,9 @@
 package io.rocketbase.commons.translation;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.context.i18n.LocaleContextHolder;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.util.*;
 
 public class HasDefaultLocaleValidator implements ConstraintValidator<HasDefaultLocale, Map<Locale, String>> {

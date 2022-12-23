@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.springframework.lang.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -67,7 +67,7 @@ public class ValidationConstraint {
     @Nullable
     @Schema(description = "Optional constraints attributes")
     private Map<String, Object> attributes;
-    
+
     @JsonAnyGetter
     public Map<String, Object> getAttributes() {
         return attributes;

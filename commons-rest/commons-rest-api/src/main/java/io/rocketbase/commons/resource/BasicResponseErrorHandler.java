@@ -2,7 +2,6 @@ package io.rocketbase.commons.resource;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.commons.exception.NotFoundException;
@@ -20,8 +19,7 @@ public class BasicResponseErrorHandler extends DefaultResponseErrorHandler {
 
     protected ObjectMapper getObjectMapper() {
         if (objectMapper == null) {
-            objectMapper = new ObjectMapper();
-            objectMapper.registerModule(new JavaTimeModule());
+            objectMapper = new ObjectMapper().findAndRegisterModules();
             objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         }
         return objectMapper;

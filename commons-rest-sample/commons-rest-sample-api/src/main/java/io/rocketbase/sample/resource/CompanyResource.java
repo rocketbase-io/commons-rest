@@ -1,7 +1,6 @@
 package io.rocketbase.sample.resource;
 
 import io.rocketbase.commons.dto.PageableResult;
-import io.rocketbase.commons.resource.AbstractCrudRestResource;
 import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import org.springframework.util.Assert;

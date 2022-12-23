@@ -1,20 +1,20 @@
-package io.rocketbase.commons.controller;
+package io.rocketbase.sample.controller;
 
+import io.rocketbase.commons.controller.BaseController;
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.obfuscated.ObfuscatedId;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.validation.constraints.NotNull;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -31,7 +31,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public abstract class AbstractCrudChildObfuscatedController<Entity, Read, Write, Converter extends EntityReadWriteConverter<Entity, Read, Write>> implements BaseController {
 
     @Getter(AccessLevel.PROTECTED)
-    private final PagingAndSortingRepository<Entity, Long> repository;
+    private final CrudRepository<Entity, Long> repository;
 
     @Getter(AccessLevel.PROTECTED)
     private final Converter converter;

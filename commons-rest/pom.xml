@@ -95,16 +95,16 @@ SOFTWARE.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <spring-boot.version>2.7.7</spring-boot.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <spring-boot.version>3.0.0</spring-boot.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <jacoco.version>0.8.8</jacoco.version>
         <hashids.version>1.0.3</hashids.version>
 
         <guava.version>31.1-jre</guava.version>
-        <pebble.version>3.1.6</pebble.version>
-        <springdoc-openapi.version>1.6.14</springdoc-openapi.version>
+        <pebble.version>3.2.0</pebble.version>
+        <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
     </properties>
 
     <dependencyManagement>

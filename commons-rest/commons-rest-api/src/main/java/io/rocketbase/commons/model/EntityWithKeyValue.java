@@ -52,7 +52,7 @@ public interface EntityWithKeyValue<T> extends HasKeyValue {
      */
     @SneakyThrows
     default T addKeyValue(String key, Collection values) {
-        return addKeyValue(key, new ObjectMapper().writeValueAsString(values));
+        return addKeyValue(key, new ObjectMapper().findAndRegisterModules().writeValueAsString(values));
     }
 
     default void removeKeyValue(String key) {

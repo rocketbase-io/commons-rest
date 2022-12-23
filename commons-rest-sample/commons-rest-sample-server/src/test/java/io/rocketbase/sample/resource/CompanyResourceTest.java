@@ -7,6 +7,7 @@ import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.CompanyEntity;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
+import jakarta.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.util.AssertionErrors;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Optional;
 

@@ -1,13 +1,13 @@
-package io.rocketbase.commons.controller;
+package io.rocketbase.sample.controller;
 
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
-import io.rocketbase.commons.obfuscated.ObfuscatedId;
 import io.rocketbase.commons.exception.NotFoundException;
-import org.springframework.data.repository.PagingAndSortingRepository;
+import io.rocketbase.sample.repository.jpa.CustomJpaRepository;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -18,24 +18,25 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
  * @param <Entity>    database entity
  * @param <Read>      response data object
  * @param <Write>     object with all properties that are changeable
+ * @param <ID>        class of the identifier
  * @param <Converter> interface that allows converting between Entity, Read and Write
  */
-public abstract class AbstractCrudObfuscatedController<Entity, Read, Write, Converter extends EntityReadWriteConverter<Entity, Read, Write>> extends AbstractBaseCrudController<Entity, Read, Write, Long, Converter> {
+public abstract class AbstractCrudController<Entity, Read, Write, ID extends Serializable, Converter extends EntityReadWriteConverter<Entity, Read, Write>> extends AbstractBaseCrudController<Entity, Read, Write, ID, Converter> {
 
-    public AbstractCrudObfuscatedController(PagingAndSortingRepository<Entity, Long> repository, Converter converter) {
+    public AbstractCrudController(CustomJpaRepository<Entity, ID> repository, Converter converter) {
         super(repository, converter);
     }
 
     @RequestMapping(method = RequestMethod.GET, path = "/{id}")
     @ResponseBody
-    public Read getById(@PathVariable("id") ObfuscatedId id) {
+    public Read getById(@PathVariable("id") ID id) {
         Entity entity = getEntity(id);
         return getConverter().fromEntity(entity);
     }
 
     @RequestMapping(method = RequestMethod.PUT, path = "/{id}", consumes = APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Read update(@PathVariable ObfuscatedId id, @RequestBody @NotNull @Validated Write write) {
+    public Read update(@PathVariable ID id, @RequestBody @NotNull @Validated Write write) {
         Entity entity = getEntity(id);
         getConverter().updateEntityFromEdit(write, entity);
         getRepository().save(entity);
@@ -43,7 +44,7 @@ public abstract class AbstractCrudObfuscatedController<Entity, Read, Write, Conv
     }
 
     @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
-    public void delete(@PathVariable("id") ObfuscatedId id) {
+    public void delete(@PathVariable("id") ID id) {
         Entity entity = getEntity(id);
         getRepository().delete(entity);
     }
@@ -51,11 +52,11 @@ public abstract class AbstractCrudObfuscatedController<Entity, Read, Write, Conv
     /**
      * get by Id or throw {@link NotFoundException}
      *
-     * @param id obfuscated unique identifier
+     * @param id unique identifier
      * @return entity
      */
-    protected Entity getEntity(ObfuscatedId id) {
-        return getRepository().findById(id.getId())
+    protected Entity getEntity(ID id) {
+        return getRepository().findById(id)
                 .orElseThrow(() -> new NotFoundException());
     }
 
