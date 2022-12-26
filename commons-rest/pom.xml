@@ -102,7 +102,6 @@ SOFTWARE.
         <jacoco.version>0.8.8</jacoco.version>
         <hashids.version>1.0.3</hashids.version>
 
-        <guava.version>31.1-jre</guava.version>
         <pebble.version>3.2.0</pebble.version>
         <springdoc-openapi.version>2.0.2</springdoc-openapi.version>
     </properties>

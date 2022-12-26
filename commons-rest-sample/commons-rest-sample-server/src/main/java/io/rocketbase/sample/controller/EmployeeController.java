@@ -10,71 +10,56 @@ import io.rocketbase.sample.model.CompanyEntity;
 import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import io.rocketbase.sample.repository.mongo.EmployeeRepository;
-import jakarta.validation.constraints.NotNull;
+import io.rocketbase.sample.resource.EmployeeApi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.util.MultiValueMap;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/company/{parentId}/employee")
-public class EmployeeController implements BaseController {
+@RequestMapping(path = "/api")
+public class EmployeeController implements BaseController, EmployeeApi {
 
 
     private final EmployeeRepository repository;
     private final CompanyRepository companyRepository;
     private final EmployeeConverter converter;
 
-    @RequestMapping(method = RequestMethod.GET)
-    @ResponseBody
-    public PageableResult<EmployeeRead> find(@PathVariable("parentId") String parentId, @RequestParam(required = false) MultiValueMap<String, String> params) {
-        Page<EmployeeEntity> entities = findAllByParentId(parentId, parsePageRequest(params, getDefaultSort()));
+    public PageableResult<EmployeeRead> find(String parentId, Pageable pageable) {
+        Page<EmployeeEntity> entities = findAllByParentId(parentId, pageable);
         return PageableResult.contentPage(converter.fromEntities(entities.getContent()), entities);
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/{id}")
-    @ResponseBody
-    public EmployeeRead getById(@PathVariable("parentId") String parentId, @PathVariable("id") String id) {
+    public EmployeeRead getById(String parentId, String id) {
         EmployeeEntity entity = getEntity(parentId, id);
         return converter.fromEntity(entity);
     }
 
-    @RequestMapping(method = RequestMethod.POST, consumes = APPLICATION_JSON_VALUE)
-    @ResponseBody
-    @ResponseStatus(value = HttpStatus.CREATED)
-    public EmployeeRead create(@PathVariable("parentId") String parentId, @RequestBody @NotNull @Validated EmployeeWrite write) {
+    public EmployeeRead create(String parentId, EmployeeWrite write) {
         EmployeeEntity entity = repository.save(newEntity(parentId, write));
         return converter.fromEntity(entity);
     }
 
-    @RequestMapping(method = RequestMethod.PUT, path = "/{id}", consumes = APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public EmployeeRead update(@PathVariable("parentId") String parentId, @PathVariable String id, @RequestBody @NotNull @Validated EmployeeWrite write) {
+    public EmployeeRead update(String parentId, String id, EmployeeWrite write) {
         EmployeeEntity entity = getEntity(parentId, id);
         converter.updateEntityFromEdit(write, entity);
         repository.save(entity);
         return converter.fromEntity(entity);
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/{id}")
-    public void delete(@PathVariable("parentId") String parentId, @PathVariable("id") String id) {
+    public void delete(String parentId, String id) {
         EmployeeEntity entity = getEntity(parentId, id);
         repository.delete(entity);
     }
 
     protected EmployeeEntity getEntity(String parentId, String id) {
-        return repository.findOneByCompanyIdAndId(parentId, id)
-                .orElseThrow(() -> new NotFoundException());
+        return repository.findFirstByCompanyIdAndId(parentId, id)
+                .orElseThrow(NotFoundException::new);
     }
 
     protected Page<EmployeeEntity> findAllByParentId(String parentId, Pageable pageable) {
@@ -83,14 +68,10 @@ public class EmployeeController implements BaseController {
 
     protected EmployeeEntity newEntity(String parentId, EmployeeWrite employeeWrite) {
         CompanyEntity companyEntity = companyRepository.findById(parentId)
-                .orElseThrow(() -> new NotFoundException());
+                .orElseThrow(NotFoundException::new);
 
         EmployeeEntity employeeEntity = converter.newEntity(employeeWrite);
-        employeeEntity.setCompany(companyEntity);
+        employeeEntity.setCompanyId(companyEntity.getId());
         return employeeEntity;
-    }
-
-    protected Sort getDefaultSort() {
-        return Sort.by("id");
     }
 }

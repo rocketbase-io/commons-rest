@@ -1,6 +1,5 @@
 package io.rocketbase.commons.openapi;
 
-import com.google.common.collect.Sets;
 import io.pebbletemplates.pebble.PebbleEngine;
 import io.pebbletemplates.pebble.extension.AbstractExtension;
 import io.pebbletemplates.pebble.extension.Function;
@@ -225,7 +224,7 @@ public class OpenApiClientCreatorService {
     }
 
     protected Set<String> pageParams() {
-        return Sets.newHashSet(springDataWebProperties.getPageable().getPageParameter(), springDataWebProperties.getPageable().getSizeParameter(), springDataWebProperties.getSort().getSortParameter());
+        return Set.of(springDataWebProperties.getPageable().getPageParameter(), springDataWebProperties.getPageable().getSizeParameter(), springDataWebProperties.getSort().getSortParameter());
     }
 
     protected void addOperation(Map<String, List<OpenApiControllerMethodExtraction>> map, PathItem.HttpMethod httpMethod, String path, Operation operation) {

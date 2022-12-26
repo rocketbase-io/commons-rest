@@ -1,6 +1,5 @@
 package io.rocketbase.commons.openapi;
 
-import com.google.common.collect.Sets;
 import io.rocketbase.commons.util.Nulls;
 import io.swagger.v3.oas.models.media.Schema;
 
@@ -39,15 +38,15 @@ public interface OpenApiConverter {
     }
 
     default Set<String> getListTypes() {
-        return Sets.newHashSet("java.util.List", "java.util.Collection", "java.util.Set");
+        return Set.of("java.util.List", "java.util.Collection", "java.util.Set");
     }
 
     default Set<String> getNativeTypes() {
-        return Sets.newHashSet("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object", "file", "blob");
+        return Set.of("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object", "file", "blob");
     }
 
     default Set<String> getJavaToUnknowns() {
-        return Sets.newHashSet("InputStreamResource", "InputStream", "Resource", "byte", "byte[]", "OutputStream", "Object");
+        return Set.of("InputStreamResource", "InputStream", "Resource", "byte", "byte[]", "OutputStream", "Object");
     }
 
     default boolean hasPageableParameter(List<String> parameterTypes) {

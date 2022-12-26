@@ -17,9 +17,9 @@
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
 
         <!-- dep versions -->
-        <spring-boot.version>3.0.0</spring-boot.version>
+        <spring-boot.version>3.0.1</spring-boot.version>
 
-        <mapstruct.version>1.4.2.Final</mapstruct.version>
+        <mapstruct.version>1.5.3.Final</mapstruct.version>
         <lombok.version>1.18.24</lombok.version>
 
         <commons-rest.version>LATEST-SNAPSHOT</commons-rest.version>
@@ -49,6 +49,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
                 <version>${spring-boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>2022.0.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

@@ -9,7 +9,8 @@ import java.util.Optional;
 
 public interface EmployeeRepository extends MongoRepository<EmployeeEntity, String> {
 
-    Optional<EmployeeEntity> findOneByCompanyIdAndId(String companyId, String id);
+    Optional<EmployeeEntity> findFirstByCompanyIdAndId(String companyId, String id);
+
 
     Page<EmployeeEntity> findAllByCompanyId(String companyId, Pageable pageRequest);
 }

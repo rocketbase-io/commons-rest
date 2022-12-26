@@ -1,8 +1,6 @@
 package io.rocketbase.commons.openapi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import io.rocketbase.commons.openapi.model.OpenApiController;
 import io.rocketbase.commons.openapi.model.TypescriptApiField;
 import io.rocketbase.commons.util.Nulls;
@@ -280,7 +278,7 @@ public class OpenApiControllerMethodExtraction {
 
     protected List<String> splitString(Object value) {
         if (value instanceof String) {
-            return Lists.newArrayList(Splitter.on(",").trimResults().split((String) value));
+            return Arrays.stream(StringUtils.split((String) value, ",")).map(String::trim).toList();
         }
         return null;
     }

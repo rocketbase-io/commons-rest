@@ -1,8 +1,8 @@
 package io.rocketbase.sample.resource;
 
-import io.rocketbase.commons.dto.ErrorResponse;
+import io.restassured.common.mapper.TypeRef;
+import io.restassured.http.ContentType;
 import io.rocketbase.commons.dto.PageableResult;
-import io.rocketbase.commons.exception.BadRequestException;
 import io.rocketbase.sample.dto.employee.EmployeeRead;
 import io.rocketbase.sample.dto.employee.EmployeeWrite;
 import io.rocketbase.sample.model.CompanyEntity;
@@ -13,24 +13,15 @@ import jakarta.annotation.Resource;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.util.AssertionErrors;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
+import static io.restassured.module.mockmvc.RestAssuredMockMvc.given;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
 public class EmployeeResourceTest extends BaseIntegrationTest {
-
-
-    private EmployeeResource employeeResource;
 
     @Resource
     private CompanyRepository companyRepository;
@@ -39,13 +30,13 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
     private EmployeeRepository employeeRepository;
 
     @BeforeEach
-    public void setup() throws Exception {
+    public void setup() {
+        super.setup();
         cleanup();
-        employeeResource = new EmployeeResource(String.format("http://localhost:%d", randomServerPort));
     }
 
     @AfterEach
-    public void cleanup() throws Exception {
+    public void cleanup() {
         companyRepository.deleteAll();
         employeeRepository.deleteAll();
     }
@@ -55,14 +46,18 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         // given
         CompanyEntity company = companyRepository.save(createDefaultCompany());
         EmployeeEntity employee = createDefaultEmployee();
-        employee.setCompany(company);
+        employee.setCompanyId(company.getId());
         employee = employeeRepository.save(employee);
 
         // when
-        Optional<EmployeeRead> data = employeeResource.getById(company.getId(), employee.getId());
+        EmployeeRead data = given()
+                .when()
+                .get("/api/company/{parentId}/employee/{id}", company.getId(), employee.getId())
+                .getBody()
+                .as(EmployeeRead.class);
 
         // then
-        assertEmployeeSame(employee, data.get());
+        assertEmployeeSame(employee, data);
     }
 
     @Test
@@ -70,16 +65,21 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         // given
         CompanyEntity company = companyRepository.save(createDefaultCompany());
         EmployeeEntity employee = createDefaultEmployee();
-        employee.setCompany(company);
+        employee.setCompanyId(company.getId());
         employee = employeeRepository.save(employee);
 
         // when
-        Optional<EmployeeRead> data = employeeResource.getById(company.getId(), "notexisting");
-        Optional<EmployeeRead> missMatch = employeeResource.getById("notexisting", employee.getId());
+        given()
+                .when()
+                .get("/api/company/{parentId}/employee/{id}", company.getId(), "notexisting")
+                .then()
+                .status(HttpStatus.NOT_FOUND);
 
-        // then
-        assertThat(data, equalTo(Optional.empty()));
-        assertThat(missMatch, equalTo(Optional.empty()));
+        given()
+                .when()
+                .get("/api/company/{parentId}/employee/{id}", "notexisting", employee.getId())
+                .then()
+                .status(HttpStatus.NOT_FOUND);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         // given
         CompanyEntity company = companyRepository.save(createDefaultCompany());
         EmployeeEntity employee = createDefaultEmployee();
-        employee.setCompany(company);
+        employee.setCompanyId(company.getId());
         employee = employeeRepository.save(employee);
 
 
@@ -97,11 +97,18 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         EmployeeEntity otherEmployee = createDefaultEmployee();
         otherEmployee.setFirstName("Other");
         otherEmployee.setEmail("other@test.de");
-        otherEmployee.setCompany(other);
+        otherEmployee.setCompanyId(other.getId());
         employeeRepository.save(otherEmployee);
 
         // when
-        PageableResult<EmployeeRead> result = employeeResource.find(company.getId(), 0, 10);
+        PageableResult<EmployeeRead> result = given()
+                .queryParam("page", 0)
+                .queryParam("size", 10)
+                .when()
+                .get("/api/company/{parentId}/employee", company.getId())
+                .getBody()
+                .as(new TypeRef<PageableResult<EmployeeRead>>() {
+                });
 
         // then
         assertThat(result, notNullValue());
@@ -129,38 +136,16 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
                 .build();
 
         // when
-        EmployeeRead employeeRead = employeeResource.create(company.getId(), employeeWrite);
-
-        // then
-        assertThat(employeeRead, notNullValue());
-        assertThat(employeeRead.getId(), notNullValue());
-
-        Optional<EmployeeEntity> employee = employeeRepository.findOneByCompanyIdAndId(company.getId(), employeeRead.getId());
-        assertEmployeeSame(employee.get(), employeeRead);
-    }
-
-    @Test
-    public void shouldGetStatusCode201OnCreate() {
-        // given
-        CompanyEntity company = companyRepository.save(createDefaultCompany());
-
-        EmployeeWrite employeeWrite = EmployeeWrite.builder()
-                .firstName("mew")
-                .lastName("max")
-                .email("new@test.de")
-                .dateOfBirth(LocalDate.now())
-                .female(false)
-                .build();
-
-        // when
-        ResponseEntity<EmployeeRead> response = new RestTemplate().exchange(String.format("http://localhost:%d/api/company/%s/employee", randomServerPort, company.getId()),
-                HttpMethod.POST,
-                new HttpEntity<>(employeeWrite),
-                EmployeeRead.class);
-
-        // then
-        assertThat(response, notNullValue());
-        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        given()
+                .contentType(ContentType.JSON)
+                .body(employeeWrite)
+                .post("/api/company/{parentId}/employee", company.getId())
+                .then()
+                .status(HttpStatus.CREATED)
+                .body("company.id", is(company.getId()))
+                .body("firstName", is(employeeWrite.getFirstName()))
+                .body("lastName", is(employeeWrite.getLastName()))
+                .body("email", is(employeeWrite.getEmail()));
     }
 
     @Test
@@ -175,16 +160,12 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
                 .build();
 
         // when
-        try {
-            ResponseEntity<EmployeeRead> response = new RestTemplate().exchange(String.format("http://localhost:%d/api/company/%s/employee", randomServerPort, "unkown-id"),
-                    HttpMethod.POST,
-                    new HttpEntity<>(employeeWrite),
-                    EmployeeRead.class);
-
-            // then
-        } catch (HttpClientErrorException httpClientError) {
-            assertThat(httpClientError.getRawStatusCode(), is(HttpStatus.NOT_FOUND.value()));
-        }
+        given()
+                .contentType(ContentType.JSON)
+                .body(employeeWrite)
+                .post("/api/company/{parentId}/employee", "unkown-id")
+                .then()
+                .status(HttpStatus.NOT_FOUND);
     }
 
 
@@ -201,18 +182,13 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
                 .build();
 
         // when
-        try {
-            EmployeeRead employeeRead = employeeResource.create(company.getId(), employeeWrite);
-
-            // then
-            AssertionErrors.fail("should not create invalid employee");
-        } catch (BadRequestException ex) {
-            ErrorResponse errorResponse = ex.getErrorResponse();
-            assertThat(errorResponse, notNullValue());
-            assertThat(errorResponse.getFields(), hasKey("email"));
-            assertThat(errorResponse.getFirstFieldValue("email"), not(emptyString()));
-        }
-
+        given()
+                .contentType(ContentType.JSON)
+                .body(employeeWrite)
+                .post("/api/company/{parentId}/employee", company.getId())
+                .then()
+                .status(HttpStatus.BAD_REQUEST)
+                .body("fields.email", not(emptyString()));
     }
 
     @Test
@@ -220,7 +196,7 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         // given
         CompanyEntity company = companyRepository.save(createDefaultCompany());
         EmployeeEntity employee = createDefaultEmployee();
-        employee.setCompany(company);
+        employee.setCompanyId(company.getId());
         employee = employeeRepository.save(employee);
 
         EmployeeWrite employeeWrite = EmployeeWrite.builder()
@@ -233,18 +209,17 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
 
 
         // when
-        EmployeeRead employeeRead = employeeResource.update(company.getId(), employee.getId(), employeeWrite);
-
-        // then
-        assertThat(employeeRead, notNullValue());
-        assertThat(employeeRead.getId(), is(employee.getId()));
-
-        assertThat(employeeRead.getFirstName(), is(employeeWrite.getFirstName()));
-        assertThat(employeeRead.getLastName(), is(employeeWrite.getLastName()));
-        assertThat(employeeRead.getEmail(), is(employeeWrite.getEmail()));
-
-        employee = employeeRepository.findById(employeeRead.getId()).get();
-        assertEmployeeSame(employee, employeeRead);
+        given()
+                .contentType(ContentType.JSON)
+                .body(employeeWrite)
+                .put("/api/company/{parentId}/employee/{id}", company.getId(), employee.getId())
+                .then()
+                .status(HttpStatus.OK)
+                .body("id", is(employee.getId()))
+                .body("company.id", is(company.getId()))
+                .body("firstName", is(employeeWrite.getFirstName()))
+                .body("lastName", is(employeeWrite.getLastName()))
+                .body("email", is(employeeWrite.getEmail()));
     }
 
     @Test
@@ -252,11 +227,12 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         // given
         CompanyEntity company = companyRepository.save(createDefaultCompany());
         EmployeeEntity employee = createDefaultEmployee();
-        employee.setCompany(company);
+        employee.setCompanyId(company.getId());
         employee = employeeRepository.save(employee);
 
         // when
-        employeeResource.delete(company.getId(), employee.getId());
+        given()
+                .delete("/api/company/{parentId}/employee/{id}", company.getId(), employee.getId());
 
         // then
         assertThat(employeeRepository.findById(employee.getId()).isPresent(), equalTo(false));
@@ -270,7 +246,7 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
         assertThat(data.getLastName(), is(entity.getLastName()));
         assertThat(data.getEmail(), is(entity.getEmail()));
         assertThat(data.getCompany(), notNullValue());
-        assertThat(data.getCompany().getId(), is(entity.getCompany().getId()));
+        assertThat(data.getCompany().getId(), is(entity.getCompanyId()));
         assertThat(data.getDateOfBirth(), is(entity.getDateOfBirth()));
         assertThat(data.isFemale(), is(entity.isFemale()));
     }
@@ -289,7 +265,7 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
                 .firstName("firstname")
                 .lastName("lastname")
                 .email("test@test.de")
-                .company(createDefaultCompany())
+                .companyId(createDefaultCompany().getId())
                 .dateOfBirth(LocalDate.now().minusYears(5))
                 .female(true)
                 .build();

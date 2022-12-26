@@ -59,7 +59,7 @@ public class DataInitializer {
                         .dateOfBirth(person.getDateOfBirth())
                         .female(person.getSex().equals(Person.Sex.FEMALE))
                         .email(person.getEmail())
-                        .company(companyList.get(ThreadLocalRandom.current().nextInt(0, companyList.size())))
+                        .companyId(companyList.get(ThreadLocalRandom.current().nextInt(0, companyList.size())).getId())
                         .build());
             }
             personRepository.saveAll(personList);
