@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.rocketbase.commons</groupId>
-        <artifactId>commons-rest-root</artifactId>
+        <artifactId>commons-rest</artifactId>
         <version>LATEST-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,12 +13,6 @@
 
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
-
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-        <jacoco.version>0.8.8</jacoco.version>
     </properties>
 
     <dependencies>
@@ -49,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>io.rocketbase.sample</groupId>
-            <artifactId>commons-rest-sample-server</artifactId>
+            <artifactId>sample-server</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
