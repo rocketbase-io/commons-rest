@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class RequestMappingAnnotationUtil {
 
     private static Class[] annotations = {RequestMapping.class, GetMapping.class, PostMapping.class, PutMapping.class, PatchMapping.class, DeleteMapping.class};

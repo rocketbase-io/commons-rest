@@ -15,6 +15,7 @@ public interface EntityWithKeyValue<T> extends HasKeyValue {
      * @param value max length of 255 characters
      * @return itself for fluent api
      */
+    @SuppressWarnings({"rawtypes", "cast"})
     default T addKeyValue(String key, String value) {
         checkKeyValue(key, value);
         if (getKeyValues() == null) {

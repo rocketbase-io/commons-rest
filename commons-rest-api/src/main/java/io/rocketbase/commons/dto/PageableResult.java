@@ -53,10 +53,10 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     @Schema(description = "content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)")
     private List<E> content;
 
-    public static <E> PageableResult<E> contentPage(List<E> content, Page page) {
+    public static <T, E> PageableResult<E> contentPage(List<E> content, Page<T> page) {
         Assert.notNull(page, "page is null - not allowed");
 
-        PageableResult result = new PageableResult();
+        PageableResult<E> result = new PageableResult<>();
         result.setContent(content != null ? content : Collections.emptyList());
         result.setTotalPages(page.getTotalPages());
         result.setTotalElements(page.getTotalElements());
@@ -69,7 +69,7 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
         Assert.notNull(page, "page is null - not allowed");
         Assert.notNull(converter, "converter not defined");
 
-        PageableResult result = new PageableResult();
+        PageableResult<E> result = new PageableResult<>();
         result.setContent(page.getContent().stream().map(converter).collect(Collectors.toList()));
         result.setTotalPages(page.getTotalPages());
         result.setTotalElements(page.getTotalElements());
@@ -81,7 +81,7 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     public static <E> PageableResult<E> page(Page<E> page) {
         Assert.notNull(page, "page is null - not allowed");
 
-        PageableResult result = new PageableResult();
+        PageableResult<E> result = new PageableResult<>();
         result.setContent(page.getContent());
         result.setTotalPages(page.getTotalPages());
         result.setTotalElements(page.getTotalElements());
@@ -93,10 +93,10 @@ public class PageableResult<E> implements Iterable<E>, Serializable {
     public static <E> PageableResult<E> content(List<E> content) {
         Assert.notNull(content, "content is null - not allowed");
 
-        PageableResult result = new PageableResult();
+        PageableResult<E> result = new PageableResult<>();
         result.setContent(content);
         result.setTotalPages(1);
-        int totalElements = content != null ? content.size() : 0;
+        int totalElements = content.size();
         result.setTotalElements(totalElements);
         result.setPage(0);
         result.setPageSize(totalElements);

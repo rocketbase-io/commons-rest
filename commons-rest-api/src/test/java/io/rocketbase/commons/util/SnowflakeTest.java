@@ -56,12 +56,11 @@ class SnowflakeTest {
         int iterations = 10000;
 
         // Validate that the IDs are not same even if they are generated in the same ms in different threads
-        Future<Long>[] futures = new Future[iterations];
+        Future[] futures = new Future[iterations];
         for (int i = 0; i < iterations; i++) {
             futures[i] = executorService.submit(() -> {
                 long id = snowflake.nextId();
                 latch.countDown();
-                ;
                 return id;
             });
         }

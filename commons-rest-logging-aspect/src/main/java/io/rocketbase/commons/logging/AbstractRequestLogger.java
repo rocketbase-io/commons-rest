@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractRequestLogger extends AbstractLoggingAspect {
 
     private static final Pattern PATH_VARIABLE_PATTERN = Pattern.compile("\\{([^}]+)}");

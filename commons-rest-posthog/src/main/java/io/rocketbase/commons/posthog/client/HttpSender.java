@@ -14,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 @Slf4j
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HttpSender {
     private String apiKey;
     private String host;
@@ -23,7 +24,7 @@ public class HttpSender {
 
     static {
         httpHeaders = new HttpHeaders();
-        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON);
     }
 
 

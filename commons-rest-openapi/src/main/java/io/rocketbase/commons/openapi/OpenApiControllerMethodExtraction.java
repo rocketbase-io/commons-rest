@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Data
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class OpenApiControllerMethodExtraction {
 
     public static String MULTIPART_TYPESCRIPT = "string | File | Blob";

@@ -140,6 +140,7 @@ public final class Nulls {
      * return's true if all values are not null<br>
      * false in case one is null
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static <T> boolean noneNullValue(T... values) {
         for (T v : values) {
             if (v == null) {
@@ -152,6 +153,7 @@ public final class Nulls {
     /**
      * return's true if at least one of the values it not null
      */
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static <T> boolean anyNoneNullValue(T... values) {
         for (T v : values) {
             if (v != null) {

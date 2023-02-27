@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 /**
  * extends open-api to add annotation information to each handels method
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class OpenApiCustomExtractor implements OperationCustomizer {
 
     public static final String GENERIC_RETURN_TYPE = "genericReturnType";

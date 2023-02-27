@@ -22,6 +22,7 @@ import java.util.*;
  *
  * @see io.rocketbase.commons.validation.ValidationService
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ValidationServiceImpl implements ValidationService {
 
     private static final ValidatorFactory FACTORY = Validation.buildDefaultValidatorFactory();

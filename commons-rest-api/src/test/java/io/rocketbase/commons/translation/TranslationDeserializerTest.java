@@ -13,6 +13,7 @@ import java.util.Locale;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
 public class TranslationDeserializerTest {
 
     private ObjectMapper mapper = new ObjectMapper();

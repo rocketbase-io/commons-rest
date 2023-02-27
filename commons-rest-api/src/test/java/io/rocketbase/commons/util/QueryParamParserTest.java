@@ -13,6 +13,7 @@ import java.util.stream.StreamSupport;
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class QueryParamParserTest {
 
 

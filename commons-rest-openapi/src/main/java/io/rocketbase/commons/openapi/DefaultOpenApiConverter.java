@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import static io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction.MULTIPART_TYPESCRIPT;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultOpenApiConverter implements OpenApiConverter {
 
     @Override
