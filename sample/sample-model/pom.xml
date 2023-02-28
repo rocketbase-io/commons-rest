@@ -11,6 +11,10 @@
 
     <artifactId>sample-model</artifactId>
 
+    <properties>
+        <maven.deploy.skip>true</maven.deploy.skip>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>io.rocketbase.sample</groupId>
