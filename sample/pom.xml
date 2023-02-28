@@ -23,7 +23,6 @@
         <mapstruct.version>1.5.3.Final</mapstruct.version>
         <lombok.version>1.18.24</lombok.version>
 
-        <commons-rest.version>LATEST-SNAPSHOT</commons-rest.version>
         <jacoco.version>0.8.8</jacoco.version>
         <testcontainers.version>1.17.6</testcontainers.version>
     </properties>
@@ -157,6 +156,15 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${jacoco.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
             </plugin>
 
         </plugins>

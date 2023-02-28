@@ -15,7 +15,7 @@
         <dependency>
             <groupId>io.rocketbase.commons</groupId>
             <artifactId>commons-rest-api</artifactId>
-            <version>${commons-rest.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springdoc</groupId>
