@@ -42,7 +42,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.rocketbase.sample</groupId>
+            <groupId>io.rocketbase.commons</groupId>
             <artifactId>sample-server</artifactId>
             <version>${project.version}</version>
         </dependency>
