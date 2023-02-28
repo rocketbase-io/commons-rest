@@ -4,8 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>io.rocketbase.sample</groupId>
-        <artifactId>sample</artifactId>
+        <groupId>io.rocketbase.commons</groupId>
+        <artifactId>rest-sample</artifactId>
         <version>LATEST-SNAPSHOT</version>
     </parent>
 
@@ -14,7 +14,7 @@
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
-    
+
     <dependencies>
         <dependency>
             <groupId>io.rocketbase.sample</groupId>

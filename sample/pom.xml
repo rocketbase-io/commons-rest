@@ -9,7 +9,7 @@
         <version>LATEST-SNAPSHOT</version>
     </parent>
 
-    <artifactId>sample</artifactId>
+    <artifactId>rest-sample</artifactId>
     <packaging>pom</packaging>
 
     <properties>
