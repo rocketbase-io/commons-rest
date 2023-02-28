@@ -17,7 +17,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.rocketbase.sample</groupId>
+            <groupId>io.rocketbase.commons</groupId>
             <artifactId>sample-model</artifactId>
             <version>${project.version}</version>
         </dependency>
