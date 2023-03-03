@@ -24,7 +24,7 @@ public class GenerateClientTest {
     @Test
     public void downloadZip() throws Exception {
         File destination = new File("target/test.zip");
-        FileUtils.copyURLToFile(new URL(baseUrl + "/generator/typescript-client/test.zip"), destination);
+        FileUtils.copyURLToFile(new URL(baseUrl + "/generator/client/v4/test.zip"), destination);
         log.info("downloaded: {}", destination.getAbsolutePath());
     }
 }

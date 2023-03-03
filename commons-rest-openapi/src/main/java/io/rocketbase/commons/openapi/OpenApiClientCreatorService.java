@@ -75,6 +75,7 @@ public class OpenApiClientCreatorService {
             context.put("timestamp", Instant.now());
             context.put("generatorConfig", openApiGeneratorProperties);
             context.put("springDataWebConfig", springDataWebProperties);
+            context.put("reactQueryVersion", reactQueryVersion);
 
             generateModels(zippedOut, context);
             generateClients(controllers, zippedOut, context);
@@ -155,6 +156,12 @@ public class OpenApiClientCreatorService {
             zippedOut.write(writer.toString().getBytes("UTF-8"));
             zippedOut.closeEntry();
         }
+
+        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/util.ts"));
+        writer = new StringWriter();
+        getCompiledTemplate("hook/util").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
 
         zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/index.ts"));
         writer = new StringWriter();

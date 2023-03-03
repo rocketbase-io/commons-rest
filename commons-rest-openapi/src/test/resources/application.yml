@@ -39,4 +39,4 @@ info:
 
 commons.openapi.generator:
   base-url: "/test"
-  group-name: TestModuleApi
+  group-name: OpenApiModuleApi
