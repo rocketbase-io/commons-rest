@@ -4,8 +4,9 @@
 {% if controller.fieldImports is not empty %}import { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.clientFolder -}}";
 {% endif %}
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "react-query";
-import { PageableResult, createInfiniteOptions } from "@rocketbase/commons-core";
+import { PageableResult } from "@rocketbase/commons-core";
 import { PageableRequest, useApi } from "../..";
+import { createPaginationOptions } from "./util";
 {% if controller.importTypes is not empty %}
 import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
 {% endif %}
@@ -25,9 +26,11 @@ import { AxiosError } from "axios";
 export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useQuery<{{ method.shortReturnType }}, AxiosError, TData>(
-    [{% if method.cacheKeysPrepared('filter.') is not empty %}{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
-    ({ signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter,{% endif %} overrides: { signal }}),
-    { {% if method.staleTime is not null and method.staleTime > 0 %}staleTime: {{ method.staleTime }} * 1000, {% endif %}...options }
+    {
+          queryKey: [{% if method.cacheKeysPrepared('filter.') is not empty %}{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% endif %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
+          queryFn: ({ signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter,{% endif %} overrides: { signal }}),
+          {% if method.staleTime is not null and method.staleTime > 0 %}staleTime: {{ method.staleTime }} * 1000, {% endif %}...options
+    }
   );
   {% elseif method.hookType equals "mutation" %}
 export function {{ method.hookName -}}({onSuccess, ...options}: UseMutationOptions<{{ method.shortReturnType }}, AxiosError, {{ method.shortInputType }}> = {}) {
@@ -54,9 +57,13 @@ export function {{ method.hookName -}}({onSuccess, ...options}: UseMutationOptio
 export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, AxiosError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useInfiniteQuery<{{ method.shortReturnType }}, AxiosError, TData>(
-    [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
-    ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}{{  infiniteParams( method ) }}, overrides: { signal } }),
-    {{  infiniteOptions( method ) }}
+    {
+        queryKey: [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
+        queryFn: ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}{{  infiniteParams( method ) }}, overrides: { signal } }),
+        {% if method.staleTime is not null and method.staleTime > 0 %}staleTime: {{ method.staleTime }} * 1000, {% endif %}
+        ...options,
+        {{  infiniteOptions( method ) }}
+    }
   );
   {% endif %}
 }

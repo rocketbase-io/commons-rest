@@ -4,3 +4,5 @@
 {% for c in controllers %}
 export * from "./{{c.filename}}";
 {% endfor %}
+
+export * from "./util";

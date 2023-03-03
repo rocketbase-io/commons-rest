@@ -76,6 +76,7 @@ public class OpenApiClientCreatorService {
             context.put("timestamp", Instant.now());
             context.put("generatorConfig", openApiGeneratorProperties);
             context.put("springDataWebConfig", springDataWebProperties);
+            context.put("reactQueryVersion", reactQueryVersion);
 
             generateModels(zippedOut, context);
             generateClients(controllers, zippedOut, context);
