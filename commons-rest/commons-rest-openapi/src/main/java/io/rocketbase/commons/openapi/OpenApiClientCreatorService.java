@@ -158,6 +158,12 @@ public class OpenApiClientCreatorService {
             zippedOut.closeEntry();
         }
 
+        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/util.ts"));
+        writer = new StringWriter();
+        getCompiledTemplate("hook/util").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
         zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/index.ts"));
         writer = new StringWriter();
         getCompiledTemplate("hook/index").evaluate(writer, context);
