@@ -118,6 +118,13 @@ public class OpenApiClientCreatorService {
         zippedOut.write(writer.toString().getBytes("UTF-8"));
         zippedOut.closeEntry();
 
+
+        zippedOut.putNextEntry(new ZipEntry("src/util.ts"));
+        writer = new StringWriter();
+        getCompiledTemplate("util").evaluate(writer, context);
+        zippedOut.write(writer.toString().getBytes("UTF-8"));
+        zippedOut.closeEntry();
+
         writer = new StringWriter();
         zippedOut.putNextEntry(new ZipEntry("src/index.ts"));
         getCompiledTemplate("index").evaluate(writer, context);
@@ -153,16 +160,10 @@ public class OpenApiClientCreatorService {
 
             writer = new StringWriter();
             context.put("controller", c);
-            getCompiledTemplate("hook/hook-template-" + reactQueryVersion.name()).evaluate(writer, context);
+            getCompiledTemplate("hook/hook-template").evaluate(writer, context);
             zippedOut.write(writer.toString().getBytes("UTF-8"));
             zippedOut.closeEntry();
         }
-
-        zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/util.ts"));
-        writer = new StringWriter();
-        getCompiledTemplate("hook/util").evaluate(writer, context);
-        zippedOut.write(writer.toString().getBytes("UTF-8"));
-        zippedOut.closeEntry();
 
         zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/index.ts"));
         writer = new StringWriter();

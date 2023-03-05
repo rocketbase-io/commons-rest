@@ -5,6 +5,7 @@ import { useAuth } from "@rocketbase/commons-core";
 export * from "./{{- generatorConfig.clientFolder -}}";
 export * from "./model";
 export * from "./{{- generatorConfig.hookFolder -}}";
+export * from "./util";
 
 export const useApi = () => {
 const { axiosClient, baseUrl} = useAuth();
