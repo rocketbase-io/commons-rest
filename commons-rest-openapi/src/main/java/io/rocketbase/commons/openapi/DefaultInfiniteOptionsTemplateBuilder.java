@@ -1,11 +1,9 @@
 package io.rocketbase.commons.openapi;
 
-import io.rocketbase.commons.util.Nulls;
-
 public class DefaultInfiniteOptionsTemplateBuilder implements InfiniteOptionsTemplateBuilder {
 
     @Override
-    public String buildQueryOptions(OpenApiControllerMethodExtraction method)  {
+    public String buildQueryOptions(OpenApiControllerMethodExtraction method) {
         return "...createPaginationOptions()";
     }
 
