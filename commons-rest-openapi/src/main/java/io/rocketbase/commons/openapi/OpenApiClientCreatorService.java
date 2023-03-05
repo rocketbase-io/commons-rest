@@ -1,12 +1,11 @@
 package io.rocketbase.commons.openapi;
 
-import com.google.common.collect.Sets;
-import com.mitchellbosecke.pebble.PebbleEngine;
-import com.mitchellbosecke.pebble.extension.AbstractExtension;
-import com.mitchellbosecke.pebble.extension.Function;
-import com.mitchellbosecke.pebble.loader.ClasspathLoader;
-import com.mitchellbosecke.pebble.template.EvaluationContext;
-import com.mitchellbosecke.pebble.template.PebbleTemplate;
+import io.pebbletemplates.pebble.PebbleEngine;
+import io.pebbletemplates.pebble.extension.AbstractExtension;
+import io.pebbletemplates.pebble.extension.Function;
+import io.pebbletemplates.pebble.loader.ClasspathLoader;
+import io.pebbletemplates.pebble.template.EvaluationContext;
+import io.pebbletemplates.pebble.template.PebbleTemplate;
 import io.rocketbase.commons.config.OpenApiGeneratorProperties;
 import io.rocketbase.commons.openapi.model.OpenApiController;
 import io.rocketbase.commons.openapi.model.ReactQueryVersion;
@@ -14,15 +13,15 @@ import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springdoc.core.Constants;
+import org.springdoc.core.utils.Constants;
 import org.springdoc.webmvc.api.OpenApiWebMvcResource;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.beans.Introspector;
 import java.io.IOException;
 import java.io.StringWriter;
@@ -233,7 +232,7 @@ public class OpenApiClientCreatorService {
     }
 
     protected Set<String> pageParams() {
-        return Sets.newHashSet(springDataWebProperties.getPageable().getPageParameter(), springDataWebProperties.getPageable().getSizeParameter(), springDataWebProperties.getSort().getSortParameter());
+        return Set.of(springDataWebProperties.getPageable().getPageParameter(), springDataWebProperties.getPageable().getSizeParameter(), springDataWebProperties.getSort().getSortParameter());
     }
 
     protected void addOperation(Map<String, List<OpenApiControllerMethodExtraction>> map, PathItem.HttpMethod httpMethod, String path, Operation operation) {
