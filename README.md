@@ -2,7 +2,7 @@
 
 ![logo](assets/commons-logo.svg)
 
-![build](https://github.com/rocketbase-io/email-template-builder/actions/workflows/ci.yml/badge.svg)
+![build](https://github.com/rocketbase-io/commons-rest/actions/workflows/ci.yml/badge.svg)
 [![Maven Central](https://badgen.net/maven/v/maven-central/io.rocketbase.commons/commons-rest)](https://mvnrepository.com/artifact/io.rocketbase.commons/commons-rest)
 
 Focus on tough problems and not on CRUD that the main focus of commons-rest.
