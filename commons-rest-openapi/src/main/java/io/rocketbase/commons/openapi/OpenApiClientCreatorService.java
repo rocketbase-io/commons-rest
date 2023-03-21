@@ -55,7 +55,7 @@ public class OpenApiClientCreatorService {
             addOperation(remapped, PathItem.HttpMethod.DELETE, entry.getKey(), entry.getValue().getDelete());
             addOperation(remapped, PathItem.HttpMethod.PATCH, entry.getKey(), entry.getValue().getPatch());
         }
-        return remapped.entrySet().stream().map(e -> new OpenApiController(e.getKey(), e.getValue())).collect(Collectors.toList());
+        return remapped.entrySet().stream().map(e -> new OpenApiController(e.getKey(), e.getValue(), typescriptConverter)).collect(Collectors.toList());
     }
 
     public void getTypescriptClients(ReactQueryVersion reactQueryVersion, HttpServletRequest request, HttpServletResponse response, String baseUrl, String groupName, String filename) {

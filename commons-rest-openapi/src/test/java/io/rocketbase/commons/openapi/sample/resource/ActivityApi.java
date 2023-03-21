@@ -49,5 +49,12 @@ public interface ActivityApi {
     )
     ResponseEntity<Activity> findById(@PathVariable("id") String id);
 
+    @GetMapping(
+            path = "/hosted/{id}",
+            produces = MimeTypeUtils.APPLICATION_JSON_VALUE,
+            consumes = MimeTypeUtils.ALL_VALUE
+    )
+    ResponseEntity<Activity> findByHosted(@PathVariable("id") String id);
+
 
 }

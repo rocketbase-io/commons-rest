@@ -19,4 +19,9 @@ public class ActivityController implements ActivityApi {
     public ResponseEntity<Activity> findById(String id) {
         return null;
     }
+
+    @Override
+    public ResponseEntity<Activity> findByHosted(String id) {
+        return null;
+    }
 }

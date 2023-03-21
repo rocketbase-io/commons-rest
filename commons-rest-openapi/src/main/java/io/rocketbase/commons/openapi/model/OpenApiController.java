@@ -1,12 +1,14 @@
 package io.rocketbase.commons.openapi.model;
 
 import io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction;
+import io.rocketbase.commons.openapi.OpenApiConverter;
 import io.rocketbase.commons.util.Nulls;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -19,17 +21,20 @@ public class OpenApiController implements Serializable {
     private String controllerBean;
     private List<OpenApiControllerMethodExtraction> methods;
 
+    private OpenApiConverter openApiConverter;
+
     public String getShortName() {
         return controllerBean.substring(controllerBean.lastIndexOf(".") + 1).replace("Controller", "");
     }
 
-    public OpenApiController(String controllerBean, List<OpenApiControllerMethodExtraction> methods) {
+    public OpenApiController(String controllerBean, List<OpenApiControllerMethodExtraction> methods, OpenApiConverter openApiConverter) {
         this.controllerBean = controllerBean;
         this.methods = methods;
         // link this controller to methods
         for (OpenApiControllerMethodExtraction m : methods) {
             m.setController(this);
         }
+        this.openApiConverter = openApiConverter;
     }
 
     public Set<String> getImportTypes() {
@@ -52,6 +57,8 @@ public class OpenApiController implements Serializable {
     public Set<String> getFieldImports() {
         return methods.stream().filter(m -> m.hasOptionalFields() || m.hasRequiredFields())
                 .map(OpenApiControllerMethodExtraction::getShortInputType)
+                .filter(v -> !Nulls.notNull(openApiConverter, OpenApiConverter::getNativeTypes, Collections.emptySet())
+                        .contains(v.toLowerCase()))
                 .collect(Collectors.toSet());
     }
 
