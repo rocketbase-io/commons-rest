@@ -36,7 +36,7 @@ public class StopwatchParts {
         return new StopwatchPartitionedConfig();
     }
 
-    enum PartOrdering {
+    public enum PartOrdering {
         NATURAL, TIME_DESC;
     }
 
