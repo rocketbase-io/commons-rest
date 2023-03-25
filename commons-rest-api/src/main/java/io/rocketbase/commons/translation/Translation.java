@@ -165,17 +165,19 @@ public class Translation implements Serializable {
         if (!(o instanceof Translation)) return false;
         final Translation other = (Translation) o;
 
-        Map<Locale, String> oTrans = Nulls.notNull(getTranslations());
+        Map<Locale, String> current = Nulls.notNull(getTranslations());
         Map<Locale, String> otherTrans = Nulls.notNull(other.getTranslations());
 
-        if (oTrans.isEmpty() && otherTrans.isEmpty()) {
+        if (current.isEmpty() && otherTrans.isEmpty()) {
             return true;
         }
-        if (!oTrans.keySet().equals(otherTrans.keySet())) {
+        if (!current.keySet().equals(otherTrans.keySet())) {
             return false;
         }
-        for (Entry<Locale, String> entry : oTrans.entrySet()) {
-            if (!entry.getValue().equals(oTrans.get(entry.getKey()))) {
+        for (Entry<Locale, String> entry : current.entrySet()) {
+            if (entry.getValue() == null ?
+                    otherTrans.get(entry.getKey()) != null
+                    : !entry.getValue().equals(otherTrans.get(entry.getKey()))) {
                 return false;
             }
         }

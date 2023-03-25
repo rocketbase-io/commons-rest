@@ -44,6 +44,23 @@ public class TranslationTest {
     }
 
     @Test
+    public void checkNullEquals() {
+        // given
+        Translation one = Translation.of(Locale.GERMAN, null)
+                .italian("Ciao");
+        Translation second = Translation.of(Locale.GERMAN, "Moin")
+                .italian("Ciao");
+
+        // when
+        boolean equals = one.equals(second);
+        boolean secondEquals = second.equals(one);
+
+        // then
+        assertThat(equals, equalTo(false));
+        assertThat(secondEquals, equalTo(false));
+    }
+
+    @Test
     public void getTranslatedRootFallbackInCaseOfMany() {
         // given
         Translation translation = Translation.of(Locale.GERMAN, "Hallo")
