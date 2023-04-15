@@ -32,6 +32,7 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
 
     public static final String GENERIC_RETURN_TYPE = "genericReturnType";
     public static final String PARAMETER_TYPES = "parameterTypes";
+    public static final String PARAMETER_NAMES = "parameterNames";
     public static final String CONTROLLER_BEAN = "controllerBean";
     public static final String DISABLED = "disabled";
     public static final String METHOD_NAME = "methodName";
@@ -55,8 +56,11 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
                 actualTypeArgument = type;
             }
             extensions.put(GENERIC_RETURN_TYPE, actualTypeArgument.getTypeName());
-            extensions.put(PARAMETER_TYPES, Arrays.stream(handlerMethod.getMethod().getGenericParameterTypes()).map(v -> v.getTypeName()).collect(Collectors.toList()));
+        } else {
+            extensions.put(GENERIC_RETURN_TYPE, handlerMethod.getMethod().getGenericReturnType().getTypeName());
         }
+        extensions.put(PARAMETER_TYPES, Arrays.stream(handlerMethod.getMethod().getGenericParameterTypes())
+                .map(v -> v.getTypeName()).collect(Collectors.toList()));
 
         ClientModuleParams beanParams = extractControllerBean(handlerMethod);
         extensions.put(CONTROLLER_BEAN, beanParams.getName());

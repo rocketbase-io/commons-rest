@@ -20,6 +20,7 @@ public @interface MutationHook {
 
     /**
      * layout variable ${varInput} @{varResponse} separation by ,<br>
+     * <b>important: input variables are named by path/requestParam names not variables (RequestBody is named body!)</b>
      * one invalidation per string (multiple parameters need to be separated by ,
      */
     String[] invalidateKeys() default {};
