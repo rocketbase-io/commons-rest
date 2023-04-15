@@ -98,7 +98,7 @@ SOFTWARE.
         <hashids.version>1.0.3</hashids.version>
 
         <pebble.version>3.2.0</pebble.version>
-        <springdoc-openapi.version>2.0.4</springdoc-openapi.version>
+        <springdoc-openapi.version>2.1.0</springdoc-openapi.version>
         <lombok.version>1.18.26</lombok.version>
     </properties>
 
