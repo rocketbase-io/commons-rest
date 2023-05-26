@@ -48,6 +48,16 @@ public final class Nulls {
     }
 
     /**
+     * return 0 when value is null
+     */
+    public static Integer notNull(Integer value) {
+        if (value == null) {
+            return 0;
+        }
+        return value;
+    }
+
+    /**
      * return BigDecimal.ZERO when value is null
      */
     public static BigDecimal notNull(BigDecimal value) {
