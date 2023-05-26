@@ -79,9 +79,10 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         String type = schema.get$ref() != null ? removeRefPath(schema.get$ref()) : schema.getType();
         if (schema instanceof ArraySchema) {
             Schema<?> item = ((ArraySchema) schema).getItems();
-            type = (item.getType() != null ? item.getType() : removeRefPath(item.get$ref())) + "[]";
+            type = convertType(item.getType() != null ? item.getType() : removeRefPath(item.get$ref())) + "[]";
+        } else {
+            type = convertType(type);
         }
-        type = convertType(type);
         return type;
     }
 

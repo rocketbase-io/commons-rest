@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @SecurityRequirement(name = "OAuth2", scopes = {"user"})
 @Tag(name = "dashboard", description = "showrooms are used mainly by vendors to present their products.")
@@ -41,5 +42,6 @@ public interface TileApi {
                                                    @Parameter(description = "filters by tiletype") @Valid @RequestParam(value = "tileType", required = false) Optional<String> tileType,
                                                    @Parameter(description = "filters by labels") @Valid @RequestParam(value = "labels", required = false) List<String> labelNames,
                                                    @Parameter(description = "filters by sharelevel") @Valid @RequestParam(value = "shareLevel", required = false) Optional<String> shareLevel,
-                                                   @Parameter(description = "filters by userPreference") @Valid @RequestParam(value = "userPreference", required = false) Optional<UserPreference> userPreference);
+                                                   @Parameter(description = "filters by userPreference") @Valid @RequestParam(value = "userPreference", required = false) Optional<UserPreference> userPreference,
+                                                   @Parameter(description = "filters by categoryId") @Valid @RequestParam(value = "categoryId", required = false) Set<Integer> categoryIds);
 }

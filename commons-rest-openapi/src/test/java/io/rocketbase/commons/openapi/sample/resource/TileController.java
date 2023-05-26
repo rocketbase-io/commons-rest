@@ -9,11 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @RestController
 public class TileController implements TileApi {
     @Override
-    public ResponseEntity<PageableResult<Tile>> loadTiles(Pageable pageable, Optional<String> query, Optional<String> tileType, List<String> labelNames, Optional<String> shareLevel, Optional<UserPreference> userPreference) {
+    public ResponseEntity<PageableResult<Tile>> loadTiles(Pageable pageable, Optional<String> query, Optional<String> tileType, List<String> labelNames, Optional<String> shareLevel, Optional<UserPreference> userPreference, Set<Integer> categoryIds) {
         return null;
     }
 }
