@@ -2,9 +2,9 @@ package io.rocketbase.commons.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 import org.springframework.lang.Nullable;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.Map;
  * wrapped response in case of errors
  */
 @Data
-@Builder
+@SuperBuilder
 @AllArgsConstructor
 @Schema(description = "wrapped response in case of errors")
 public class ErrorResponse {

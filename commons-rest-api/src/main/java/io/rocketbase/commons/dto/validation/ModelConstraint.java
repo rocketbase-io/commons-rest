@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,6 +55,8 @@ import java.util.Map;
  * @see ValidationConstraint
  */
 @Data
+@NoArgsConstructor
+@SuperBuilder
 @EqualsAndHashCode(of = "model")
 @JsonPropertyOrder(value = {"model", "constraints"})
 @Schema(example = "{\n" +

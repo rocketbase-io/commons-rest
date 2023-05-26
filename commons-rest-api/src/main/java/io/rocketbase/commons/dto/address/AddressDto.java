@@ -2,10 +2,9 @@ package io.rocketbase.commons.dto.address;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
@@ -14,9 +13,8 @@ import java.io.Serializable;
  * simple address object
  */
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@SuperBuilder
 @Schema(description = "simple address object")
 public class AddressDto implements Serializable {
 

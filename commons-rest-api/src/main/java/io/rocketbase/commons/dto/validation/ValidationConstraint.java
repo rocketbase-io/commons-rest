@@ -3,7 +3,10 @@ package io.rocketbase.commons.dto.validation;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.lang.Nullable;
 
 import java.util.HashMap;
@@ -30,9 +33,8 @@ import java.util.Map;
  * </pre>
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @EqualsAndHashCode(of = {"type", "message"})
 @Schema(example = "{\"lastName\": [{\n" +
         "    \"type\": \"NotBlank\",\n" +

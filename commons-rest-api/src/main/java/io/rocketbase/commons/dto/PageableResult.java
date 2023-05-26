@@ -3,6 +3,8 @@ package io.rocketbase.commons.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,6 +22,8 @@ import java.util.stream.Collectors;
  * wrapping object for paged result lists
  */
 @Data
+@NoArgsConstructor
+@SuperBuilder
 @Schema(description = "wrapping object for paged result lists")
 public class PageableResult<E> implements Iterable<E>, Serializable {
 

@@ -4,19 +4,17 @@ import io.rocketbase.commons.model.HasFirstAndLastName;
 import io.rocketbase.commons.util.Nulls;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Transient;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
 
 @Data
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
+@SuperBuilder
 public class ContactDto implements Serializable, HasFirstAndLastName {
 
     @Nullable
