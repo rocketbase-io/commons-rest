@@ -58,7 +58,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if (name != null && !name.contains("<")) {
             try {
                 Class clazz = Class.forName(name);
-                if ((clazz.isAnnotationPresent(JsonSubTypes.class) && clazz.isInterface() && clazz.isAnnotationPresent(JsonTypeInfo.class))) {
+                if ((clazz.isAnnotationPresent(JsonSubTypes.class) && clazz.isAnnotationPresent(JsonTypeInfo.class))) {
                     return name + "Union";
                 }
             } catch (ClassNotFoundException cnf) {
