@@ -17,4 +17,9 @@ public class TileController implements TileApi {
     public ResponseEntity<PageableResult<Tile>> loadTiles(Pageable pageable, Optional<String> query, Optional<String> tileType, List<String> labelNames, Optional<String> shareLevel, Optional<UserPreference> userPreference, Set<Integer> categoryIds) {
         return null;
     }
+
+    @Override
+    public Tile get(String id) {
+        return null;
+    }
 }
