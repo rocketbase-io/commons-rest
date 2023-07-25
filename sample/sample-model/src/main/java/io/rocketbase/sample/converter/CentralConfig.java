@@ -7,7 +7,7 @@ import org.mapstruct.ReportingPolicy;
 @MapperConfig(
         unmappedTargetPolicy = ReportingPolicy.ERROR,
         componentModel = "spring",
-        uses = {ObfuscatedIdMapper.class},
+        uses = {ObfuscatedIdMapper.class, TsidMapper.class},
         builder = @Builder(disableBuilder = true)
 )
 public interface CentralConfig {

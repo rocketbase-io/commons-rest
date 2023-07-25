@@ -3,10 +3,13 @@ package io.rocketbase.sample.initializer;
 import com.devskiller.jfairy.Fairy;
 import com.devskiller.jfairy.producer.company.Company;
 import com.devskiller.jfairy.producer.person.Person;
+import com.devskiller.jfairy.producer.text.TextProducer;
 import io.rocketbase.sample.model.CompanyEntity;
 import io.rocketbase.sample.model.CustomerEntity;
 import io.rocketbase.sample.model.EmployeeEntity;
+import io.rocketbase.sample.model.LocationEntity;
 import io.rocketbase.sample.repository.jpa.CustomerRepository;
+import io.rocketbase.sample.repository.jpa.LocationRepository;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
 import io.rocketbase.sample.repository.mongo.EmployeeRepository;
 import jakarta.annotation.PostConstruct;
@@ -30,6 +33,9 @@ public class DataInitializer {
 
     @Resource
     private CustomerRepository customerRepository;
+
+    @Resource
+    private LocationRepository locationRepository;
 
     private AtomicInteger companyCounter = new AtomicInteger(0);
 
@@ -75,6 +81,21 @@ public class DataInitializer {
             }
             customerRepository.saveAll(customerList);
             log.info("initialized {} customers", customerList.size());
+        }
+
+        if (locationRepository.count() == 0) {
+            List<LocationEntity> locationList = new ArrayList<>();
+            for (int count = 0; count < 50; count++) {
+                TextProducer textProducer = fairy.textProducer();
+                locationList.add(LocationEntity.builder()
+                        .name(textProducer.word())
+                        .city(textProducer.latinWord())
+                        .street(textProducer.sentence(3))
+                        .country("de")
+                        .build());
+            }
+            locationRepository.saveAll(locationList);
+            log.info("initialized {} locations", locationList.size());
         }
     }
 }

@@ -29,6 +29,7 @@
 
         <jacoco.version>0.8.10</jacoco.version>
         <testcontainers.version>1.18.3</testcontainers.version>
+        <hibernate-utils.version>3.5.1</hibernate-utils.version>
     </properties>
 
     <modules>
