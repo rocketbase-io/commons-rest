@@ -24,4 +24,9 @@ public class ActivityController implements ActivityApi {
     public ResponseEntity<Activity> findByHosted(String id) {
         return null;
     }
+
+    @Override
+    public PageableResult<Activity> getAll(Pageable pageable) {
+        return null;
+    }
 }

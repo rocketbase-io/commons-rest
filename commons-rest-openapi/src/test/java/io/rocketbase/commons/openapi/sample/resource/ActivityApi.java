@@ -6,6 +6,7 @@ import io.rocketbase.commons.generator.QueryHook;
 import io.rocketbase.commons.openapi.sample.dto.Activity;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,5 +58,10 @@ public interface ActivityApi {
     )
     ResponseEntity<Activity> findByHosted(@PathVariable("id") String id);
 
+    @InfiniteHook(cacheKeys = "validate, logs", staleTime = 1)
+    @Operation(summary = "Returns the last 10 synchronization log entries for content with given id. The results are ordered from latest to earliest.")
+    @ApiResponse(responseCode = "200", description = "The list of the last 10 sync log entries")
+    @GetMapping(path = "/validate/logs", produces = MediaType.APPLICATION_JSON_VALUE)
+    PageableResult<Activity> getAll(@ParameterObject @SortDefault(sort = "dated", direction = Sort.Direction.DESC) Pageable pageable);
 
 }
