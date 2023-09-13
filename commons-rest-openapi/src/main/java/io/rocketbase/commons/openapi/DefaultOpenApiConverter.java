@@ -96,7 +96,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if ("Void".equalsIgnoreCase(type)) {
             type = "void";
         }
-        if ("Integer".equalsIgnoreCase(type) || "Long".equalsIgnoreCase(type) || "Double".equalsIgnoreCase(type) || "Float".equalsIgnoreCase(type) || "BigDecimal".equalsIgnoreCase(type)) {
+        if ("Integer".equalsIgnoreCase(type) || "Long".equalsIgnoreCase(type) || "Double".equalsIgnoreCase(type) || "Float".equalsIgnoreCase(type) || "Short".equalsIgnoreCase(type) || "BigDecimal".equalsIgnoreCase(type)) {
             type = "number";
         }
         for (String java : getJavaToUnknowns()) {
