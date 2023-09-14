@@ -54,12 +54,12 @@ export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TEr
     ...options
   });
   {% elseif method.hookType equals "infinite" %}
-export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TError = unknown>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
+export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TError = unknown>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useInfiniteQuery<{{ method.shortReturnType }}, TError, TData>(
     {
         queryKey: [{% for ck in method.cacheKeysPrepared('filter.') %}`{{ck}}`{% if not loop.last %}, {% endif %}{% endfor %}{% if method.hasRequiredFields or method.hasOptionalFields %}, filter {% endif %}],
-        queryFn: ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields %}...filter, {% endif %}{{  infiniteParams( method ) }}, overrides: { signal } }),
+        queryFn: ({ pageParam, signal }) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({ {% if method.hasRequiredFields or method.hasOptionalFields or method.fieldsExtendsPaging %}...filter, {% endif %}{{  infiniteParams( method ) }}, overrides: { signal } }),
         {% if method.staleTime is not null and method.staleTime > 0 %}staleTime: {{ method.staleTime }} * 1000, {% endif %}
         ...options,
         {{  infiniteOptions( method ) }}
