@@ -46,7 +46,8 @@ public class OpenApiClientCreatorService {
 
     @SneakyThrows
     public List<OpenApiController> getControllers(HttpServletRequest request) {
-        OpenAPI openAPI = Json.mapper().readValue(openApiWebMvcResource.openapiJson(request, Constants.DEFAULT_API_DOCS_URL, Locale.GERMAN), OpenAPI.class);
+        byte[] openapiJson = openApiWebMvcResource.openapiJson(request, Constants.DEFAULT_API_DOCS_URL, Locale.getDefault());
+        OpenAPI openAPI = Json.mapper().readValue(openapiJson, OpenAPI.class);
         Map<String, List<OpenApiControllerMethodExtraction>> remapped = new HashMap<>();
         for (Map.Entry<String, PathItem> entry : openAPI.getPaths().entrySet()) {
             addOperation(remapped, PathItem.HttpMethod.GET, entry.getKey(), entry.getValue().getGet());

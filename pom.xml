@@ -101,6 +101,7 @@ SOFTWARE.
         <pebble.version>3.2.1</pebble.version>
         <springdoc-openapi.version>2.2.0</springdoc-openapi.version>
         <lombok.version>1.18.28</lombok.version>
+        <swagger-annotations.version>2.2.15</swagger-annotations.version>
     </properties>
 
     <dependencyManagement>
