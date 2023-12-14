@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
+/**
+ * exception will get later replaced by javax.ws.rs.BadRequestException so that this handler is not needed anymore
+ */
+@Deprecated
 @ControllerAdvice
 public class BadRequestExceptionHandler extends BaseExceptionHandler {
 

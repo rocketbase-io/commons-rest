@@ -99,6 +99,12 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if ("Integer".equalsIgnoreCase(type) || "Long".equalsIgnoreCase(type) || "Double".equalsIgnoreCase(type) || "Float".equalsIgnoreCase(type) || "Short".equalsIgnoreCase(type) || "BigDecimal".equalsIgnoreCase(type)) {
             type = "number";
         }
+        if (type != null && type.endsWith("TSID")) {
+            return "string";
+        }
+        if (type != null && type.endsWith("JsonNode")) {
+            return "any";
+        }
         for (String java : getJavaToUnknowns()) {
             if (java.equalsIgnoreCase(type)) {
                 return "unknown";

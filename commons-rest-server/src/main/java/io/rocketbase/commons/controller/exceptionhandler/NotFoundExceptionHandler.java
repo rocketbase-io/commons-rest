@@ -9,6 +9,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+/**
+ * exception will get later replaced by javax.ws.rs.NotFoundException so that this handler is not needed anymore
+ */
+@Deprecated
 @ControllerAdvice
 public class NotFoundExceptionHandler extends BaseExceptionHandler {
 
