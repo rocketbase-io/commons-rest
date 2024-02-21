@@ -8,7 +8,9 @@ import { PageableResult } from "@rocketbase/commons-core";
 import { PageableRequest, useApi } from "../..";
 import { createPaginationOptions } from "../util";
 {% if controller.importTypes is not empty %}
-import { {% for i in controller.importTypes %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../model";
+{% for pack in controller.importTypes %}
+import { {% for i in pack.types %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "{{- pack.name -}}";
+{% endfor %}
 {% endif %}
 
 

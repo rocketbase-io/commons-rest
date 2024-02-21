@@ -8,10 +8,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Data
@@ -37,14 +34,20 @@ public class OpenApiController implements Serializable {
         this.openApiConverter = openApiConverter;
     }
 
-    public Set<String> getImportTypes() {
-        Set<String> result = new HashSet<>();
+    public Collection<ImportGroup> getImportTypes() {
+        Map<String, ImportGroup> packMap = new TreeMap<>();
         for (OpenApiControllerMethodExtraction m : Nulls.notNull(methods)) {
-            if (m != null && m.getImportTypes() != null) {
-                result.addAll(m.getImportTypes());
-            }
+            Nulls.notNull(m, OpenApiControllerMethodExtraction::getImportTypes, new ArrayList<ImportGroup>())
+                    .stream()
+                    .forEach(i -> {
+                        if (packMap.containsKey(i.getName())) {
+                            packMap.get(i.getName()).getTypes().addAll(i.getTypes());
+                        } else {
+                            packMap.put(i.getName(), i);
+                        }
+                    });
         }
-        return result;
+        return packMap.values();
     }
 
     protected String toKebabCase(String input) {

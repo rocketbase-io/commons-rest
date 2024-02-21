@@ -1,6 +1,7 @@
 package io.rocketbase.commons.openapi;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.rocketbase.commons.openapi.model.ImportGroup;
 import io.rocketbase.commons.openapi.model.OpenApiController;
 import io.rocketbase.commons.openapi.model.TypescriptApiField;
 import io.rocketbase.commons.util.Nulls;
@@ -109,6 +110,7 @@ public class OpenApiControllerMethodExtraction {
             for (Parameter p : operation.getParameters()) {
                 if (!(config.getTypescriptConverter().hasPageableParameter(parameterTypes)
                         && Nulls.notNull(config.getPageableParams()).contains(p.getName()))) {
+
                     result.add(convert(p));
                 }
             }
@@ -232,7 +234,7 @@ public class OpenApiControllerMethodExtraction {
                 .collect(Collectors.toList());
     }
 
-    public Set<String> getImportTypes() {
+    public List<ImportGroup> getImportTypes() {
         Set<String> types = new HashSet<>();
         if (genericReturnType != null) {
             types.add(genericReturnType);
@@ -240,8 +242,14 @@ public class OpenApiControllerMethodExtraction {
         types.addAll(Nulls.notNull(getFields()).stream()
                 .filter(Objects::nonNull)
                 .map(TypescriptApiField::getType)
-                .collect(Collectors.toSet()));
-        return config.getTypescriptConverter().getImportTypes(types);
+                .toList());
+
+        Map<String, List<String>> packageMap = types.stream()
+                .collect(Collectors.groupingBy(v -> config.getTypescriptConverter().getImportPackage(v)));
+
+        return packageMap.entrySet().stream()
+                .map(e -> new ImportGroup(e.getKey(), config.getTypescriptConverter().getImportTypes(new HashSet<>(e.getValue()))))
+                .collect(Collectors.toList());
     }
 
     public String getShortReturnType() {

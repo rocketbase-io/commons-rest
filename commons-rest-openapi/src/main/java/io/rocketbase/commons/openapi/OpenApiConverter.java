@@ -27,6 +27,16 @@ public interface OpenApiConverter {
     Set<String> getImportTypes(Set<String> allTypes);
 
     /**
+     * in some cases you want to import dependencies from other packages then your code... then you need to implement this method by your-own
+     *
+     * @param type raw name of the java-class that is elected to be imported
+     * @return a path or package to get it from
+     */
+    default String getImportPackage(String type) {
+        return "../../model";
+    }
+
+    /**
      * used to remove package string from full classpath of class
      */
     default String removePackage(String value) {
