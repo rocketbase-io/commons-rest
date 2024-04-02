@@ -93,15 +93,16 @@ SOFTWARE.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring-boot.version>3.2.0</spring-boot.version>
+        <spring-boot.version>3.2.4</spring-boot.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <jacoco.version>0.8.11</jacoco.version>
         <hashids.version>1.0.3</hashids.version>
 
         <pebble.version>3.2.2</pebble.version>
-        <springdoc-openapi.version>2.3.0</springdoc-openapi.version>
-        <lombok.version>1.18.30</lombok.version>
-        <swagger-annotations.version>2.2.19</swagger-annotations.version>
+        <springdoc-openapi.version>2.5.0</springdoc-openapi.version>
+        <lombok.version>1.18.32</lombok.version>
+        <swagger-annotations.version>2.2.21</swagger-annotations.version>
+        <hypersistence-tsid.version>2.1.1</hypersistence-tsid.version>
     </properties>
 
     <dependencyManagement>
@@ -132,7 +133,7 @@ SOFTWARE.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.1.2</version>
+                    <version>3.2.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -170,7 +171,7 @@ SOFTWARE.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>
+                    <version>3.13.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -185,7 +186,7 @@ SOFTWARE.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.13.0</version>
             </plugin>
 
             <plugin>
@@ -223,7 +224,7 @@ SOFTWARE.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>3.6.3</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -239,7 +240,7 @@ SOFTWARE.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
+                        <version>3.2.2</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

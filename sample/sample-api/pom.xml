@@ -30,7 +30,7 @@
         <dependency>
             <groupId>io.hypersistence</groupId>
             <artifactId>hypersistence-tsid</artifactId>
-            <version>2.1.1</version>
+            <version>${hypersistence-tsid.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
