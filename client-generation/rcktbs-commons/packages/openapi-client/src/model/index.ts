@@ -1,7 +1,7 @@
 export * from './openapi';
 
 export interface PageableRequest {
-  page?: number;
+  page?: unknown;
   pageSize?: number;
   sort?: string[];
 }

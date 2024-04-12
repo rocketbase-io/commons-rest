@@ -2,6 +2,7 @@ package io.rocketbase.commons.openapi.sample.resource;
 
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.generator.InfiniteHook;
+import io.rocketbase.commons.generator.QueryHook;
 import io.rocketbase.commons.openapi.sample.dto.Tile;
 import io.rocketbase.commons.openapi.sample.dto.UserPreference;
 import io.swagger.v3.oas.annotations.Operation;
@@ -46,7 +47,7 @@ public interface TileApi {
                                                    @Parameter(description = "filters by userPreference") @Valid @RequestParam(value = "userPreference", required = false) Optional<UserPreference> userPreference,
                                                    @Parameter(description = "filters by categoryId") @Valid @RequestParam(value = "categoryId", required = false) Set<Integer> categoryIds);
 
-    @InfiniteHook(value = "findOne", cacheKeys = "tile,detail,${id}")
+    @QueryHook(value = "findOne", cacheKeys = "tile,detail,${id}")
     @GetMapping(
             path = "/tile/{id}",
             produces = MimeTypeUtils.APPLICATION_JSON_VALUE,

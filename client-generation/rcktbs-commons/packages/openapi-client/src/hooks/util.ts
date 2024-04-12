@@ -1,5 +1,5 @@
 import { PageableResult } from "@rocketbase/commons-core";
-import { InfiniteData } from '{{- reactQueryVersion.packageName -}}';
+import { InfiniteData } from '@tanstack/react-query';
 
 export function createPaginationOptions<T extends PageableResult<unknown>>() {
   return {
@@ -7,10 +7,9 @@ export function createPaginationOptions<T extends PageableResult<unknown>>() {
       return page !== 0 ? page - 1 : 0;
     },
     getNextPageParam: ({page, totalPages}:  T) => {
-      return page < totalPages - 1 ? page + 1 : {% if reactQueryVersion.name equals "v5" %}null{% else %}undefined{% endif %};
+      return page < totalPages - 1 ? page + 1 : null;
     },
-    {% if reactQueryVersion.name equals "v5" %}
-    initialPageParam: 0,{% endif %}
+    initialPageParam: 0
   }
 }
 

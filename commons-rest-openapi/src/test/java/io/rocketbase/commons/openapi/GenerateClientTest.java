@@ -27,7 +27,7 @@ public class GenerateClientTest {
     @Test
     public void downloadZip() throws Exception {
         File destination = new File("target/test.zip");
-        download(new URL(baseUrl + "/generator/client/v4/test.zip"), destination);
+        download(new URL(baseUrl + "/generator/client/v5/test.zip"), destination);
         log.info("downloaded: {}", destination.getAbsolutePath());
     }
 

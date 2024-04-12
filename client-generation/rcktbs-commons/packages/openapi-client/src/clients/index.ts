@@ -10,7 +10,7 @@ export const useApi = () => {
 
   return React.useMemo(
     () => ({
-      moduleApi: createOpenApiModuleApi(axiosClient, { baseURL: baseUrl() }),
+      openApiModuleApi: createOpenApiModuleApi(axiosClient, { baseURL: baseUrl() }),
     }),
     [axiosClient, baseUrl]
   );

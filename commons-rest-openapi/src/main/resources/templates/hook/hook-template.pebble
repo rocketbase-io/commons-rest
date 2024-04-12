@@ -3,7 +3,7 @@
 
 {% if controller.fieldImports is not empty %}import { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.clientFolder -}}";
 {% endif %}
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "{% if reactQueryVersion.name equals "v4" %}@tanstack/{% endif %}react-query";
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "{{- reactQueryVersion.packageName -}}";
 import { PageableResult } from "@rocketbase/commons-core";
 import { PageableRequest, useApi } from "../..";
 import { createPaginationOptions } from "../util";
@@ -24,7 +24,7 @@ import { {% for i in pack.types %}{{ i }}{% if not loop.last %}, {% endif %}{% e
 
   */
   {% if method.hookType equals "query" %}
-export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TError = unknown>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"> = {}) {
+export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {% block "terror" %}TError = {% if reactQueryVersion.name equals "v5" %}Error{% else %}unknown{% endif %}{% endblock %}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useQuery<{{ method.shortReturnType }}, TError, TData>(
     {
@@ -34,7 +34,7 @@ export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TEr
     }
   );
   {% elseif method.hookType equals "mutation" %}
-export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TError = unknown, TVariables = {{ method.shortInputType }}, TContext = unknown>({onSuccess, ...options}: Omit<UseMutationOptions<{{ method.shortReturnType }}, TError, {{ method.shortInputType }}, TContext>,'mutationFn'> = {}) {
+export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {{ block("terror") }}, TVariables = {{ method.shortInputType }}, TContext = unknown>({onSuccess, ...options}: Omit<UseMutationOptions<{{ method.shortReturnType }}, TError, {{ method.shortInputType }}, TContext>,'mutationFn'> = {}) {
   const queryClient = useQueryClient();
   const { {{ configuredGroupVar }} } = useApi();
   return useMutation<{{ method.shortReturnType }}, TError, {{ method.shortInputType }}, TContext>({
@@ -56,7 +56,7 @@ export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TEr
     ...options
   });
   {% elseif method.hookType equals "infinite" %}
-export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, TError = unknown>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {
+export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {{ block("terror") }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" {% if reactQueryVersion.name equals "v5" %} | "initialPageParam"{% endif %}> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useInfiniteQuery<{{ method.shortReturnType }}, TError, TData>(
     {

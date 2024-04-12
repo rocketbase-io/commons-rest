@@ -9,6 +9,9 @@ mkdir -p ./tmp
 
 NX_WORKSPACE=rcktbs-commons
 PACKAGE=openapi-client
+VERSION="1.$(date '+%Y%m%d').$(date '+%H%M')"
+
+
 ARRAY=(
 "../commons-rest-openapi/target/test.zip:openapi"
  )
@@ -37,7 +40,7 @@ rm -rf ./tmp
 
 cd $NX_WORKSPACE
 cd packages/$PACKAGE
-npm version "0.1.0-rc.$(date '+%Y%m%d-%H%M')"
+npm version $VERSION
 npm i
 cd ../..
 npm install -g npx
