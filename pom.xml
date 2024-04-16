@@ -103,6 +103,7 @@ SOFTWARE.
         <lombok.version>1.18.32</lombok.version>
         <swagger-annotations.version>2.2.21</swagger-annotations.version>
         <hypersistence-tsid.version>2.1.1</hypersistence-tsid.version>
+        <typescript-generator.version>3.2.1263</typescript-generator.version>
     </properties>
 
     <dependencyManagement>

@@ -42,6 +42,12 @@
         </dependency>
 
         <dependency>
+            <groupId>cz.habarta.typescript-generator</groupId>
+            <artifactId>typescript-generator-spring</artifactId>
+            <version>3.2.1263</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <version>${springdoc-openapi.version}</version>
@@ -56,5 +62,97 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.rocketbase.commons</groupId>
+            <artifactId>commons-rest-tsid</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.hypersistence</groupId>
+            <artifactId>hypersistence-tsid</artifactId>
+            <version>${hypersistence-tsid.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <!--
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>cz.habarta.typescript-generator</groupId>
+                <artifactId>typescript-generator-maven-plugin</artifactId>
+                <version>${typescript-generator.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jsonLibrary>jackson2</jsonLibrary>
+                    <optionalAnnotations>
+                        <optionalAnnotation>jakarta.annotation.Nullable</optionalAnnotation>
+                    </optionalAnnotations>
+                    <optionalProperties>useSpecifiedAnnotations</optionalProperties>
+                    <classPatterns>
+                        <classPattern>io.rocketbase.commons.sample.dto.**</classPattern>
+                    </classPatterns>
+                    <excludeClassPatterns>
+                        <excludeClassPattern>**Builder</excludeClassPattern>
+                        <excludeClassPattern>**BuilderImpl</excludeClassPattern>
+                        <excludeClassPattern>**Deserializer</excludeClassPattern>
+                        <excludeClassPattern>**Serializer</excludeClassPattern>
+                        <excludeClassPattern>**Exception</excludeClassPattern>
+                        <excludeClassPattern>**Visitor</excludeClassPattern>
+                        <excludeClassPattern>org.springframework.boot.autoconfigure.**</excludeClassPattern>
+                    </excludeClassPatterns>
+                    <excludeClasses>
+                        <excludeClass>java.io.Serializable</excludeClass>
+                        <excludeClass>java.lang.Iterable</excludeClass>
+                    </excludeClasses>
+                    <customTypeMappings>
+                        <customTypeMapping>java.net.URL:string</customTypeMapping>
+                        <customTypeMapping>io.hypersistence.tsid.TSID:string</customTypeMapping>
+                        <customTypeMapping>java.time.LocalDate:string</customTypeMapping>
+                        <customTypeMapping>java.time.LocalTime:string</customTypeMapping>
+                        <customTypeMapping>java.time.LocalDateTime:string</customTypeMapping>
+                        <customTypeMapping>java.time.Instant:string</customTypeMapping>
+                        <customTypeMapping><![CDATA[java.util.Map<K,V>:Record<K,V>]]></customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.obfuscated.ObfuscatedId:rest.ObfuscatedId
+                        </customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.dto.ErrorResponse:rest.ErrorResponse
+                        </customTypeMapping>
+                        <customTypeMapping>
+                            <![CDATA[io.rocketbase.commons.dto.PageableResult<E>:rest.PageableResult<E>]]></customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.dto.address.AddressDto:rest.AddressDto
+                        </customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.dto.address.ContactDto:rest.ContactDto
+                        </customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.dto.address.Gender:rest.Gender</customTypeMapping>
+                        <customTypeMapping>io.rocketbase.commons.translation.Translation:rest.Translation
+                        </customTypeMapping>
+                    </customTypeMappings>
+                    <outputFileType>implementationFile</outputFileType>
+                    <outputFile>${project.build.directory}/typescript-generator/openapi.ts</outputFile>
+                    <outputKind>module</outputKind>
+                    <mapEnum>asEnum</mapEnum>
+                    <nonConstEnums>true</nonConstEnums>
+                    <noEslintDisable>true</noEslintDisable>
+                    <noTslintDisable>true</noTslintDisable>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>cz.habarta.typescript-generator</groupId>
+                        <artifactId>typescript-generator-spring</artifactId>
+                        <version>${typescript-generator.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
+    -->
 </project>

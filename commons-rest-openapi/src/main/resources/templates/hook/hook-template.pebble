@@ -41,7 +41,11 @@ export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {{ 
     mutationFn: ({% if not method.isVoidShortInputType %}content{% endif %}) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({% if method.isVoidShortInputType %} {} {% else %} content {% endif %}),
     {% if method.invalidateKeysPrepared('content.', 'data.') is not empty %}
     onSuccess: async (data, content, context) => {
-        const invalide = async () => await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}queryClient.invalidateQueries([{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]){% if not loop.last %}, {% endif %}{% endfor %}]);
+        const invalide = async () => await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}
+        queryClient.invalidateQueries(
+            {% if reactQueryVersion.name equals "v5" %}{queryKey: [{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]}
+            {% else %}[{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}
+       ){% if not loop.last %}, {% endif %}{% endfor %}]);
 
         if (onSuccess) {
           const result = onSuccess(data, content, context);
