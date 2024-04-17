@@ -3,7 +3,7 @@
 
 {% if controller.fieldImports is not empty %}import { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "../../{{- generatorConfig.clientFolder -}}";
 {% endif %}
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions } from "{{- reactQueryVersion.packageName -}}";
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions {% if reactQueryVersion.number >= 4 %}, InfiniteData{% endif %} } from "{{- reactQueryVersion.packageName -}}";
 import { PageableResult } from "@rocketbase/commons-core";
 import { PageableRequest, useApi } from "../..";
 import { createPaginationOptions } from "../util";
@@ -60,7 +60,7 @@ export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {{ 
     ...options
   });
   {% elseif method.hookType equals "infinite" %}
-export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {{ block("terror") }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" {% if reactQueryVersion.name equals "v5" %} | "initialPageParam"{% endif %}> = {}) {
+export function {{ method.hookName -}}<TData = {% if reactQueryVersion.number >= 4 %}InfiniteData<{{ method.shortReturnType }}>{% else %}{{ method.shortReturnType }}{% endif %}, {{ block("terror") }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" {% if reactQueryVersion.name equals "v5" %} | "initialPageParam"{% endif %}> = {}) {
   const { {{ configuredGroupVar }} } = useApi();
   return useInfiniteQuery<{{ method.shortReturnType }}, TError, TData>(
     {
