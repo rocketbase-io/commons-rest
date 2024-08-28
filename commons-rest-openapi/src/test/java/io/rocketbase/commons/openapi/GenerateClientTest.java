@@ -31,6 +31,13 @@ public class GenerateClientTest {
         log.info("downloaded: {}", destination.getAbsolutePath());
     }
 
+    @Test
+    public void downloadOpenApiYaml() throws Exception {
+        File destination = new File("target/api-docs.yaml");
+        download(new URL(baseUrl + "/v3/api-docs.yaml"), destination);
+        log.info("downloaded: {}", destination.getAbsolutePath());
+    }
+
     private static void download(URL url, File file) throws IOException {
         ReadableByteChannel rbc = Channels.newChannel(url.openStream());
         FileOutputStream fos = new FileOutputStream(file);

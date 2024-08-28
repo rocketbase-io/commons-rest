@@ -1,5 +1,6 @@
 package io.rocketbase.commons.openapi.sample.dto;
 
+import io.hypersistence.tsid.TSID;
 import lombok.*;
 
 import java.io.Serializable;
@@ -12,7 +13,7 @@ import java.time.Instant;
 @Data
 public class Tile implements Serializable {
 
-    private String id;
+    private TSID id;
 
     private TileType type;
 

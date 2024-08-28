@@ -1,5 +1,6 @@
 package io.rocketbase.commons.openapi.sample.resource;
 
+import io.hypersistence.tsid.TSID;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.openapi.sample.dto.Tile;
 import io.rocketbase.commons.openapi.sample.dto.UserPreference;
@@ -19,7 +20,7 @@ public class TileController implements TileApi {
     }
 
     @Override
-    public Tile get(String id) {
+    public Tile get(TSID id) {
         return null;
     }
 }

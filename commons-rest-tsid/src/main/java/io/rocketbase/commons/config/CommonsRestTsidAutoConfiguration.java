@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.Module;
 import io.hypersistence.tsid.TSID;
 import io.rocketbase.commons.controller.exceptionhandler.TsidDecodeExceptionHandler;
 import io.rocketbase.commons.exception.TsidDecodeException;
+import io.rocketbase.commons.tsid.TsidConverter;
 import io.rocketbase.commons.tsid.TsidModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.Formatter;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.WebDataBinder;
@@ -34,6 +36,11 @@ public class CommonsRestTsidAutoConfiguration {
     @Bean
     public Module tsidModule() {
         return new TsidModule();
+    }
+
+    @Bean
+    public Converter tsidConverter() {
+        return new TsidConverter();
     }
 
     @RestControllerAdvice

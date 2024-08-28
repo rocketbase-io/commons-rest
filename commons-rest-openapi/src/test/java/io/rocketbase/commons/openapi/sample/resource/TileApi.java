@@ -1,5 +1,6 @@
 package io.rocketbase.commons.openapi.sample.resource;
 
+import io.hypersistence.tsid.TSID;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.generator.InfiniteHook;
 import io.rocketbase.commons.generator.QueryHook;
@@ -54,5 +55,5 @@ public interface TileApi {
             consumes = MimeTypeUtils.ALL_VALUE
     )
     Tile get(@Parameter(description = "id of tile", required = true)
-             @PathVariable("id") String id);
+             @PathVariable("id") TSID id);
 }
