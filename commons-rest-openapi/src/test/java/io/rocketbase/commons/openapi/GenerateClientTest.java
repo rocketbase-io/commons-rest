@@ -1,7 +1,12 @@
 package io.rocketbase.commons.openapi;
 
 
+import cz.habarta.typescript.generator.*;
+import cz.habarta.typescript.generator.parser.RestApplicationParser;
+import cz.habarta.typescript.generator.parser.SourceType;
+import cz.habarta.typescript.generator.spring.SpringApplicationParser;
 import io.rocketbase.commons.openapi.sample.SampleApplication;
+import io.rocketbase.commons.openapi.sample.resource.ActivityController;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +20,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.Collections;
+import java.util.List;
 
 @Slf4j
 @ExtendWith(SpringExtension.class)
@@ -44,5 +51,32 @@ public class GenerateClientTest {
         fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         fos.close();
         rbc.close();
+    }
+
+    private void generateTypeScriptTypes() {
+        final Settings settings = new Settings();
+        settings.outputKind = TypeScriptOutputKind.global;
+        settings.outputFileType = TypeScriptFileType.implementationFile;
+        settings.jsonLibrary = JsonLibrary.jackson2;
+        settings.noFileComment = true;
+        settings.noTslintDisable = true;
+        settings.noEslintDisable = true;
+        settings.newline = "\n";
+        settings.customTypeMappings = Collections.singletonMap("java.util.Map<K, V>", "Map<K, V>");
+        settings.mapDate = DateMapping.asString;
+        settings.classLoader = Thread.currentThread().getContextClassLoader();
+        settings.optionalAnnotations = List.of(jakarta.annotation.Nullable.class, org.springframework.lang.Nullable.class);
+        settings.generateSpringApplicationClient = true;
+
+
+        final Input.Parameters parameters = new Input.Parameters();
+        parameters.classNamePatterns = List.of("io.rocketbase.commons.openapi.sample.dto.**");
+
+        TypeScriptGenerator typeScriptGenerator = new TypeScriptGenerator(settings);
+        String result = typeScriptGenerator.generateTypeScript(Input.from(ActivityController.class));//Input.from(parameters));
+
+        SpringApplicationParser springApplicationParser = new SpringApplicationParser(settings, typeScriptGenerator.getCommonTypeProcessor());
+
+        RestApplicationParser.Result jaxrsResult = springApplicationParser.tryParse(new SourceType<>(ActivityController.class));
     }
 }
