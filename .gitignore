@@ -28,6 +28,3 @@ hs_err_pid*
 target/
 
 node_modules/
-
-client-generation/rcktbs-commons/packages/openapi-client/src/hooks/**
-client-generation/rcktbs-commons/packages/openapi-client/src/clients/**

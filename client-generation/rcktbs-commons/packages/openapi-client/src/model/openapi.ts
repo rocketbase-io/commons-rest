@@ -1,53 +1,53 @@
-// Generated using typescript-generator version 3.2.1263 on 2024-04-16 18:09:05.
+// Generated using typescript-generator version 3.2.1263 on 2025-07-05 10:12:11.
 
 export interface Activity {
-  type: "comment" | "dossier";
-  id: string;
-  dated: string;
-  user: string;
+    type: "comment" | "dossier";
+    id: string;
+    dated: string;
+    user: string;
 }
 
 export interface CommentActivity extends Activity {
-  type: "comment";
-  comment: string;
-  attachments: string[];
+    type: "comment";
+    comment: string;
+    attachments: string[];
 }
 
 export interface PermissionCmd {
-  objectId: string;
-  identityIds: string[];
-  permissionId: number;
+    objectId: string;
+    identityIds: string[];
+    permissionId: number;
 }
 
 export interface RecommendationActivity extends Activity {
-  type: "dossier";
-  objectId: string;
-  objectTitle: string;
-  message: string;
+    type: "dossier";
+    objectId: string;
+    objectTitle: string;
+    message: string;
 }
 
 export interface Tile {
-  id: string;
-  type: TileType;
-  name: string;
-  description: string;
-  commentCount: number;
-  itemCount: number;
-  userPreference: UserPreference;
-  created: string;
-  lastModified: string;
+    id: string;
+    type: TileType;
+    name: string;
+    description: string;
+    commentCount: number;
+    itemCount: number;
+    userPreference: UserPreference;
+    created: string;
+    lastModified: string;
 }
 
 export type ActivityUnion = CommentActivity | RecommendationActivity;
 
 export enum TileType {
-  SEARCH_CONFIG = "search-config",
-  PINBOARD = "pinboard",
-  BRIEFING = "briefing",
-  SHOWROOM = "showroom",
+    SEARCH_CONFIG = "search-config",
+    PINBOARD = "pinboard",
+    BRIEFING = "briefing",
+    SHOWROOM = "showroom",
 }
 
 export enum UserPreference {
-  FAVORED = "favored",
-  DISFAVORED = "disfavored",
+    FAVORED = "favored",
+    DISFAVORED = "disfavored",
 }

@@ -99,7 +99,7 @@
                     </optionalAnnotations>
                     <optionalProperties>useSpecifiedAnnotations</optionalProperties>
                     <classPatterns>
-                        <classPattern>io.rocketbase.commons.sample.dto.**</classPattern>
+                        <classPattern>io.rocketbase.commons.openapi.sample.dto.**</classPattern>
                     </classPatterns>
                     <excludeClassPatterns>
                         <excludeClassPattern>**Builder</excludeClassPattern>

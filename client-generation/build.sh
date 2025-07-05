@@ -32,10 +32,10 @@ for config in "${ARRAY[@]}" ; do
     cp -r ./tmp/src/clients/* ./$NX_WORKSPACE/packages/$PACKAGE/src/clients/$VALUE
 done
 
-#
-# mkdir -p ./$NX_WORKSPACE/packages/$PACKAGE/src/model/
-# cp ./$PACKAGE/target/typescript-generator/user.ts ./$NX_WORKSPACE/packages/$PACKAGE/src/model/
-#
+# due to typescript-gen issues with test-classes manual process
+#mkdir -p ./$NX_WORKSPACE/packages/$PACKAGE/src/model/
+#cp ./$PACKAGE/target/typescript-generator/openapi.ts ./$NX_WORKSPACE/packages/$PACKAGE/src/model/
+
 rm -rf ./tmp
 
 cd $NX_WORKSPACE
