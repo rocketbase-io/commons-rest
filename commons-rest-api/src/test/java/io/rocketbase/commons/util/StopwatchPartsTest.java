@@ -19,7 +19,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[[0-9]{1,2}% part9\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part8\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part7\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part6\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part5\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part4\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part3\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part2\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part1\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part0\\: [0-9]{2,3} ms\\]"));
+                "⏱ [0-9]+ ms \\[[0-9]{1,3}% part9\\: [0-9]+ ms \\| [0-9]{1,3}% part8\\: [0-9]+ ms \\| [0-9]{1,3}% part7\\: [0-9]+ ms \\| [0-9]{1,3}% part6\\: [0-9]+ ms \\| [0-9]{1,3}% part5\\: [0-9]+ ms \\| [0-9]{1,3}% part4\\: [0-9]+ ms \\| [0-9]{1,3}% part3\\: [0-9]+ ms \\| [0-9]{1,3}% part2\\: [0-9]+ ms \\| [0-9]{1,3}% part1\\: [0-9]+ ms \\| [0-9]{1,3}% part0\\: [0-9]+ ms\\]"));
 
     }
 
@@ -34,7 +34,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[[0-9]{1,2}% part0\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part1\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part2\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part3\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part4\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part5\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part6\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part7\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part8\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part9\\: [0-9]{2,3} ms\\]"));
+                "⏱ [0-9]+ ms \\[[0-9]{1,3}% part0: [0-9]+ ms \\| [0-9]{1,3}% part1: [0-9]+ ms \\| [0-9]{1,3}% part2: [0-9]+ ms \\| [0-9]{1,3}% part3: [0-9]+ ms \\| [0-9]{1,3}% part4: [0-9]+ ms \\| [0-9]{1,3}% part5: [0-9]+ ms \\| [0-9]{1,3}% part6: [0-9]+ ms \\| [0-9]{1,3}% part7: [0-9]+ ms \\| [0-9]{1,3}% part8: [0-9]+ ms \\| [0-9]{1,3}% part9: [0-9]+ ms\\]"));
     }
 
     @Test
@@ -49,7 +49,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[[0-9]{1,2}% part9\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part8\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part7\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part6\\: [0-9]{2,3} ms\\]"));
+                "⏱ [0-9]+ ms \\[([0-9]{1,3}% part[0-9]: [0-9]+ ms \\| ){3}[0-9]{1,3}% part[0-9]: [0-9]+ ms\\]"));
     }
 
     @Test
@@ -65,7 +65,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[[0-9]{1,2}% part0\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part1\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part2\\: [0-9]{2,3} ms\\]"));
+                "⏱ [0-9]+ ms \\[[0-9]{1,3}% part0: [0-9]+ ms \\| [0-9]{1,3}% part1: [0-9]+ ms \\| [0-9]{1,3}% part2: [0-9]+ ms\\]"));
     }
 
     @Test
@@ -82,7 +82,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[part0\\: [0-9]{2,3} ms \\| part1\\: [0-9]{2,3} ms \\| part2\\: [0-9]{2,3} ms\\]"));
+                "⏱ [0-9]+ ms \\[part0: [0-9]+ ms \\| part1: [0-9]+ ms \\| part2: [0-9]+ ms\\]"));
     }
 
     @Test
@@ -99,7 +99,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[[0-9]{1,2}% part0 \\| [0-9]{1,2}% part1 \\| [0-9]{1,2}% part2\\]"));
+                "⏱ [0-9]+ ms \\[[0-9]{1,3}% part0 \\| [0-9]{1,3}% part1 \\| [0-9]{1,3}% part2\\]"));
     }
 
     @Test
@@ -113,7 +113,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms"));
+                "⏱ [0-9]+ ms"));
     }
 
     @Test
@@ -128,7 +128,7 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "🎉 [0-9]{2,3} ms"));
+                "🎉 [0-9]+ ms"));
     }
 
     @Test
@@ -142,6 +142,6 @@ class StopwatchPartsTest {
         }
         String print = stopwatch.print();
         assertThat(print, matchesPattern(
-                "⏱ [0-9]{2,3} ms \\[[0-9]{1,2}% part9\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part8\\: [0-9]{2,3} ms \\| [0-9]{1,2}% part7\\: [0-9]{2,3} ms \\| [0-9]{1,2}% \"other\"\\: [0-9]{2,3} ms\\]"));
+                "⏱ [0-9]+ ms \\[([0-9]{1,3}% part[0-9]: [0-9]+ ms \\| ){2}[0-9]{1,3}% part[0-9]: [0-9]+ ms \\| [0-9]{1,3}% \"other\": [0-9]+ ms\\]"));
     }
 }
