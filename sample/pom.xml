@@ -25,7 +25,7 @@
         <spring-boot.version>3.5.3</spring-boot.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
-        <lombok.version>1.18.38</lombok.version>
+        <lombok.version>1.18.36</lombok.version>
 
         <jacoco.version>0.8.13</jacoco.version>
         <testcontainers.version>1.21.3</testcontainers.version>
