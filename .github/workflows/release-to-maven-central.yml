@@ -34,7 +34,7 @@ jobs:
         run: mvn versions:set "-DnewVersion=${{ github.event.inputs.releaseversion }}"
 
       - name: Publish package
-        run: mvn --batch-mode -Dgpg.passphrase= deploy -DskipTests
+        run: mvn --batch-mode -Prelease -Dgpg.passphrase=${{ secrets.MAVEN_GPG_PASSPHRASE }} -Dgpg.pinentry-mode=loopback clean deploy -DskipTests
         env:
           MAVEN_USERNAME: ${{ secrets.OSS_SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSS_SONATYPE_PASSWORD }}
