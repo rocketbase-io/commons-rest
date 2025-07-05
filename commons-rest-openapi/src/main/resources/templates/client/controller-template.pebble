@@ -2,7 +2,7 @@
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
 import { buildRequestorFactory, RequestorBuilder, PageableResult } from "@rocketbase/commons-core";
-import { PageableRequest } from "../..";
+import { PageableRequest } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.modelFolder -}}";
 {% if controller.importTypes is not empty %}
 {% for pack in controller.importTypes %}
 import { {% for i in pack.types %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "{{- pack.name -}}";
