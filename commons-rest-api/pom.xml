@@ -35,6 +35,7 @@ SOFTWARE.
     </parent>
 
     <artifactId>commons-rest-api</artifactId>
+    <name>Commons REST API</name>
 
     <dependencies>
         <dependency>

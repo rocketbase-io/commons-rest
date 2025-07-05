@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>commons-rest-logging-aspect</artifactId>
+    <name>Commons REST Logging Aspect</name>
 
     <dependencies>
         <dependency>

@@ -8,6 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>commons-rest-posthog</artifactId>
+    <name>Commons REST PostHog</name>
 
     <dependencies>
         <dependency>
