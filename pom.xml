@@ -210,13 +210,6 @@ SOFTWARE.
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
-                            <excludeArtifacts>
-                                <excludeArtifact>rest-sample</excludeArtifact>
-                                <excludeArtifact>sample-api</excludeArtifact>
-                                <excludeArtifact>sample-model</excludeArtifact>
-                                <excludeArtifact>sample-server</excludeArtifact>
-                                <excludeArtifact>coverage</excludeArtifact>
-                            </excludeArtifacts>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -246,6 +239,12 @@ SOFTWARE.
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <gpgArguments>
+                                        <arg>--pinentry-mode</arg>
+                                        <arg>loopback</arg>
+                                    </gpgArguments>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
