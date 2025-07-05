@@ -204,12 +204,19 @@ SOFTWARE.
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
+                        <version>0.8.2</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
                             <autoPublish>true</autoPublish>
                             <waitUntil>published</waitUntil>
+                            <excludeArtifacts>
+                                <excludeArtifact>rest-sample</excludeArtifact>
+                                <excludeArtifact>sample-api</excludeArtifact>
+                                <excludeArtifact>sample-model</excludeArtifact>
+                                <excludeArtifact>sample-server</excludeArtifact>
+                                <excludeArtifact>coverage</excludeArtifact>
+                            </excludeArtifacts>
                         </configuration>
                     </plugin>
                     <plugin>

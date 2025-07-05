@@ -31,11 +31,17 @@ jobs:
         run: mvn versions:set "-DnewVersion=${{ github.event.inputs.releaseversion }}"
 
       - name: Publish package
-        run: mvn --batch-mode clean deploy -P release -DskipTests=true -Dcentral.autoPublish=true
+        run: mvn --batch-mode clean deploy -P release -DskipTests=true
         env:
           MAVEN_USERNAME: ${{ secrets.OSS_SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSS_SONATYPE_PASSWORD }}
           MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+
+      - name: Publish to Central Portal
+        run: mvn central-publishing:publish -P release
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSS_SONATYPE_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSS_SONATYPE_PASSWORD }}
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
