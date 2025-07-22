@@ -211,6 +211,19 @@ public class OpenApiControllerMethodExtraction {
         return result;
     }
 
+    public String getQueryOptionName() {
+        if (hookType == null) {
+            return null;
+        }
+        String result = "queryOption";
+        if (getShortInputType().equalsIgnoreCase("void")) {
+            result += StringUtils.capitalize(getController().getShortName()) + StringUtils.capitalize(getMethodName());
+        } else {
+            result += StringUtils.capitalize(getShortInputType());
+        }
+        return result;
+    }
+
     public List<String> getCacheKeysPrepared(String prefix) {
         if (cacheKeys == null) {
             return null;

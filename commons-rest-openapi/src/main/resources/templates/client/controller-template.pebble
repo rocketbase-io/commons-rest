@@ -60,7 +60,7 @@ export interface {{ controller.shortName -}}Api {
   /*
    * {{ method.description }}
 
-  */
+   */
 {% endif %}
   {{ method.methodName }}: RequestorBuilder<{% if method.fields is not empty %}{{ method.shortInputType}}{% elseif method.fieldsExtendsPaging %}PageableRequest{% else %}unknown{% endif %}, {{ method.shortReturnType }}>;
 {% endif %}
