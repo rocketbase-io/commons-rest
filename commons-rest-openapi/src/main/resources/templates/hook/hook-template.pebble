@@ -95,7 +95,7 @@ export const {{ method.queryOptionName -}} = <TData={{ method.shortReturnType }}
     {{  infiniteOptions( method ) }}
 });
 
-export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {% block "terror" %}TError = {% if reactQueryVersion.name equals "v5" %}Error{% else %}unknown{% endif %}{% endblock %}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" | "initialPageParam"> = {}) {
+export function {{ method.hookName -}}<TData = InfiniteData<{{ method.shortReturnType }}>, {% block "terror" %}TError = {% if reactQueryVersion.name equals "v5" %}Error{% else %}unknown{% endif %}{% endblock %}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" | "initialPageParam"> = {}) {
     const { {{ configuredGroupVar }} } = useApi();
     return useInfiniteQuery<{{ method.shortReturnType }}, TError, TData>({{ method.queryOptionName -}}({{ configuredGroupVar }}, {% if method.hasRequiredFields or method.hasOptionalFields %}filter,{% endif %} options));
 }
