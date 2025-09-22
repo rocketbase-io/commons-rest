@@ -84,15 +84,15 @@ SOFTWARE.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring-boot.version>3.5.3</spring-boot.version>
+        <spring-boot.version>3.5.6</spring-boot.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <jacoco.version>0.8.13</jacoco.version>
         <hashids.version>1.0.3</hashids.version>
 
         <pebble.version>3.2.4</pebble.version>
-        <springdoc-openapi.version>2.8.9</springdoc-openapi.version>
+        <springdoc-openapi.version>2.8.13</springdoc-openapi.version>
         <lombok.version>1.18.36</lombok.version>
-        <swagger-annotations.version>2.2.34</swagger-annotations.version>
+        <swagger-annotations.version>2.2.37</swagger-annotations.version>
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
         <typescript-generator.version>3.2.1263</typescript-generator.version>
     </properties>
@@ -125,7 +125,7 @@ SOFTWARE.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version>
+                    <version>3.5.4</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
