@@ -52,7 +52,7 @@ public interface OpenApiConverter {
     }
 
     default Set<String> getNativeTypes() {
-        return Set.of("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object", "file", "blob");
+        return Set.of("string", "boolean", "long", "void", "any", "unknown", "integer", "number", "object", "file", "blob", "never", "record", "bigint", "symbol");
     }
 
     default Set<String> getJavaToUnknowns() {
