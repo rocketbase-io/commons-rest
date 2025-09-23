@@ -64,6 +64,11 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         return startsWithAny(type, MAP_TYPES);
     }
 
+    private static final String PAGEABLE_FQN = "io.rocketbase.commons.dto.PageableResult";
+
+    private boolean isPageable(String type) {
+        return type.startsWith(PAGEABLE_FQN) || type.startsWith("PageableResult");
+    }
 
     private List<String> splitTopLevelGenerics(String typeWithGenerics) {
         int lt = typeWithGenerics.indexOf('<');
@@ -136,7 +141,15 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if (genericReturnType.equalsIgnoreCase("java.lang.void")) return "void";
         if (genericReturnType.equalsIgnoreCase("java.lang.object")) return "any";
 
-        // --- Map<K,V> -> Record<K,V> ---
+        if (isPageable(genericReturnType)) {
+            String name = convertInfiniteReturnTypes(genericReturnType);
+            List<String> inner = splitTopLevelGenerics(name);
+            if (inner.isEmpty()) return "PageableResult<unknown>";
+            String t = getReturnType(normalizeWildcard(inner.get(0)));
+            return "PageableResult<" + t + ">";
+        }
+
+        // ---- Map<K,V> -> Record<K,V> (dein neues Verhalten) ----
         if (isMapType(genericReturnType)) {
             List<String> kv = splitTopLevelGenerics(genericReturnType);
             if (kv.size() != 2) return "Record<string, any>";
@@ -177,10 +190,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
             return t + "[]";
         }
 
-        // --- dein bisheriger Default-Zweig ---
-        String name = convertInfiniteReturnTypes(genericReturnType);
-
-        // (Optional) Falls du weiterhin getListTypes() verwenden willst, darf dieser Block stehen bleiben.
+        String name = new String(genericReturnType);
         Optional<String> arrayType = getListTypes().stream()
                 .filter(v -> genericReturnType.startsWith(v)).findFirst();
         if (arrayType.isPresent()) {
@@ -304,15 +314,16 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
     }
 
     protected String convertImportWrappers(String type, Set<String> importTypes) {
+        if (type.startsWith(PAGEABLE_FQN + "<") || type.startsWith("PageableResult<")) {
+            String inner = type.replaceFirst("^.*PageableResult<", "").replace(">", "");
+            return inner;
+        }
         for (String p : COLLECTION_TYPES)
             if (type.startsWith(p + "<")) return type.replace(p + "<", "").replace(">", "");
         for (String p : STREAM_TYPES) if (type.startsWith(p + "<")) return type.replace(p + "<", "").replace(">", "");
         for (String p : OPTIONAL_TYPES) if (type.startsWith(p + "<")) return type.replace(p + "<", "").replace(">", "");
         for (String p : FUTURE_TYPES) if (type.startsWith(p + "<")) return type.replace(p + "<", "").replace(">", "");
         for (String p : MAP_TYPES) if (type.startsWith(p + "<")) return type.replace(p + "<", "").replace(">", "");
-        if (type.startsWith("io.rocketbase.commons.dto.PageableResult<")) {
-            return type.replace("io.rocketbase.commons.dto.PageableResult<", "").replace(">", "");
-        }
 
         int lt = type.indexOf('<');
         if (lt >= 0) {
