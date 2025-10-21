@@ -13,64 +13,64 @@ import static io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction.MU
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultOpenApiConverter implements OpenApiConverter {
-    private static final Set<String> COLLECTION_TYPES = Set.of(
+    protected static final Set<String> COLLECTION_TYPES = Set.of(
             "java.util.List", "java.util.ArrayList", "java.util.LinkedList",
             "java.util.Set", "java.util.HashSet", "java.util.LinkedHashSet", "java.util.SortedSet", "java.util.TreeSet",
             "java.util.Collection", "java.lang.Iterable",
             "java.util.Queue", "java.util.Deque", "java.util.ArrayDeque"
     );
 
-    private static final Set<String> STREAM_TYPES = Set.of(
+    protected static final Set<String> STREAM_TYPES = Set.of(
             "java.util.stream.Stream"
     );
 
-    private static final Set<String> OPTIONAL_TYPES = Set.of(
+    protected static final Set<String> OPTIONAL_TYPES = Set.of(
             "java.util.Optional", "java.util.OptionalInt", "java.util.OptionalLong", "java.util.OptionalDouble"
     );
 
-    private static final Set<String> FUTURE_TYPES = Set.of(
+    protected static final Set<String> FUTURE_TYPES = Set.of(
             "java.util.concurrent.CompletableFuture", "java.util.concurrent.Future"
     );
 
-    private static final Set<String> MAP_TYPES = Set.of(
+    protected static final Set<String> MAP_TYPES = Set.of(
             "java.util.Map", "java.util.HashMap", "java.util.LinkedHashMap",
             "java.util.SortedMap", "java.util.TreeMap"
     );
 
-    private boolean startsWithAny(String type, Set<String> prefixes) {
+    protected boolean startsWithAny(String type, Set<String> prefixes) {
         for (String p : prefixes) {
             if (type.startsWith(p)) return true;
         }
         return false;
     }
 
-    private boolean isCollectionType(String type) {
+    protected boolean isCollectionType(String type) {
         return startsWithAny(type, COLLECTION_TYPES);
     }
 
-    private boolean isStreamType(String type) {
+    protected boolean isStreamType(String type) {
         return startsWithAny(type, STREAM_TYPES);
     }
 
-    private boolean isOptionalType(String type) {
+    protected boolean isOptionalType(String type) {
         return startsWithAny(type, OPTIONAL_TYPES);
     }
 
-    private boolean isFutureType(String type) {
+    protected boolean isFutureType(String type) {
         return startsWithAny(type, FUTURE_TYPES);
     }
 
-    private boolean isMapType(String type) {
+    protected boolean isMapType(String type) {
         return startsWithAny(type, MAP_TYPES);
     }
 
-    private static final String PAGEABLE_FQN = "io.rocketbase.commons.dto.PageableResult";
+    protected static final String PAGEABLE_FQN = "io.rocketbase.commons.dto.PageableResult";
 
-    private boolean isPageable(String type) {
+    protected boolean isPageable(String type) {
         return type.startsWith(PAGEABLE_FQN) || type.startsWith("PageableResult");
     }
 
-    private List<String> splitTopLevelGenerics(String typeWithGenerics) {
+    protected List<String> splitTopLevelGenerics(String typeWithGenerics) {
         int lt = typeWithGenerics.indexOf('<');
         int gt = typeWithGenerics.lastIndexOf('>');
         if (lt < 0 || gt < 0 || gt < lt) return List.of();
@@ -98,7 +98,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         return parts;
     }
 
-    private String normalizeWildcard(String t) {
+    protected String normalizeWildcard(String t) {
         // "? extends X" / "? super X" → "X", "?" → "any"
         String s = t.trim();
         if (s.equals("?")) return "any";
@@ -107,7 +107,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         return s.trim();
     }
 
-    private String toTsKeyType(String javaKeyTypeRaw) {
+    protected String toTsKeyType(String javaKeyTypeRaw) {
         String t = normalizeWildcard(javaKeyTypeRaw);
         String simple = removePackage(t);
 
@@ -262,7 +262,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if (getNativeTypes().contains(type.toLowerCase())) type = type.toLowerCase();
         if ("Void".equalsIgnoreCase(type)) type = "void";
 
-        if (Set.of("Integer", "Long", "Double", "Float", "Short", "BigDecimal", "BigInteger").contains(type)) {
+        if (Set.of("integer", "long", "double", "float", "short", "bigdecimal", "biginteger").contains(type.toLowerCase())) {
             type = "number";
         }
         if ("Boolean".equalsIgnoreCase(type)) type = "boolean";

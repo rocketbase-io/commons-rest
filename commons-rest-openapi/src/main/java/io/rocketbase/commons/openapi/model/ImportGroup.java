@@ -14,8 +14,8 @@ import java.util.Set;
 @Builder
 public class ImportGroup implements Serializable {
 
-    private String name;
+    protected String name;
 
-    private Set<String> types;
+    protected Set<String> types;
 
 }

@@ -102,7 +102,7 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
         return operation;
     }
 
-    private ClientModuleParams extractControllerBean(HandlerMethod handlerMethod) {
+    protected ClientModuleParams extractControllerBean(HandlerMethod handlerMethod) {
         ClientModuleParams result = new ClientModuleParams(handlerMethod.getBeanType().getName(), false);
         if (handlerMethod.getBeanType().isAnnotationPresent(ClientModule.class)) {
             ClientModule annotation = handlerMethod.getBeanType().getAnnotation(ClientModule.class);
@@ -118,8 +118,8 @@ public class OpenApiCustomExtractor implements OperationCustomizer {
     @AllArgsConstructor
     @NoArgsConstructor
     protected static class ClientModuleParams {
-        private String name;
-        private boolean disabled;
+        protected String name;
+        protected boolean disabled;
     }
 
     protected String extractMethodName(String configuredValue, HandlerMethod handlerMethod) {

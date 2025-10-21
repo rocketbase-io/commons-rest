@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class OpenApiController implements Serializable {
 
-    private String controllerBean;
-    private List<OpenApiControllerMethodExtraction> methods;
+    protected String controllerBean;
+    protected List<OpenApiControllerMethodExtraction> methods;
 
-    private OpenApiConverter openApiConverter;
+    protected OpenApiConverter openApiConverter;
 
     public String getShortName() {
         return controllerBean.substring(controllerBean.lastIndexOf(".") + 1).replace("Controller", "");

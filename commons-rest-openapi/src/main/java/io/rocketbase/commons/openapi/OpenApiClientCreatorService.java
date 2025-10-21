@@ -36,13 +36,13 @@ import java.util.zip.ZipOutputStream;
 @RequiredArgsConstructor
 public class OpenApiClientCreatorService {
 
-    private final SpringDataWebProperties springDataWebProperties;
-    private final OpenApiGeneratorProperties openApiGeneratorProperties;
-    private final OpenApiWebMvcResource openApiWebMvcResource;
-    private final OpenApiConverter typescriptConverter;
-    private final InfiniteOptionsTemplateBuilder templateBuilder;
+    protected final SpringDataWebProperties springDataWebProperties;
+    protected final OpenApiGeneratorProperties openApiGeneratorProperties;
+    protected final OpenApiWebMvcResource openApiWebMvcResource;
+    protected final OpenApiConverter typescriptConverter;
+    protected final InfiniteOptionsTemplateBuilder templateBuilder;
 
-    private Map<String, PebbleTemplate> compiledTemplateMap = new HashMap<>();
+    protected Map<String, PebbleTemplate> compiledTemplateMap = new HashMap<>();
 
     @SneakyThrows
     public List<OpenApiController> getControllers(HttpServletRequest request) {
@@ -91,7 +91,7 @@ public class OpenApiClientCreatorService {
         }
     }
 
-    private void generateModels(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+    protected void generateModels(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
         zippedOut.putNextEntry(new ZipEntry("src/model/"));
 
@@ -108,7 +108,7 @@ public class OpenApiClientCreatorService {
         zippedOut.closeEntry();
     }
 
-    private void generateIndexAndPackageJson(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+    protected void generateIndexAndPackageJson(ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
         zippedOut.putNextEntry(new ZipEntry("src/"));
 
@@ -132,7 +132,7 @@ public class OpenApiClientCreatorService {
         zippedOut.closeEntry();
     }
 
-    private void generateClients(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+    protected void generateClients(List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
         zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getClientFolder() + "/"));
         for (OpenApiController c : controllers) {
@@ -152,7 +152,7 @@ public class OpenApiClientCreatorService {
         zippedOut.closeEntry();
     }
 
-    private void generateHooks(ReactQueryVersion reactQueryVersion, List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
+    protected void generateHooks(ReactQueryVersion reactQueryVersion, List<OpenApiController> controllers, ZipOutputStream zippedOut, Map<String, Object> context) throws IOException {
         Writer writer;
         zippedOut.putNextEntry(new ZipEntry("src/" + openApiGeneratorProperties.getHookFolder() + "/"));
         for (OpenApiController c : controllers) {

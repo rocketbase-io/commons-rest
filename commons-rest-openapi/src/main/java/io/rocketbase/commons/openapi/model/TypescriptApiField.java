@@ -13,13 +13,13 @@ import java.io.Serializable;
 @Builder
 public class TypescriptApiField implements Serializable {
 
-    private String name;
+    protected String name;
 
-    private boolean required;
+    protected boolean required;
 
-    private String type;
+    protected String type;
 
-    private boolean inPath;
+    protected boolean inPath;
 
-    private String description;
+    protected String description;
 }

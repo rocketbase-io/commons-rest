@@ -49,12 +49,12 @@ public class OpenApiControllerMethodExtraction {
     @NoArgsConstructor
     @Builder
     public static class ExtractorConfig {
-        private Set<String> pageableParams;
-        private OpenApiConverter typescriptConverter;
-        private PathItem.HttpMethod httpMethod;
-        private String path;
-        private Operation operation;
-        private Integer defaultStaleTime;
+        protected Set<String> pageableParams;
+        protected OpenApiConverter typescriptConverter;
+        protected PathItem.HttpMethod httpMethod;
+        protected String path;
+        protected Operation operation;
+        protected Integer defaultStaleTime;
     }
 
     public String getHookType() {
