@@ -1,17 +1,17 @@
 /* eslint-disable no-use-before-define */
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
-{% if controller.fieldImports is not empty %}import { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";
+{% if controller.fieldImports is not empty %}import type { {% for fieldImport in controller.fieldImports %}{{ fieldImport }}{% if not loop.last %}, {% endif %}{% endfor %} } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";
 {% endif %}
-{% if reactQueryVersion.number >= 5 %}import { {{ groupName }} } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";{% endif %}
-import { useInfiniteQuery, useQuery, useMutation, useQueryClient, UseQueryOptions, UseInfiniteQueryOptions, UseMutationOptions {% if reactQueryVersion.number >= 4 %}, InfiniteData{% endif %}{% if reactQueryVersion.number >= 5 %}, queryOptions, infiniteQueryOptions {% endif %} } from "{{- reactQueryVersion.packageName -}}";
-import { PageableResult } from "@rocketbase/commons-core";
+{% if reactQueryVersion.number >= 5 %}import type { {{ groupName }} } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";{% endif %}
+import { useInfiniteQuery, useQuery, useMutation, useQueryClient, type UseQueryOptions, type UseInfiniteQueryOptions, type UseMutationOptions {% if reactQueryVersion.number >= 4 %}, type InfiniteData{% endif %}{% if reactQueryVersion.number >= 5 %}, queryOptions, infiniteQueryOptions {% endif %} } from "{{- reactQueryVersion.packageName -}}";
+import type { PageableResult } from "@rocketbase/commons-core";
 import { useApi } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";
-import { PageableRequest } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.modelFolder -}}";
+import type { PageableRequest } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.modelFolder -}}";
 import { createPaginationOptions } from "{{- generatorConfig.createPaginationOptions -}}";
 {% if controller.importTypes is not empty %}
 {% for pack in controller.importTypes %}
-import { {% for i in pack.types %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "{{- pack.name -}}";
+import type { {% for i in pack.types %}{{ i }}{% if not loop.last %}, {% endif %}{% endfor %} } from "{{- pack.name -}}";
 {% endfor %}
 {% endif %}
 
