@@ -4,7 +4,7 @@
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
 
 {% for c in controllers %}
-import type { {{ c.shortName -}}Api, create{{- c.shortName -}}Api  } from "./{{- c.fileName -}}";
+import { type {{ c.shortName -}}Api, create{{- c.shortName -}}Api  } from "./{{- c.fileName -}}";
 {% endfor %}
 
 {% for c in controllers %}
