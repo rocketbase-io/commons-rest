@@ -84,15 +84,15 @@ SOFTWARE.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring-boot.version>3.5.7</spring-boot.version>
+        <spring-boot.version>3.5.8</spring-boot.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
         <jacoco.version>0.8.13</jacoco.version>
         <hashids.version>1.0.3</hashids.version>
 
         <pebble.version>3.2.4</pebble.version>
         <springdoc-openapi.version>2.8.14</springdoc-openapi.version>
-        <lombok.version>1.18.36</lombok.version>
-        <swagger-annotations.version>2.2.37</swagger-annotations.version>
+        <lombok.version>1.18.42</lombok.version>
+        <swagger-annotations.version>2.2.40</swagger-annotations.version>
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
         <typescript-generator.version>3.2.1263</typescript-generator.version>
     </properties>
