@@ -59,17 +59,25 @@ export function {{ method.hookName -}}<TData = {{ method.shortReturnType }}, {{ 
   const queryClient = useQueryClient();
   const { {{ configuredGroupVar }} } = useApi();
   return useMutation<{{ method.shortReturnType }}, TError, {{ method.shortInputType }}, TContext>({
-    mutationFn: ({% if not method.isVoidShortInputType %}content{% endif %}) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({% if method.isVoidShortInputType %} {} {% else %} content {% endif %}),
-    {% if method.invalidateKeysPrepared('content.', 'data.') is not empty %}
-    onSuccess: async (data, content{% if reactQueryVersion.number >= 5 %}, onMutateResult{% endif %}, context) => {
-        const invalide = async () => await Promise.all([{% for ik in method.invalidateKeysPrepared('content.', 'data.') %}
+    mutationFn: ({% if not method.isVoidShortInputType %}content: {{ method.shortInputType }}{% endif %}) => {{ configuredGroupVar -}}.{{- controller.fieldName -}}.{{- method.methodName -}}({% if method.isVoidShortInputType %} {} {% else %} content {% endif %}),
+    {% if method.invalidateKeysPrepared('variables.', 'data.') is not empty %}
+    {% if reactQueryVersion.number >= 5 %}
+    onSuccess: async (data: {{ method.shortReturnType }}, variables: {{ method.shortInputType }}, onMutateResult: TContext | undefined, context: unknown) => {
+    {% else %}
+    onSuccess: async (data: {{ method.shortReturnType }}, variables: {{ method.shortInputType }}, context: TContext) => {
+    {% endif %}
+        const invalide = async () => await Promise.all([{% for ik in method.invalidateKeysPrepared('variables.', 'data.') %}
         queryClient.invalidateQueries(
             {% if reactQueryVersion.name equals "v5" %}{queryKey: [{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]}
             {% else %}[{% for k in ik %}`{{ k }}`{% if not loop.last %}, {% endif %}{% endfor %}]{% endif %}
        ){% if not loop.last %}, {% endif %}{% endfor %}]);
 
         if (onSuccess) {
-          const result = onSuccess(data, content{% if reactQueryVersion.number >= 5 %}, onMutateResult{% endif %}, context);
+          {% if reactQueryVersion.number >= 5 %}
+          const result = onSuccess(data, variables, onMutateResult, context);
+          {% else %}
+          const result = onSuccess(data, variables, context);
+          {% endif %}
           if (result && Object.prototype.toString.call(result) === "[object Promise]") {
             await result;
             return invalide();
