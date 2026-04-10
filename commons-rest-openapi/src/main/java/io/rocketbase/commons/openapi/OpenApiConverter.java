@@ -6,6 +6,25 @@ import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @deprecated This interface has been replaced by {@link TypeScriptTypeConverter}.
+ * The new implementation uses typescript-generator for all type conversions,
+ * eliminating manual string manipulation.
+ * <p>
+ * Migration guide:
+ * <ul>
+ *   <li>Replace {@code OpenApiConverter} with {@code TypeScriptTypeConverter}</li>
+ *   <li>Use {@link OpenApiTypeMapper} as the default implementation</li>
+ *   <li>Type definitions are now generated automatically via {@link TypeScriptModelGenerator}</li>
+ * </ul>
+ * <p>
+ * This interface will be removed in a future major release.
+ *
+ * @see TypeScriptTypeConverter
+ * @see OpenApiTypeMapper
+ * @see TypeScriptModelGenerator
+ */
+@Deprecated(since = "LATEST-SNAPSHOT", forRemoval = true)
 public interface OpenApiConverter {
 
     /**

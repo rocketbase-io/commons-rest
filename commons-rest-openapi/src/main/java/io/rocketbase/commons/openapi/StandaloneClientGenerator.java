@@ -2,6 +2,7 @@ package io.rocketbase.commons.openapi;
 
 import io.rocketbase.commons.config.OpenApiGeneratorProperties;
 import io.rocketbase.commons.openapi.model.ReactQueryVersion;
+import io.rocketbase.commons.openapi.util.ReflectionPropertyHelper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
@@ -10,6 +11,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+
+import static io.rocketbase.commons.openapi.util.ReflectionPropertyHelper.setField;
 
 /**
  * Standalone tool to generate TypeScript client from OpenAPI spec.
@@ -98,15 +101,8 @@ public class StandaloneClientGenerator {
     private static OpenApiGeneratorProperties createGeneratorProperties(String baseUrl, String groupName) {
         try {
             OpenApiGeneratorProperties props = OpenApiGeneratorProperties.class.getDeclaredConstructor().newInstance();
-
-            java.lang.reflect.Field baseUrlField = OpenApiGeneratorProperties.class.getDeclaredField("baseUrl");
-            baseUrlField.setAccessible(true);
-            baseUrlField.set(props, baseUrl);
-
-            java.lang.reflect.Field groupNameField = OpenApiGeneratorProperties.class.getDeclaredField("groupName");
-            groupNameField.setAccessible(true);
-            groupNameField.set(props, groupName);
-
+            setField(props, "baseUrl", baseUrl);
+            setField(props, "groupName", groupName);
             return props;
         } catch (Exception e) {
             throw new RuntimeException("Failed to create OpenApiGeneratorProperties", e);
@@ -114,34 +110,6 @@ public class StandaloneClientGenerator {
     }
 
     private static SpringDataWebProperties createSpringDataProperties() {
-        try {
-            SpringDataWebProperties props = SpringDataWebProperties.class.getDeclaredConstructor().newInstance();
-            SpringDataWebProperties.Pageable pageable = SpringDataWebProperties.Pageable.class.getDeclaredConstructor().newInstance();
-            SpringDataWebProperties.Sort sort = SpringDataWebProperties.Sort.class.getDeclaredConstructor().newInstance();
-
-            java.lang.reflect.Field pageParamField = SpringDataWebProperties.Pageable.class.getDeclaredField("pageParameter");
-            pageParamField.setAccessible(true);
-            pageParamField.set(pageable, "page");
-
-            java.lang.reflect.Field sizeParamField = SpringDataWebProperties.Pageable.class.getDeclaredField("sizeParameter");
-            sizeParamField.setAccessible(true);
-            sizeParamField.set(pageable, "size");
-
-            java.lang.reflect.Field sortParamField = SpringDataWebProperties.Sort.class.getDeclaredField("sortParameter");
-            sortParamField.setAccessible(true);
-            sortParamField.set(sort, "sort");
-
-            java.lang.reflect.Field pageableField = SpringDataWebProperties.class.getDeclaredField("pageable");
-            pageableField.setAccessible(true);
-            pageableField.set(props, pageable);
-
-            java.lang.reflect.Field sortField = SpringDataWebProperties.class.getDeclaredField("sort");
-            sortField.setAccessible(true);
-            sortField.set(props, sort);
-
-            return props;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create SpringDataWebProperties", e);
-        }
+        return ReflectionPropertyHelper.createDefaultSpringDataProperties();
     }
 }
