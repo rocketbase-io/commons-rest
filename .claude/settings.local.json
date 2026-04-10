@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:central.sonatype.org)",
+      "Bash(gh run list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh release list:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:gist.github.com)",
+      "Bash(mvn versions:display-dependency-updates:*)",
+      "Bash(mvn versions:display-plugin-updates:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(mvn clean compile:*)",
+      "Bash(mvn clean install:*)",
+      "Bash(bash -c \"source $HOME/.sdkman/bin/sdkman-init.sh && sdk use java 17.0.13-tem && java -version\")",
+      "Bash(bash -c \"source $HOME/.sdkman/bin/sdkman-init.sh && sdk list java | grep ''17\\.'' | grep installed\")",
+      "Bash(bash -l -c \"sdk list java | grep ''17\\.''\")",
+      "Bash(bash -l -c \"sdk use java 17.0.18-tem && java -version && mvn -version\")",
+      "Bash(bash -l -c:*)",
+      "Read(//Users/marten/.sdkman/candidates/java/**)",
+      "Bash(export JAVA_HOME=~/.sdkman/candidates/java/17.0.6-amzn:*)",
+      "Bash(export PATH=$JAVA_HOME/bin:$PATH)",
+      "Bash(java:*)",
+      "Bash(bash -c 'export JAVA_HOME=~/.sdkman/candidates/java/17.0.6-amzn && export PATH=$JAVA_HOME/bin:$PATH && java -version':*)",
+      "Bash(bash -c 'export JAVA_HOME=~/.sdkman/candidates/java/17.0.6-amzn && export PATH=$JAVA_HOME/bin:$PATH && cd /Users/marten/Development/github/rocketbase/commons-rest/commons-rest-openapi && mvn clean compile -DskipTests')",
+      "Bash(bash:*)",
+      "Bash(chmod:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
+    ],
+    "deny": []
+  }
+}
