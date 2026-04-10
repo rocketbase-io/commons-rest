@@ -140,18 +140,19 @@ public class TypeScriptModelGenerator {
         settings.quotes = "\"";
         settings.indentString = "  ";
 
-        // Type mappings
-        settings.customTypeMappings = getCustomTypeMappings();
-        settings.mapDate = DateMapping.asString;
-        settings.mapEnum = EnumMapping.asUnion;  // Modern TypeScript idiom
-        settings.nonConstEnums = false;  // Not needed for union types
+        // Type mappings - use config values
+        Map<String, String> typeMappings = new HashMap<>(getCustomTypeMappings());
+        if (config.getAdditionalTypeMappings() != null) {
+            typeMappings.putAll(config.getAdditionalTypeMappings());
+        }
+        settings.customTypeMappings = typeMappings;
+        settings.mapDate = config.getMapDate();
+        settings.mapEnum = config.getMapEnum();
+        settings.nonConstEnums = config.isNonConstEnums();
 
-        // Optional handling
+        // Optional handling - use config values
         settings.optionalProperties = OptionalProperties.useSpecifiedAnnotations;
-        settings.optionalAnnotations = List.of(
-            jakarta.annotation.Nullable.class,
-            org.springframework.lang.Nullable.class
-        );
+        settings.optionalAnnotations = config.getOptionalAnnotations();
 
         // Class loader
         settings.classLoader = Thread.currentThread().getContextClassLoader();
@@ -220,17 +221,48 @@ public class TypeScriptModelGenerator {
 
     /**
      * Configuration for TypeScript generation.
+     * Allows customization of typescript-generator settings.
      */
     public static class TypeScriptGeneratorConfig {
-        private List<String> classPatterns = List.of("io.rocketbase.commons.**.dto.**");
+        private EnumMapping mapEnum = EnumMapping.asUnion;
+        private DateMapping mapDate = DateMapping.asString;
+        private boolean nonConstEnums = false;
+        private List<Class<? extends java.lang.annotation.Annotation>> optionalAnnotations = List.of(
+            jakarta.annotation.Nullable.class,
+            org.springframework.lang.Nullable.class
+        );
         private Map<String, String> additionalTypeMappings = Map.of();
 
-        public List<String> getClassPatterns() {
-            return classPatterns;
+        public EnumMapping getMapEnum() {
+            return mapEnum;
         }
 
-        public void setClassPatterns(List<String> classPatterns) {
-            this.classPatterns = classPatterns;
+        public void setMapEnum(EnumMapping mapEnum) {
+            this.mapEnum = mapEnum;
+        }
+
+        public DateMapping getMapDate() {
+            return mapDate;
+        }
+
+        public void setMapDate(DateMapping mapDate) {
+            this.mapDate = mapDate;
+        }
+
+        public boolean isNonConstEnums() {
+            return nonConstEnums;
+        }
+
+        public void setNonConstEnums(boolean nonConstEnums) {
+            this.nonConstEnums = nonConstEnums;
+        }
+
+        public List<Class<? extends java.lang.annotation.Annotation>> getOptionalAnnotations() {
+            return optionalAnnotations;
+        }
+
+        public void setOptionalAnnotations(List<Class<? extends java.lang.annotation.Annotation>> optionalAnnotations) {
+            this.optionalAnnotations = optionalAnnotations;
         }
 
         public Map<String, String> getAdditionalTypeMappings() {

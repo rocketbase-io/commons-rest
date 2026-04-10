@@ -11,6 +11,37 @@ import java.util.stream.Collectors;
 
 import static io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction.MULTIPART_TYPESCRIPT;
 
+/**
+ * Default implementation of OpenApiConverter using manual string manipulation.
+ *
+ * @deprecated This class has been replaced by {@link OpenApiTypeMapper} which uses
+ * typescript-generator for automatic type generation. All type conversion is now handled
+ * via {@link TypeScriptModelGenerator} and {@link TypeScriptTypeConverter}.
+ * <p>
+ * This implementation relied on complex string manipulation and regex patterns to convert
+ * Java types to TypeScript. The new approach generates proper TypeScript interfaces from
+ * Java classes, eliminating the need for manual type conversion.
+ * <p>
+ * Migration:
+ * <pre>{@code
+ * // Old approach (deprecated):
+ * OpenApiConverter converter = new DefaultOpenApiConverter();
+ * String tsType = converter.getReturnType("io.example.MyDto");
+ *
+ * // New approach:
+ * TypeScriptModelGenerator generator = new TypeScriptModelGenerator(config);
+ * TypeScriptGenerationResult result = generator.generateFromOpenAPI(openAPI, outputPath);
+ * TypeScriptTypeConverter converter = new OpenApiTypeMapper(result);
+ * String tsType = converter.toTypeScript("io.example.MyDto");
+ * }</pre>
+ * <p>
+ * This class will be removed in a future major release.
+ *
+ * @see OpenApiTypeMapper
+ * @see TypeScriptTypeConverter
+ * @see TypeScriptModelGenerator
+ */
+@Deprecated(since = "LATEST-SNAPSHOT", forRemoval = true)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class DefaultOpenApiConverter implements OpenApiConverter {
     protected static final Set<String> COLLECTION_TYPES = Set.of(
