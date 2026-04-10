@@ -13,6 +13,8 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+
 @Configuration
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @RequiredArgsConstructor
@@ -31,9 +33,9 @@ public class CommonsRestOpenApiAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public OpenApiClientCreatorService openApiClientCreatorService(@Autowired OpenApiWebMvcResource openApiWebMvcResource,
-                                                                   @Autowired OpenApiConverter openApiConverter,
+                                                                   @Autowired TypeScriptTypeConverter typeConverter,
                                                                    @Autowired InfiniteOptionsTemplateBuilder templateBuilder) {
-        return new OpenApiClientCreatorService(springDataWebProperties, openApiGeneratorProperties, openApiWebMvcResource, openApiConverter, templateBuilder);
+        return new OpenApiClientCreatorService(springDataWebProperties, openApiGeneratorProperties, openApiWebMvcResource, typeConverter, templateBuilder);
     }
 
     @Bean
@@ -44,8 +46,10 @@ public class CommonsRestOpenApiAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OpenApiConverter openApiConverter() {
-        return new DefaultOpenApiConverter();
+    public TypeScriptTypeConverter typeScriptTypeConverter() {
+        // Provide a default implementation with empty generation result
+        // In practice, this will be replaced during actual generation
+        return new OpenApiTypeMapper(new TypeScriptGenerationResult("", new HashMap<>()));
     }
 
     @Bean

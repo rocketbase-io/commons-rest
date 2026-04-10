@@ -126,6 +126,9 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         if (simple.equalsIgnoreCase("boolean") || simple.equalsIgnoreCase("Boolean")) {
             return "string";
         }
+        if (simple.endsWith("Date") || simple.endsWith("DateTime") || simple.endsWith("Timestamp")) {
+            return "string";
+        }
         if (simple.endsWith("Enum")) {
             return "string";
         }

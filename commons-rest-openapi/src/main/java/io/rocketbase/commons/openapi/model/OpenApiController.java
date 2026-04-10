@@ -1,7 +1,7 @@
 package io.rocketbase.commons.openapi.model;
 
 import io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction;
-import io.rocketbase.commons.openapi.OpenApiConverter;
+import io.rocketbase.commons.openapi.TypeScriptTypeConverter;
 import io.rocketbase.commons.util.Nulls;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,20 +18,20 @@ public class OpenApiController implements Serializable {
     protected String controllerBean;
     protected List<OpenApiControllerMethodExtraction> methods;
 
-    protected OpenApiConverter openApiConverter;
+    protected TypeScriptTypeConverter typeConverter;
 
     public String getShortName() {
         return controllerBean.substring(controllerBean.lastIndexOf(".") + 1).replace("Controller", "");
     }
 
-    public OpenApiController(String controllerBean, List<OpenApiControllerMethodExtraction> methods, OpenApiConverter openApiConverter) {
+    public OpenApiController(String controllerBean, List<OpenApiControllerMethodExtraction> methods, TypeScriptTypeConverter typeConverter) {
         this.controllerBean = controllerBean;
         this.methods = methods;
         // link this controller to methods
         for (OpenApiControllerMethodExtraction m : methods) {
             m.setController(this);
         }
-        this.openApiConverter = openApiConverter;
+        this.typeConverter = typeConverter;
     }
 
     public Collection<ImportGroup> getImportTypes() {
@@ -60,7 +60,7 @@ public class OpenApiController implements Serializable {
     public Set<String> getFieldImports() {
         return methods.stream().filter(m -> m.hasOptionalFields() || m.hasRequiredFields())
                 .map(OpenApiControllerMethodExtraction::getShortInputType)
-                .filter(v -> !Nulls.notNull(openApiConverter, OpenApiConverter::getNativeTypes, Collections.emptySet())
+                .filter(v -> !Nulls.notNull(typeConverter, TypeScriptTypeConverter::getNativeTypes, Collections.emptySet())
                         .contains(v.toLowerCase()))
                 .collect(Collectors.toSet());
     }
