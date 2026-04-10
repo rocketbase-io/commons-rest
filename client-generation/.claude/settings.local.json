@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/marten/Development/github/rocketbase/commons-rest/**)",
+      "Bash(mvn versions:display-property-updates:*)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
