@@ -50,7 +50,7 @@ public class OpenApiControllerMethodExtraction {
     @Builder
     public static class ExtractorConfig {
         protected Set<String> pageableParams;
-        protected OpenApiConverter typescriptConverter;
+        protected TypeScriptTypeConverter typeConverter;
         protected PathItem.HttpMethod httpMethod;
         protected String path;
         protected Operation operation;
@@ -108,25 +108,63 @@ public class OpenApiControllerMethodExtraction {
         Operation operation = config.getOperation();
         if (operation.getParameters() != null) {
             for (Parameter p : operation.getParameters()) {
-                if (!(config.getTypescriptConverter().hasPageableParameter(parameterTypes)
-                        && Nulls.notNull(config.getPageableParams()).contains(p.getName()))) {
-
+                // Skip pageable parameters (page, size, sort)
+                if (!(hasPageableParameter() && Nulls.notNull(config.getPageableParams()).contains(p.getName()))) {
                     result.add(convert(p));
                 }
             }
         }
         Schema requestBodySchema = getRequestBodySchema(operation.getRequestBody());
         if (requestBodySchema != null) {
-            String type = config.getTypescriptConverter().convertType(requestBodySchema);
+            String type = convertSchemaToTypeScript(requestBodySchema);
             if (requestBodyType != null && requestBodyType.toLowerCase().contains("multipart")) {
                 type = MULTIPART_TYPESCRIPT;
             } else if (type == null && requestBodyType != null) {
-                type = config.getTypescriptConverter().getReturnType(requestBodyType);
+                type = config.getTypeConverter().toTypeScript(requestBodyType);
             }
             result.add(new TypescriptApiField("body", true, type,
                     false, operation.getRequestBody().getDescription()));
         }
         return result.isEmpty() ? null : result;
+    }
+
+    /**
+     * Check if this method has a Pageable parameter.
+     */
+    private boolean hasPageableParameter() {
+        return Nulls.notNull(parameterTypes).contains("org.springframework.data.domain.Pageable");
+    }
+
+    /**
+     * Convert OpenAPI Schema to TypeScript type.
+     * Simple implementation - just uses the $ref or returns basic type.
+     */
+    private String convertSchemaToTypeScript(Schema schema) {
+        if (schema == null) return "unknown";
+
+        // If there's a $ref, extract the type name
+        if (schema.get$ref() != null) {
+            String ref = schema.get$ref();
+            String typeName = ref.substring(ref.lastIndexOf("/") + 1);
+            return typeName; // The type name from OpenAPI schema
+        }
+
+        // Basic type
+        String type = schema.getType();
+        if (type == null) return "unknown";
+
+        switch (type) {
+            case "string": return "string";
+            case "integer":
+            case "number": return "number";
+            case "boolean": return "boolean";
+            case "array":
+                if (schema.getItems() != null) {
+                    return convertSchemaToTypeScript(schema.getItems()) + "[]";
+                }
+                return "unknown[]";
+            default: return "unknown";
+        }
     }
 
     public boolean hasRequiredFields() {
@@ -248,25 +286,35 @@ public class OpenApiControllerMethodExtraction {
     }
 
     public List<ImportGroup> getImportTypes() {
-        Set<String> types = new HashSet<>();
+        Set<String> allTypescriptTypes = new HashSet<>();
+
+        // Add return type
         if (genericReturnType != null) {
-            types.add(genericReturnType);
+            String tsReturnType = config.getTypeConverter().toTypeScript(genericReturnType);
+            allTypescriptTypes.addAll(config.getTypeConverter().extractImportTypes(tsReturnType));
         }
-        types.addAll(Nulls.notNull(getFields()).stream()
+
+        // Add field types
+        Nulls.notNull(getFields()).stream()
                 .filter(Objects::nonNull)
                 .map(TypescriptApiField::getType)
-                .toList());
+                .forEach(type -> allTypescriptTypes.addAll(config.getTypeConverter().extractImportTypes(type)));
 
-        Map<String, List<String>> packageMap = types.stream()
-                .collect(Collectors.groupingBy(v -> config.getTypescriptConverter().getImportPackage(v)));
+        // Filter out native types
+        Set<String> importTypes = allTypescriptTypes.stream()
+                .filter(type -> !config.getTypeConverter().getNativeTypes().contains(type.toLowerCase()))
+                .collect(Collectors.toSet());
 
-        return packageMap.entrySet().stream()
-                .map(e -> new ImportGroup(e.getKey(), config.getTypescriptConverter().getImportTypes(new HashSet<>(e.getValue()))))
-                .collect(Collectors.toList());
+        // All imports come from the model folder
+        if (!importTypes.isEmpty()) {
+            return List.of(new ImportGroup(config.getTypeConverter().getModelImportPath(), importTypes));
+        }
+
+        return new ArrayList<>();
     }
 
     public String getShortReturnType() {
-        return config.getTypescriptConverter().getReturnType(genericReturnType);
+        return config.getTypeConverter().toTypeScript(genericReturnType);
     }
 
     protected Schema getRequestBodySchema(RequestBody body) {
@@ -292,7 +340,7 @@ public class OpenApiControllerMethodExtraction {
         return TypescriptApiField.builder()
                 .name(p.getName())
                 .required(p.getRequired() != null && p.getRequired())
-                .type(config.getTypescriptConverter().convertType(p.getSchema()))
+                .type(convertSchemaToTypeScript(p.getSchema()))
                 .inPath(p.getIn().equalsIgnoreCase("path"))
                 .description(p.getDescription())
                 .build();
