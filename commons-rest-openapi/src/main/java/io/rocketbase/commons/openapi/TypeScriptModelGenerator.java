@@ -150,9 +150,10 @@ public class TypeScriptModelGenerator {
         settings.mapEnum = config.getMapEnum();
         settings.nonConstEnums = config.isNonConstEnums();
 
-        // Optional handling - use config values
+        // Required property handling - use config values
+        // Only fields with requiredAnnotations will be required, all others optional
         settings.optionalProperties = OptionalProperties.useSpecifiedAnnotations;
-        settings.optionalAnnotations = config.getOptionalAnnotations();
+        settings.requiredAnnotations = config.getRequiredAnnotations();
 
         // Class loader
         settings.classLoader = Thread.currentThread().getContextClassLoader();
@@ -227,10 +228,17 @@ public class TypeScriptModelGenerator {
         private EnumMapping mapEnum = EnumMapping.asUnion;
         private DateMapping mapDate = DateMapping.asString;
         private boolean nonConstEnums = false;
-        private List<Class<? extends java.lang.annotation.Annotation>> optionalAnnotations = List.of(
-            jakarta.annotation.Nullable.class,
-            org.springframework.lang.Nullable.class
+
+        /**
+         * Annotations that mark fields as required in TypeScript.
+         * Only fields with these annotations will be required, all others will be optional.
+         * Default: @NotNull and @NotBlank
+         */
+        private List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations = List.of(
+            jakarta.validation.constraints.NotNull.class,
+            jakarta.validation.constraints.NotBlank.class
         );
+
         private Map<String, String> additionalTypeMappings = Map.of();
 
         public EnumMapping getMapEnum() {
@@ -257,12 +265,12 @@ public class TypeScriptModelGenerator {
             this.nonConstEnums = nonConstEnums;
         }
 
-        public List<Class<? extends java.lang.annotation.Annotation>> getOptionalAnnotations() {
-            return optionalAnnotations;
+        public List<Class<? extends java.lang.annotation.Annotation>> getRequiredAnnotations() {
+            return requiredAnnotations;
         }
 
-        public void setOptionalAnnotations(List<Class<? extends java.lang.annotation.Annotation>> optionalAnnotations) {
-            this.optionalAnnotations = optionalAnnotations;
+        public void setRequiredAnnotations(List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations) {
+            this.requiredAnnotations = requiredAnnotations;
         }
 
         public Map<String, String> getAdditionalTypeMappings() {
