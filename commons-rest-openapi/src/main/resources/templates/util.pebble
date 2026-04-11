@@ -1,4 +1,4 @@
-import { PageableResult } from "@rocketbase/commons-core";
+import { PageableResult } from "@rocketbase/commons-rest-client";
 import { InfiniteData } from '{{- reactQueryVersion.packageName -}}';
 
 export function createPaginationOptions<T extends PageableResult<unknown>>() {

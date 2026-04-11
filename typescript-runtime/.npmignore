@@ -1,0 +1,10 @@
+src/
+tests/
+*.ts
+!dist/**/*.d.ts
+tsconfig.json
+rollup.config.js
+.gitignore
+node_modules/
+.DS_Store
+*.log

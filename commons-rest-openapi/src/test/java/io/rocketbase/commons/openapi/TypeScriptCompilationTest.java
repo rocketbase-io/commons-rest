@@ -52,6 +52,7 @@ class TypeScriptCompilationTest {
         );
 
         // Create package.json with TypeScript and dependencies
+        // Using local typescript-runtime package via file: protocol
         String packageJson = """
             {
               "name": "test-client",
@@ -61,8 +62,9 @@ class TypeScriptCompilationTest {
                 "typecheck": "tsc --noEmit"
               },
               "dependencies": {
+                "@rocketbase/commons-rest-client": "file:../../../typescript-runtime",
                 "@tanstack/react-query": "^5.0.0",
-                "axios": "^1.6.0",
+                "axios": "^1.7.0",
                 "react": "^18.2.0"
               },
               "devDependencies": {
@@ -90,57 +92,13 @@ class TypeScriptCompilationTest {
                 "resolveJsonModule": true,
                 "isolatedModules": true,
                 "noEmit": true,
-                "jsx": "react-jsx",
-                "baseUrl": ".",
-                "paths": {
-                  "@rocketbase/commons-core": ["./mocks/commons-core.ts"]
-                }
+                "jsx": "react-jsx"
               },
-              "include": ["src/**/*", "mocks/**/*"],
+              "include": ["src/**/*"],
               "exclude": ["node_modules"]
             }
             """;
         Files.writeString(outputDir.resolve("tsconfig.json"), tsConfig);
-
-        // Create mock for @rocketbase/commons-core
-        Files.createDirectories(outputDir.resolve("mocks"));
-        String commonsCoreMock = """
-            // Mock for @rocketbase/commons-core
-            export interface PageableConfig {
-              page?: string;
-              size?: string;
-              sort?: string;
-            }
-
-            export interface PageableResult<T> {
-              content: T[];
-              totalElements: number;
-              totalPages: number;
-              page: number;
-              pageSize: number;
-            }
-
-            export const buildPageableQueryParams = (config?: PageableConfig): Record<string, string> => {
-              const params: Record<string, string> = {};
-              if (config?.page) params.page = config.page;
-              if (config?.size) params.size = config.size;
-              if (config?.sort) params.sort = config.sort;
-              return params;
-            };
-
-            export const buildSortParam = (sort?: string[]): string | undefined => {
-              return sort?.join(',');
-            };
-
-            export const useAuth = () => {
-              return {
-                token: null,
-                axiosClient: undefined,
-                baseUrl: '',
-              };
-            };
-            """;
-        Files.writeString(outputDir.resolve("mocks/commons-core.ts"), commonsCoreMock);
 
         // Create empty types.ts if it doesn't exist (when no classes found)
         Path typesFile = outputDir.resolve("src/model/types.ts");

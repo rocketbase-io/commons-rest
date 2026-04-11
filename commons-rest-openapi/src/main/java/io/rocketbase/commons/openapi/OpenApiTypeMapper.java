@@ -80,7 +80,10 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
             if (part.isEmpty()) continue;
             if (isNativeType(part)) continue;
 
-            types.add(part);
+            // Extract simple name (e.g., "io.rocketbase.commons.dto.Activity" -> "Activity")
+            // This handles Java package names that typescript-generator may generate
+            String simpleName = part.contains(".") ? part.substring(part.lastIndexOf('.') + 1) : part;
+            types.add(simpleName);
         }
 
         return types;
