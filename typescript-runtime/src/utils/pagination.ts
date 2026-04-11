@@ -74,3 +74,37 @@ export function infiniteTotalElements<T>(
 
   return data.pages[0].totalElements;
 }
+
+/**
+ * Flattens all items from infinite query data into a single array.
+ * Useful for rendering all loaded items from an infinite scroll query.
+ *
+ * @template T - Content type
+ * @param data - Infinite query data
+ * @returns Array of all items across all loaded pages
+ *
+ * @example
+ * ```typescript
+ * const { data } = useInfiniteQuery({
+ *   queryKey: ['users'],
+ *   queryFn: ({ pageParam = 0 }) => fetchUsers({ page: pageParam }),
+ *   ...createPaginationOptions(),
+ * });
+ *
+ * const allUsers = infiniteItems(data);
+ * return (
+ *   <ul>
+ *     {allUsers.map(user => <li key={user.id}>{user.name}</li>)}
+ *   </ul>
+ * );
+ * ```
+ */
+export function infiniteItems<T>(
+  data: InfiniteData<PageableResult<T>> | undefined
+): T[] {
+  if (!data?.pages) {
+    return [];
+  }
+
+  return data.pages.flatMap((page) => page.content);
+}
