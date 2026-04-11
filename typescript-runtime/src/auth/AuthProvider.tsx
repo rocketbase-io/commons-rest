@@ -2,7 +2,7 @@ import { useMemo, type ReactNode } from 'react';
 import axios, { type AxiosInstance } from 'axios';
 import { AuthContext } from './AuthContext';
 import type { TokenService } from './types';
-import { bearerInterceptor } from '../utils/interceptors';
+import { bearerInterceptor, unauthorizedInterceptor } from '../utils/interceptors';
 
 export interface AuthProviderProps {
   /**
@@ -89,6 +89,9 @@ export function AuthProvider({
 
     // Add bearer token interceptor
     axiosClient.interceptors.request.use(bearerInterceptor(tokenService));
+
+    // Add 401 unauthorized interceptor
+    axiosClient.interceptors.response.use(...unauthorizedInterceptor(tokenService));
 
     // Create base URL resolver
     const baseUrlFn = (key?: string): string => {
