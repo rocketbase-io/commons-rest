@@ -82,7 +82,8 @@ public class OpenApiClientCreatorService {
 
         // STEP 1: Generate ALL TypeScript types using typescript-generator
         log.info("Step 1: Generating TypeScript types from OpenAPI schema");
-        TypeScriptModelGenerator tsGenerator = new TypeScriptModelGenerator(new TypeScriptModelGenerator.TypeScriptGeneratorConfig());
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig tsConfig = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        TypeScriptModelGenerator tsGenerator = new TypeScriptModelGenerator(tsConfig);
         Path typesFile = outputDirectory.resolve("src/model/types.ts");
         this.tsGenerationResult = tsGenerator.generateFromOpenAPI(openAPI, typesFile);
 
@@ -112,7 +113,10 @@ public class OpenApiClientCreatorService {
             // STEP 6: Generate hooks
             generateHooksToFileSystem(controllers, writer, context);
 
-            // STEP 7: Generate index and package.json
+            // STEP 7: Generate Zod schemas for mutations
+            generateZodSchemasToFileSystem(writer, openAPI, outputDirectory, tsConfig);
+
+            // STEP 8: Generate index and package.json
             generateIndexAndPackageJsonToFileSystem(writer, context);
 
             log.info("Successfully generated TypeScript client to: {}", outputDirectory);
@@ -187,6 +191,20 @@ public class OpenApiClientCreatorService {
 
         String index = evaluateTemplate("index", context);
         writer.writeFile("src/index.ts", index);
+    }
+
+    /**
+     * Generates Zod schemas for mutation commands.
+     */
+    protected void generateZodSchemasToFileSystem(FileSystemClientWriter writer, OpenAPI openAPI, Path outputDirectory, TypeScriptModelGenerator.TypeScriptGeneratorConfig tsConfig) {
+        try {
+            log.info("Generating Zod schemas for mutations");
+            ZodSchemaGenerator zodGenerator = new ZodSchemaGenerator(openAPI, tsConfig);
+            Path zodFile = outputDirectory.resolve("src/model/zod-schemas.ts");
+            zodGenerator.generateZodSchemas(zodFile);
+        } catch (Exception e) {
+            log.warn("Failed to generate Zod schemas (non-fatal): {}", e.getMessage(), e);
+        }
     }
 
     /**

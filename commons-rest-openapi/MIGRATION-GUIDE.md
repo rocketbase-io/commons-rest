@@ -151,10 +151,10 @@ public TypeScriptGeneratorConfig typeScriptGeneratorConfig() {
     customMappings.put("com.example.CustomType", "string");
     config.setAdditionalTypeMappings(customMappings);
 
-    // Optional annotations
-    config.setOptionalAnnotations(List.of(
-        jakarta.annotation.Nullable.class,
-        org.springframework.lang.Nullable.class
+    // Required annotations (only fields with these will be required, all others optional)
+    config.setRequiredAnnotations(List.of(
+        jakarta.validation.constraints.NotNull.class,
+        jakarta.validation.constraints.NotBlank.class
     ));
 
     return config;
