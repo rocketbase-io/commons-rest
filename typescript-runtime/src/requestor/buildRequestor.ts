@@ -21,13 +21,15 @@ export function buildDefaultAxiosRequestConfig(): AxiosRequestConfig {
  * Build a requestor function from configuration.
  * The returned function will execute HTTP requests based on the provided config.
  *
+ * Automatically handles AbortSignal from React Query for request cancellation.
+ *
  * @template Options - Request options type
  * @template Result - Expected response type
  * @param config - Requestor configuration
  * @param defaults - Default axios config to merge
  * @returns Requestor function that executes the HTTP request
  *
- * @example
+ * @example Basic usage
  * ```typescript
  * const getUser = buildRequestor<{ id: string }, User>({
  *   method: 'get',
@@ -35,6 +37,21 @@ export function buildDefaultAxiosRequestConfig(): AxiosRequestConfig {
  * });
  *
  * const user = await getUser({ id: '123' });
+ * ```
+ *
+ * @example React Query integration with automatic cancellation
+ * ```typescript
+ * const getUsers = buildRequestor<{ page: number }, PageableResult<User>>({
+ *   method: 'get',
+ *   url: '/users',
+ *   params: ['page'],
+ * });
+ *
+ * // React Query automatically passes signal for cancellation
+ * const query = useQuery({
+ *   queryKey: ['users', page],
+ *   queryFn: ({ signal }) => getUsers({ page, signal }),
+ * });
  * ```
  */
 export function buildRequestor<Options extends Record<string, unknown>, Result>(
@@ -75,6 +92,13 @@ export function buildRequestor<Options extends Record<string, unknown>, Result>(
     // Build additional options
     const additionalOptions = applyIfNecessary(config.options, options);
 
+    // Extract AbortSignal if present in options (for React Query integration)
+    // React Query passes { signal?: AbortSignal } to queryFn
+    const signal =
+      'signal' in options && options.signal instanceof AbortSignal
+        ? options.signal
+        : undefined;
+
     // Merge all configs
     const requestConfig = mergeRequestConfig(
       buildDefaultAxiosRequestConfig(),
@@ -85,6 +109,7 @@ export function buildRequestor<Options extends Record<string, unknown>, Result>(
         headers: headers as Record<string, string>,
         params: params as Record<string, unknown>,
         data,
+        signal, // Add signal for request cancellation
       },
       additionalOptions
     );
