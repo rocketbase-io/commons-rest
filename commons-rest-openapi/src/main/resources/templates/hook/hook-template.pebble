@@ -5,7 +5,7 @@
 {% endif %}
 {% if reactQueryVersion.number >= 5 %}import type { {{ groupName }} } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";{% endif %}
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient, type UseQueryOptions, type UseInfiniteQueryOptions, type UseMutationOptions {% if reactQueryVersion.number >= 4 %}, type InfiniteData{% endif %}{% if reactQueryVersion.number >= 5 %}, queryOptions, infiniteQueryOptions {% endif %} } from "{{- reactQueryVersion.packageName -}}";
-import type { PageableResult } from "@rocketbase/commons-core";
+import type { PageableResult } from "@rocketbase/commons-rest-client";
 import { useApi } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.clientFolder -}}";
 import type { PageableRequest } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.modelFolder -}}";
 import { createPaginationOptions } from "{{- generatorConfig.createPaginationOptions -}}";

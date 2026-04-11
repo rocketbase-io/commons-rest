@@ -1,6 +1,6 @@
 import { create{{ groupName -}} } from "./{{- generatorConfig.clientFolder -}}";
 import * as React from "react";
-import { useAuth } from "@rocketbase/commons-core";
+import { useAuth } from "@rocketbase/commons-rest-client";
 
 export * from "./{{- generatorConfig.clientFolder -}}";
 export * from "./model";

@@ -45,6 +45,14 @@ public class GenerateClientTest {
         log.info("downloaded: {}", destination.getAbsolutePath());
     }
 
+
+    @Test
+    public void downloadOpenApiJson() throws Exception {
+        File destination = new File("target/openapi.json");
+        download(new URL(baseUrl + "/v3/api-docs"), destination);
+        log.info("downloaded: {}", destination.getAbsolutePath());
+    }
+
     private static void download(URL url, File file) throws IOException {
         ReadableByteChannel rbc = Channels.newChannel(url.openStream());
         FileOutputStream fos = new FileOutputStream(file);
