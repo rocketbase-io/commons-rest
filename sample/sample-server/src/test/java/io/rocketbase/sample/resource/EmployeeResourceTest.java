@@ -113,13 +113,13 @@ public class EmployeeResourceTest extends BaseIntegrationTest {
 
         // then
         assertThat(result, notNullValue());
-        assertThat(result.getTotalElements(), is(1L));
-        assertThat(result.getPage(), is(0));
-        assertThat(result.getTotalPages(), is(1));
-        assertThat(result.getPageSize(), is(10));
-        assertThat(result.getContent(), hasSize(1));
+        assertThat(result.totalElements(), is(1L));
+        assertThat(result.page(), is(0));
+        assertThat(result.totalPages(), is(1));
+        assertThat(result.pageSize(), is(10));
+        assertThat(result.content(), hasSize(1));
         assertEmployeeSame(employee,
-                result.getContent()
+                result.content()
                         .get(0));
     }
 

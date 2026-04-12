@@ -18,6 +18,7 @@ import java.util.*;
 public class TypeScriptModelGenerator {
 
     private final TypeScriptGeneratorConfig config;
+    private final List<TypeScriptGeneratorCustomizer> customizers;
 
     /**
      * Generates ALL TypeScript types from OpenAPI specification.
@@ -31,7 +32,7 @@ public class TypeScriptModelGenerator {
         log.info("Generating TypeScript types from OpenAPI specification");
 
         // 1. Analyze OpenAPI to find all used classes
-        OpenApiSchemaAnalyzer analyzer = new OpenApiSchemaAnalyzer();
+        OpenApiSchemaAnalyzer analyzer = new OpenApiSchemaAnalyzer(customizers);
         Set<String> classNamesFromExtensions = analyzer.extractFromExtensions(openAPI);
 
         log.info("Found {} class names from OpenAPI extensions", classNamesFromExtensions.size());
@@ -84,7 +85,7 @@ public class TypeScriptModelGenerator {
     }
 
     /**
-     * Loads Java classes from class names.
+     * Loads Java classes from class names and applies exclusion filters.
      */
     private Set<Class<?>> loadClasses(Set<String> classNames) {
         Set<Class<?>> classes = new HashSet<>();
@@ -93,6 +94,13 @@ public class TypeScriptModelGenerator {
         for (String className : classNames) {
             try {
                 Class<?> clazz = Class.forName(className, false, classLoader);
+
+                // Check if class should be excluded
+                if (shouldExcludeClass(clazz)) {
+                    log.debug("Excluding class from TypeScript generation: {}", className);
+                    continue;
+                }
+
                 classes.add(clazz);
                 log.debug("Loaded class: {}", className);
             } catch (ClassNotFoundException e) {
@@ -123,6 +131,7 @@ public class TypeScriptModelGenerator {
 
     /**
      * Creates typescript-generator settings based on configuration.
+     * Applies customizers after default settings are created.
      */
     private Settings createSettings() {
         Settings settings = new Settings();
@@ -158,10 +167,35 @@ public class TypeScriptModelGenerator {
         // Class loader
         settings.classLoader = Thread.currentThread().getContextClassLoader();
 
-        // Note: excludeFilter is not accessible, using different approach
-        // Filtering will be done before passing classes to generator
+        // Apply customizers (sorted by order)
+        applyCustomizers(settings);
 
         return settings;
+    }
+
+    /**
+     * Applies all registered customizers to the settings.
+     * Customizers are sorted by their order (lower values first).
+     */
+    private void applyCustomizers(Settings settings) {
+        if (customizers == null || customizers.isEmpty()) {
+            log.debug("No TypeScript generator customizers found");
+            return;
+        }
+
+        log.info("Applying {} TypeScript generator customizer(s)", customizers.size());
+
+        // Sort customizers by order
+        customizers.stream()
+                .sorted((c1, c2) -> Integer.compare(c1.getOrder(), c2.getOrder()))
+                .forEach(customizer -> {
+                    log.debug("Applying customizer: {}", customizer.getClass().getSimpleName());
+                    try {
+                        customizer.customize(settings);
+                    } catch (Exception e) {
+                        log.error("Error applying customizer {}: {}", customizer.getClass().getSimpleName(), e.getMessage(), e);
+                    }
+                });
     }
 
     /**
@@ -179,13 +213,19 @@ public class TypeScriptModelGenerator {
             Map.entry("java.time.OffsetDateTime", "string"),
             Map.entry("java.time.ZonedDateTime", "string"),
             Map.entry("java.util.Map<K, V>", "Record<K, V>"),
-            Map.entry("io.rocketbase.commons.obfuscated.ObfuscatedId", "string")
+            Map.entry("io.rocketbase.commons.obfuscated.ObfuscatedId", "string"),
+            // PageableResult types - imported from @rocketbase/commons-rest-client
+            // These are not generated, but imported from the runtime library
+            Map.entry("io.rocketbase.commons.dto.PageableResult<T>", "PageableResult<T>"),
+            Map.entry("io.rocketbase.commons.dto.PageableResultImpl<T>", "PageableResult<T>"),
+            Map.entry("io.rocketbase.commons.dto.PageableResultWithMeta<T, M>", "PageableResultWithMeta<T, M>")
             // Let typescript-generator handle DTOs - they will be generated as interfaces
         );
     }
 
     /**
      * Determines if a class should be excluded from generation.
+     * Checks both built-in exclusion rules and registered customizers.
      */
     private boolean shouldExcludeClass(Class<?> clazz) {
         String className = clazz.getName();
@@ -215,6 +255,16 @@ public class TypeScriptModelGenerator {
         if (className.equals("java.io.Serializable") ||
             className.equals("java.lang.Iterable")) {
             return true;
+        }
+
+        // Check customizers
+        if (customizers != null) {
+            for (TypeScriptGeneratorCustomizer customizer : customizers) {
+                if (customizer.shouldExcludeClass(clazz)) {
+                    log.debug("Class {} excluded by customizer: {}", className, customizer.getClass().getSimpleName());
+                    return true;
+                }
+            }
         }
 
         return false;

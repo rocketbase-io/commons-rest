@@ -79,11 +79,11 @@ public class CompanyResourceTest extends BaseIntegrationTest {
 
         // then
         assertThat(result, notNullValue());
-        assertThat(result.getTotalElements(), is(1L));
-        assertThat(result.getPage(), is(0));
-        assertThat(result.getTotalPages(), is(1));
-        assertThat(result.getPageSize(), is(10));
-        assertThat(result.getContent(), hasSize(1));
+        assertThat(result.totalElements(), is(1L));
+        assertThat(result.page(), is(0));
+        assertThat(result.totalPages(), is(1));
+        assertThat(result.pageSize(), is(10));
+        assertThat(result.content(), hasSize(1));
     }
 
     @Test
@@ -190,10 +190,10 @@ public class CompanyResourceTest extends BaseIntegrationTest {
 
         // then
         assertThat(result, notNullValue());
-        assertThat(result.getTotalElements(), is(2L));
-        assertThat(result.getPage(), is(0));
-        assertThat(result.getTotalPages(), is(1));
-        assertThat(result.getContent(), hasSize(2));
+        assertThat(result.totalElements(), is(2L));
+        assertThat(result.page(), is(0));
+        assertThat(result.totalPages(), is(1));
+        assertThat(result.content(), hasSize(2));
     }
 
     @Test
@@ -219,10 +219,10 @@ public class CompanyResourceTest extends BaseIntegrationTest {
 
         // then
         assertThat(result, notNullValue());
-        assertThat(result.getTotalElements(), is(2L));
-        assertThat(result.getPage(), is(0));
-        assertThat(result.getTotalPages(), is(1));
-        assertThat(result.getContent(), hasSize(2));
+        assertThat(result.totalElements(), is(2L));
+        assertThat(result.page(), is(0));
+        assertThat(result.totalPages(), is(1));
+        assertThat(result.content(), hasSize(2));
     }
 
 

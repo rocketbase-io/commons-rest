@@ -2,10 +2,6 @@ package io.rocketbase.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,129 +15,264 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * wrapping object for paged result lists
+ * Interface for paginated result lists.
+ * <p>
+ * This interface provides a clean, serializable contract for REST API pagination responses,
+ * decoupled from Spring Data's internal Page implementation.
+ * </p>
+ *
+ * @param <T> the type of elements in the page content
  */
-@Data
-@NoArgsConstructor
-@SuperBuilder
-@Schema(description = "wrapping object for paged result lists")
-public class PageableResult<E> implements Iterable<E>, Serializable {
+@Schema(description = "Interface for paginated result lists")
+public interface PageableResult<T> extends Iterable<T>, Serializable {
 
     /**
-     * total count of values in database
-     */
-    @Schema(description = "total count of values in database")
-    private long totalElements;
-
-    /**
-     * count of pages in total with given pageSize
-     */
-    @Schema(description = "count of pages in total with given pageSize")
-    private int totalPages;
-
-    /**
-     * current page (starts by 0)
-     */
-    @Schema(description = "current page (starts by 0)")
-    private int page;
-
-    /**
-     * maximum size of content list
-     */
-    @Schema(description = "maximum size of content list")
-    private int pageSize;
-
-    /**
-     * content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)
+     * @return the page content as a list
      */
     @Schema(description = "content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)")
-    private List<E> content;
+    List<T> content();
 
-    public static <T, E> PageableResult<E> contentPage(List<E> content, Page<T> page) {
-        Assert.notNull(page, "page is null - not allowed");
+    /**
+     * @return the current page number (0-indexed)
+     */
+    @Schema(description = "current page (starts by 0)")
+    int page();
 
-        PageableResult<E> result = new PageableResult<>();
-        result.setContent(content != null ? content : Collections.emptyList());
-        result.setTotalPages(page.getTotalPages());
-        result.setTotalElements(page.getTotalElements());
-        result.setPage(page.getNumber());
-        result.setPageSize(page.getSize());
-        return result;
+    /**
+     * @return the size of the page
+     */
+    @Schema(description = "maximum size of content list")
+    int pageSize();
+
+    /**
+     * @return the total number of elements across all pages
+     */
+    @Schema(description = "total count of values in database")
+    long totalElements();
+
+    /**
+     * @return the total number of pages
+     */
+    @Schema(description = "count of pages in total with given pageSize")
+    int totalPages();
+
+    // ==================== Backwards Compatibility Getters ====================
+    // These methods provide backwards compatibility with the old class-based API
+    // They delegate to the record accessor methods
+
+    /**
+     * @deprecated Use {@link #content()} instead. This method is provided for backwards compatibility.
+     */
+    @Deprecated(since = "4.0", forRemoval = true)
+    @JsonIgnore
+    default List<T> getContent() {
+        return content();
     }
 
-    public static <T, E> PageableResult<E> page(Page<T> page, Function<T, E> converter) {
+    /**
+     * @deprecated Use {@link #page()} instead. This method is provided for backwards compatibility.
+     */
+    @Deprecated(since = "4.0", forRemoval = true)
+    @JsonIgnore
+    default int getPage() {
+        return page();
+    }
+
+    /**
+     * @deprecated Use {@link #pageSize()} instead. This method is provided for backwards compatibility.
+     */
+    @Deprecated(since = "4.0", forRemoval = true)
+    @JsonIgnore
+    default int getPageSize() {
+        return pageSize();
+    }
+
+    /**
+     * @deprecated Use {@link #totalElements()} instead. This method is provided for backwards compatibility.
+     */
+    @Deprecated(since = "4.0", forRemoval = true)
+    @JsonIgnore
+    default long getTotalElements() {
+        return totalElements();
+    }
+
+    /**
+     * @deprecated Use {@link #totalPages()} instead. This method is provided for backwards compatibility.
+     */
+    @Deprecated(since = "4.0", forRemoval = true)
+    @JsonIgnore
+    default int getTotalPages() {
+        return totalPages();
+    }
+
+    // ==================== Default Methods ====================
+
+    /**
+     * Returns whether there is a next page.
+     *
+     * @return true if there is a next page, false otherwise
+     */
+    @JsonIgnore
+    default boolean hasNextPage() {
+        return page() < (totalPages() - 1);
+    }
+
+    /**
+     * Returns whether there is a previous page.
+     *
+     * @return true if there is a previous page, false otherwise
+     */
+    @JsonIgnore
+    default boolean hasPreviousPage() {
+        return page() > 0;
+    }
+
+    /**
+     * Returns an iterator over the content.
+     *
+     * @return iterator over page content
+     */
+    @Override
+    default Iterator<T> iterator() {
+        return content().iterator();
+    }
+
+    /**
+     * Converts this PageableResult to a Spring Data Page.
+     *
+     * @return Spring Data Page representation
+     */
+    @JsonIgnore
+    default Page<T> toPage() {
+        return new PageImpl<>(content(), PageRequest.of(page(), pageSize()), totalElements());
+    }
+
+    /**
+     * Returns a new PageableResult with the content mapped by the given function.
+     *
+     * @param <U>       the type of elements in the mapped page
+     * @param converter the function to map content elements
+     * @return a new PageableResult with mapped content
+     */
+    default <U> PageableResult<U> map(Function<? super T, ? extends U> converter) {
+        Assert.notNull(converter, "Converter must not be null!");
+
+        List<U> mappedContent = content().stream()
+                .map(converter)
+                .collect(Collectors.toList());
+
+        return new PageableResultImpl<>(
+                mappedContent,
+                page(),
+                pageSize(),
+                totalElements(),
+                totalPages()
+        );
+    }
+
+    // ==================== Static Factory Methods ====================
+
+    /**
+     * Creates a PageableResult from a Spring Data Page with custom content.
+     * Useful when you need to convert entities to DTOs.
+     *
+     * @param <T>     the type of elements in the result
+     * @param <S>     the type of elements in the source page
+     * @param content the converted content list
+     * @param page    the source Spring Data Page
+     * @return a new PageableResult
+     */
+    static <T, S> PageableResult<T> contentPage(List<T> content, Page<S> page) {
+        Assert.notNull(page, "page is null - not allowed");
+
+        return new PageableResultImpl<>(
+                content != null ? content : Collections.emptyList(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
+    }
+
+    /**
+     * Creates a PageableResult from a Spring Data Page with a converter function.
+     *
+     * @param <T>       the type of elements in the result
+     * @param <S>       the type of elements in the source page
+     * @param page      the source Spring Data Page
+     * @param converter function to convert page elements
+     * @return a new PageableResult
+     */
+    static <T, S> PageableResult<T> fromPage(Page<S> page, Function<S, T> converter) {
         Assert.notNull(page, "page is null - not allowed");
         Assert.notNull(converter, "converter not defined");
 
-        PageableResult<E> result = new PageableResult<>();
-        result.setContent(page.getContent().stream().map(converter).collect(Collectors.toList()));
-        result.setTotalPages(page.getTotalPages());
-        result.setTotalElements(page.getTotalElements());
-        result.setPage(page.getNumber());
-        result.setPageSize(page.getSize());
-        return result;
-    }
+        List<T> content = page.getContent().stream()
+                .map(converter)
+                .collect(Collectors.toList());
 
-    public static <E> PageableResult<E> page(Page<E> page) {
-        Assert.notNull(page, "page is null - not allowed");
-
-        PageableResult<E> result = new PageableResult<>();
-        result.setContent(page.getContent());
-        result.setTotalPages(page.getTotalPages());
-        result.setTotalElements(page.getTotalElements());
-        result.setPage(page.getNumber());
-        result.setPageSize(page.getSize());
-        return result;
-    }
-
-    public static <E> PageableResult<E> content(List<E> content) {
-        Assert.notNull(content, "content is null - not allowed");
-
-        PageableResult<E> result = new PageableResult<>();
-        result.setContent(content);
-        result.setTotalPages(1);
-        int totalElements = content.size();
-        result.setTotalElements(totalElements);
-        result.setPage(0);
-        result.setPageSize(totalElements);
-        return result;
-    }
-
-    @Override
-    public Iterator<E> iterator() {
-        return content.iterator();
-    }
-
-    @JsonIgnore
-    public boolean hasNextPage() {
-        return page < (totalPages - 1);
-    }
-
-    @JsonIgnore
-    public boolean hasPreviousPage() {
-        return page > 0;
-    }
-
-    @JsonIgnore
-    public Page<E> toPage() {
-        return new PageImpl<>(getContent(), PageRequest.of(page, pageSize), totalElements);
+        return new PageableResultImpl<>(
+                content,
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
     /**
-     * Returns a new {@link PageableResult} with the content of the current one mapped by the given {@link Converter}.
+     * Creates a PageableResult directly from a Spring Data Page.
      *
-     * @param converter must not be {@literal null}.
+     * @param <T>  the type of elements
+     * @param page the source Spring Data Page
+     * @return a new PageableResult
      */
-    public <U> PageableResult<U> map(Function<? super E, ? extends U> converter) {
-        Assert.notNull(converter, "Function must not be null!");
+    static <T> PageableResult<T> fromPage(Page<T> page) {
+        Assert.notNull(page, "page is null - not allowed");
 
-        PageableResult<U> result = new PageableResult<>();
-        result.setContent(getContent().stream().map(converter::apply).collect(Collectors.toList()));
-        result.setTotalPages(getTotalPages());
-        result.setTotalElements(getTotalElements());
-        result.setPage(getPage());
-        result.setPageSize(getPageSize());
-        return result;
+        return new PageableResultImpl<>(
+                page.getContent(),
+                page.getNumber(),
+                page.getSize(),
+                page.getTotalElements(),
+                page.getTotalPages()
+        );
     }
 
+    /**
+     * Creates a PageableResult from a simple content list.
+     * Treats the entire list as a single page.
+     *
+     * @param <T>     the type of elements
+     * @param content the content list
+     * @return a new PageableResult
+     */
+    static <T> PageableResult<T> of(List<T> content) {
+        Assert.notNull(content, "content is null - not allowed");
+
+        int size = content.size();
+        return new PageableResultImpl<>(
+                content,
+                0,
+                size,
+                size,
+                1
+        );
+    }
+
+    /**
+     * Creates an empty PageableResult.
+     *
+     * @param <T> the type of elements
+     * @return an empty PageableResult
+     */
+    static <T> PageableResult<T> empty() {
+        return new PageableResultImpl<>(
+                Collections.emptyList(),
+                0,
+                0,
+                0,
+                0
+        );
+    }
 }

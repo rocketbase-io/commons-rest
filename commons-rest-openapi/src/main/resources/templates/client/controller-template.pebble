@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
-import { buildRequestorFactory, type RequestorBuilder, type PageableResult } from "@rocketbase/commons-rest-client";
+import { buildRequestorFactory, type RequestorBuilder, type PageableResult, type PageableResultWithMeta } from "@rocketbase/commons-rest-client";
 import type { PageableRequest } from "{{- generatorConfig.srcNavigation -}}{{- generatorConfig.modelFolder -}}";
 {% if controller.importTypes is not empty %}
 {% for pack in controller.importTypes %}
