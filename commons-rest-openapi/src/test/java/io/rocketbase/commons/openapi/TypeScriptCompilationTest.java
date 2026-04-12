@@ -52,17 +52,8 @@ class TypeScriptCompilationTest {
         );
 
         // Create package.json with TypeScript and dependencies
-        // Using local typescript-runtime package via file: protocol with absolute path
-        // Resolve typescript-runtime path relative to project root
-        // Maven sets user.dir to project root, so we navigate up from commons-rest-openapi
-        Path projectRoot = Path.of("").toAbsolutePath();
-        // If we're in commons-rest-openapi, go up to parent
-        if (projectRoot.endsWith("commons-rest-openapi")) {
-            projectRoot = projectRoot.getParent();
-        }
-        Path typescriptRuntimePath = projectRoot.resolve("typescript-runtime");
-
-        String packageJson = String.format("""
+        // Using published @rocketbase/commons-rest-client from npm
+        String packageJson = """
             {
               "name": "test-client",
               "version": "1.0.0",
@@ -71,7 +62,7 @@ class TypeScriptCompilationTest {
                 "typecheck": "tsc --noEmit"
               },
               "dependencies": {
-                "@rocketbase/commons-rest-client": "file:%s",
+                "@rocketbase/commons-rest-client": "^1.0.0",
                 "@tanstack/react-query": "^5.0.0",
                 "axios": "^1.7.0",
                 "react": "^18.2.0"
@@ -83,7 +74,7 @@ class TypeScriptCompilationTest {
                 "zod": "^3.22.0"
               }
             }
-            """, typescriptRuntimePath.toString());
+            """;
         Files.writeString(outputDir.resolve("package.json"), packageJson);
 
         // Create tsconfig.json
