@@ -1,6 +1,8 @@
 package io.rocketbase.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -24,86 +26,43 @@ import java.util.stream.Collectors;
  * @param <T> the type of elements in the page content
  */
 @Schema(description = "Interface for paginated result lists")
+@JsonDeserialize(as = PageableResultImpl.class)
 public interface PageableResult<T> extends Iterable<T>, Serializable {
 
     /**
      * @return the page content as a list
      */
     @Schema(description = "content of current page. count of elements is less or equals pageSize (depends on totalElements and page/pageSize)")
+    @JsonProperty("content")
     List<T> content();
 
     /**
      * @return the current page number (0-indexed)
      */
     @Schema(description = "current page (starts by 0)")
+    @JsonProperty("page")
     int page();
 
     /**
      * @return the size of the page
      */
     @Schema(description = "maximum size of content list")
+    @JsonProperty("pageSize")
     int pageSize();
 
     /**
      * @return the total number of elements across all pages
      */
     @Schema(description = "total count of values in database")
+    @JsonProperty("totalElements")
     long totalElements();
 
     /**
      * @return the total number of pages
      */
     @Schema(description = "count of pages in total with given pageSize")
+    @JsonProperty("totalPages")
     int totalPages();
-
-    // ==================== Backwards Compatibility Getters ====================
-    // These methods provide backwards compatibility with the old class-based API
-    // They delegate to the record accessor methods
-
-    /**
-     * @deprecated Use {@link #content()} instead. This method is provided for backwards compatibility.
-     */
-    @Deprecated(since = "4.0", forRemoval = true)
-    @JsonIgnore
-    default List<T> getContent() {
-        return content();
-    }
-
-    /**
-     * @deprecated Use {@link #page()} instead. This method is provided for backwards compatibility.
-     */
-    @Deprecated(since = "4.0", forRemoval = true)
-    @JsonIgnore
-    default int getPage() {
-        return page();
-    }
-
-    /**
-     * @deprecated Use {@link #pageSize()} instead. This method is provided for backwards compatibility.
-     */
-    @Deprecated(since = "4.0", forRemoval = true)
-    @JsonIgnore
-    default int getPageSize() {
-        return pageSize();
-    }
-
-    /**
-     * @deprecated Use {@link #totalElements()} instead. This method is provided for backwards compatibility.
-     */
-    @Deprecated(since = "4.0", forRemoval = true)
-    @JsonIgnore
-    default long getTotalElements() {
-        return totalElements();
-    }
-
-    /**
-     * @deprecated Use {@link #totalPages()} instead. This method is provided for backwards compatibility.
-     */
-    @Deprecated(since = "4.0", forRemoval = true)
-    @JsonIgnore
-    default int getTotalPages() {
-        return totalPages();
-    }
 
     // ==================== Default Methods ====================
 

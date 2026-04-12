@@ -1,5 +1,7 @@
 package io.rocketbase.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.lang.Nullable;
 
@@ -22,23 +24,16 @@ import java.util.List;
  * @param <M> the type of metadata attached to this result
  */
 @Schema(description = "Pageable result with additional metadata support")
+@JsonDeserialize(as = PageableResultWithMeta.class)
 public record PageableResultWithMeta<T, M>(
-        @Schema(description = "content of current page")
         List<T> content,
-
-        @Schema(description = "current page (starts by 0)")
         int page,
-
-        @Schema(description = "maximum size of content list")
         int pageSize,
-
-        @Schema(description = "total count of values in database")
         long totalElements,
-
-        @Schema(description = "count of pages in total with given pageSize")
         int totalPages,
 
         @Schema(description = "additional metadata (summary, GeoJSON, etc.)")
+        @JsonProperty("meta")
         @Nullable
         M meta
 ) implements PageableResult<T> {
@@ -48,6 +43,7 @@ public record PageableResultWithMeta<T, M>(
      * Ensures all values are within valid ranges. Meta can be null.
      */
     public PageableResultWithMeta {
+        // Validation
         if (content == null) {
             throw new IllegalArgumentException("content cannot be null");
         }
