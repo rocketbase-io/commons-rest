@@ -1,6 +1,6 @@
 {
   "name": "@rocketbase/commons-rest-client",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "Runtime library for @rocketbase OpenAPI generated TypeScript clients",
   "main": "./dist/index.cjs",
@@ -46,7 +46,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/rocketbase-io/commons-rest.git",
+    "url": "git+https://github.com/rocketbase-io/commons-rest.git",
     "directory": "typescript-runtime"
   },
   "license": "MIT",
