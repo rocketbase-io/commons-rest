@@ -11,7 +11,7 @@ const { axiosClient, baseUrl} = useAuth();
 
 return React.useMemo(
 () => ({
-{{ configuredGroupVar -}}: create{{ groupName -}}(axiosClient, { baseURL: baseUrl })
+{{ configuredGroupVar -}}: create{{ groupName -}}(axiosClient, { baseURL: baseUrl() })
 }),
 [axiosClient]
 );
