@@ -1,6 +1,5 @@
 package io.rocketbase.sample.controller;
 
-import io.rocketbase.commons.controller.BaseController;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
 import io.rocketbase.sample.converter.EmployeeConverter;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api")
-public class EmployeeController implements BaseController, EmployeeApi {
+public class EmployeeController implements EmployeeApi {
 
 
     private final EmployeeRepository repository;

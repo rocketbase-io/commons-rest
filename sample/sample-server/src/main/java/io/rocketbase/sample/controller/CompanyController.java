@@ -1,6 +1,5 @@
 package io.rocketbase.sample.controller;
 
-import io.rocketbase.commons.controller.BaseController;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
 import io.rocketbase.sample.converter.CompanyConverter;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api")
-public class CompanyController implements BaseController, CompanyApi {
+public class CompanyController implements CompanyApi {
 
 
     private final CompanyRepository repository;

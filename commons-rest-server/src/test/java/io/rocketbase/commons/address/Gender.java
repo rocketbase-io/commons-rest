@@ -1,13 +1,10 @@
-package io.rocketbase.commons.dto.address;
+package io.rocketbase.commons.address;
 
-import com.fasterxml.jackson.annotation.JsonValue;
 import io.rocketbase.commons.translation.Translation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 import java.util.Locale;
 
-@Schema(enumAsRef = true)
 public enum Gender {
 
     FEMALE("female",
@@ -28,7 +25,6 @@ public enum Gender {
     @Getter
     private Translation salutation;
 
-    @JsonValue
     public String getValue() {
         return value;
     }

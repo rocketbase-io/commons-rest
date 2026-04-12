@@ -1,6 +1,5 @@
 package io.rocketbase.sample.controller;
 
-import io.rocketbase.commons.controller.BaseController;
 import io.rocketbase.commons.dto.PageableResult;
 import io.rocketbase.commons.exception.NotFoundException;
 import io.rocketbase.commons.obfuscated.ObfuscatedId;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(path = "/api")
-public class CustomerController implements BaseController, CustomerApi {
+public class CustomerController implements CustomerApi {
 
     private final CustomerRepository repository;
     private final CustomerConverter converter;
