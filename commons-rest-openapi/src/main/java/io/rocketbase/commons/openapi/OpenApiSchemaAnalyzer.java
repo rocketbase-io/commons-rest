@@ -19,6 +19,45 @@ import java.util.stream.Collectors;
 @Slf4j
 public class OpenApiSchemaAnalyzer {
 
+    // Cache PageableResult class reference
+    private static final Class<?> PAGEABLE_RESULT_CLASS;
+    private static final Class<?> PAGEABLE_RESULT_IMPL_CLASS;
+    private static final Class<?> PAGEABLE_RESULT_WITH_META_CLASS;
+
+    static {
+        Class<?> pageableResultClass = null;
+        Class<?> pageableResultImplClass = null;
+        Class<?> pageableResultWithMetaClass = null;
+        try {
+            pageableResultClass = Class.forName("io.rocketbase.commons.dto.PageableResult");
+            pageableResultImplClass = Class.forName("io.rocketbase.commons.dto.PageableResultImpl");
+            pageableResultWithMetaClass = Class.forName("io.rocketbase.commons.dto.PageableResultWithMeta");
+        } catch (ClassNotFoundException e) {
+            log.warn("PageableResult classes not found in classpath - filtering disabled");
+        }
+        PAGEABLE_RESULT_CLASS = pageableResultClass;
+        PAGEABLE_RESULT_IMPL_CLASS = pageableResultImplClass;
+        PAGEABLE_RESULT_WITH_META_CLASS = pageableResultWithMetaClass;
+    }
+
+    private final List<TypeScriptGeneratorCustomizer> customizers;
+
+    /**
+     * Constructor with customizers support.
+     *
+     * @param customizers List of customizers to apply during class extraction
+     */
+    public OpenApiSchemaAnalyzer(List<TypeScriptGeneratorCustomizer> customizers) {
+        this.customizers = customizers != null ? customizers : Collections.emptyList();
+    }
+
+    /**
+     * Default constructor without customizers (backward compatible).
+     */
+    public OpenApiSchemaAnalyzer() {
+        this(Collections.emptyList());
+    }
+
     /**
      * Extracts all Java class names from OpenAPI spec.
      * Includes: DTOs from request/response bodies, parameter types, return types.
@@ -43,12 +82,18 @@ public class OpenApiSchemaAnalyzer {
             });
         }
 
-        // Convert class names to Class objects
+        // Convert class names to Class objects and filter
         Set<Class<?>> classes = new HashSet<>();
         for (String className : classNames) {
             try {
-                // Try to load the class
                 Class<?> clazz = Class.forName(className);
+
+                // Filter out classes that shouldn't be generated
+                if (shouldExcludeFromGeneration(clazz)) {
+                    log.debug("Excluding class from TypeScript generation: {}", className);
+                    continue;
+                }
+
                 classes.add(clazz);
                 log.debug("Loaded class for TypeScript generation: {}", className);
             } catch (ClassNotFoundException e) {
@@ -127,9 +172,72 @@ public class OpenApiSchemaAnalyzer {
 
             // If it looks like a fully qualified class name (contains .)
             if (part.contains(".") && !part.startsWith("java.lang.") && !part.startsWith("java.util.")) {
+                // Try to load and check if should be excluded
+                try {
+                    Class<?> clazz = Class.forName(part);
+                    if (shouldExcludeFromGeneration(clazz)) {
+                        log.debug("Excluding class from extraction: {}", part);
+                        continue;
+                    }
+                } catch (ClassNotFoundException e) {
+                    // Class not loadable here - will be filtered later in extractAllUsedClasses
+                }
+
                 classNames.add(part);
             }
         }
+    }
+
+    /**
+     * Determines if a class should be excluded from TypeScript generation.
+     * <p>
+     * This method checks:
+     * <ul>
+     *   <li>If the class is exactly one of the PageableResult types (fast exact match)</li>
+     *   <li>If the class implements or extends PageableResult (catches custom implementations)</li>
+     *   <li>If any registered TypeScriptGeneratorCustomizer excludes the class</li>
+     * </ul>
+     * </p>
+     * <p>
+     * PageableResult types are excluded because they are provided by @rocketbase/commons-rest-client
+     * and should not be generated.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> This method can be overridden or extended via TypeScriptGeneratorCustomizer
+     * to add custom exclusion logic.
+     * </p>
+     *
+     * @param clazz The class to check
+     * @return true if the class should be excluded from generation
+     */
+    protected boolean shouldExcludeFromGeneration(Class<?> clazz) {
+        if (clazz == null) return false;
+
+        // Fast path: exact match with known PageableResult classes
+        if (clazz == PAGEABLE_RESULT_CLASS ||
+            clazz == PAGEABLE_RESULT_IMPL_CLASS ||
+            clazz == PAGEABLE_RESULT_WITH_META_CLASS) {
+            return true;
+        }
+
+        // Slow path: check if class implements/extends PageableResult
+        // This catches custom implementations like PageableResultGeo, PageableResultExtended, etc.
+        if (PAGEABLE_RESULT_CLASS != null && PAGEABLE_RESULT_CLASS.isAssignableFrom(clazz)) {
+            return true;
+        }
+
+        // Check customizers
+        if (!customizers.isEmpty()) {
+            for (TypeScriptGeneratorCustomizer customizer : customizers) {
+                if (customizer.shouldExcludeClass(clazz)) {
+                    log.debug("Class {} excluded by customizer: {}",
+                        clazz.getName(), customizer.getClass().getSimpleName());
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private boolean isPrimitiveOrCommon(String type) {

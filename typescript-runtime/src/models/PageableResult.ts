@@ -28,3 +28,26 @@ export interface PageableResult<T> {
    */
   pageSize: number;
 }
+
+/**
+ * Extended pageable result with additional metadata support.
+ * <p>
+ * This implementation allows you to attach custom metadata to paginated results.
+ * The metadata field can be used for various purposes such as:
+ * <ul>
+ *   <li>Summary information (totals, aggregations, statistics)</li>
+ *   <li>GeoJSON feature collections</li>
+ *   <li>Revision hashes or versioning information</li>
+ *   <li>Any other domain-specific metadata</li>
+ * </ul>
+ * </p>
+ *
+ * @template T - the type of elements in the page content
+ * @template M - the type of metadata attached to this result
+ */
+export interface PageableResultWithMeta<T, M> extends PageableResult<T> {
+  /**
+   * Additional metadata (summary, GeoJSON, etc.)
+   */
+  meta?: M;
+}

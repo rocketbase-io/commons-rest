@@ -34,7 +34,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 @Slf4j
-@RequiredArgsConstructor
 public class OpenApiClientCreatorService {
 
     protected final SpringDataWebProperties springDataWebProperties;
@@ -42,11 +41,43 @@ public class OpenApiClientCreatorService {
     protected final OpenApiWebMvcResource openApiWebMvcResource;
     protected final TypeScriptTypeConverter typeConverter; // NEW: Simple type converter
     protected final InfiniteOptionsTemplateBuilder templateBuilder;
+    protected final List<TypeScriptGeneratorCustomizer> typeScriptCustomizers; // NEW: Customizers
 
     protected Map<String, PebbleTemplate> compiledTemplateMap = new HashMap<>();
 
     // Cache for TypeScript generation result
     protected TypeScriptGenerationResult tsGenerationResult;
+
+    /**
+     * Constructor with customizers (injected by Spring).
+     */
+    public OpenApiClientCreatorService(
+            SpringDataWebProperties springDataWebProperties,
+            OpenApiGeneratorProperties openApiGeneratorProperties,
+            OpenApiWebMvcResource openApiWebMvcResource,
+            TypeScriptTypeConverter typeConverter,
+            InfiniteOptionsTemplateBuilder templateBuilder,
+            List<TypeScriptGeneratorCustomizer> typeScriptCustomizers) {
+        this.springDataWebProperties = springDataWebProperties;
+        this.openApiGeneratorProperties = openApiGeneratorProperties;
+        this.openApiWebMvcResource = openApiWebMvcResource;
+        this.typeConverter = typeConverter;
+        this.templateBuilder = templateBuilder;
+        this.typeScriptCustomizers = typeScriptCustomizers != null ? typeScriptCustomizers : Collections.emptyList();
+    }
+
+    /**
+     * Constructor without customizers (for backward compatibility and standalone use).
+     */
+    public OpenApiClientCreatorService(
+            SpringDataWebProperties springDataWebProperties,
+            OpenApiGeneratorProperties openApiGeneratorProperties,
+            OpenApiWebMvcResource openApiWebMvcResource,
+            TypeScriptTypeConverter typeConverter,
+            InfiniteOptionsTemplateBuilder templateBuilder) {
+        this(springDataWebProperties, openApiGeneratorProperties, openApiWebMvcResource,
+             typeConverter, templateBuilder, Collections.emptyList());
+    }
 
     @SneakyThrows
     public List<OpenApiController> getControllers(HttpServletRequest request) {
@@ -83,7 +114,7 @@ public class OpenApiClientCreatorService {
         // STEP 1: Generate ALL TypeScript types using typescript-generator
         log.info("Step 1: Generating TypeScript types from OpenAPI schema");
         TypeScriptModelGenerator.TypeScriptGeneratorConfig tsConfig = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
-        TypeScriptModelGenerator tsGenerator = new TypeScriptModelGenerator(tsConfig);
+        TypeScriptModelGenerator tsGenerator = new TypeScriptModelGenerator(tsConfig, typeScriptCustomizers);
         Path typesFile = outputDirectory.resolve("src/model/types.ts");
         this.tsGenerationResult = tsGenerator.generateFromOpenAPI(openAPI, typesFile);
 
