@@ -1,13 +1,10 @@
-package io.rocketbase.commons.dto.address;
+package io.rocketbase.commons.address;
 
-import io.rocketbase.commons.model.HasFirstAndLastName;
-import io.rocketbase.commons.util.Nulls;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.springframework.data.annotation.Transient;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
@@ -15,7 +12,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class ContactDto implements Serializable, HasFirstAndLastName {
+public class ContactDto implements Serializable {
 
     @Nullable
     private Gender gender;
@@ -48,13 +45,5 @@ public class ContactDto implements Serializable, HasFirstAndLastName {
     @Size(max = 50)
     @Nullable
     private String cellphone;
-
-    /**
-     * similar to getFullName but has email as fallback
-     */
-    @Transient
-    public String getDisplayName() {
-        return Nulls.notEmpty(getFullName(), email);
-    }
 
 }

@@ -1,7 +1,6 @@
 package io.rocketbase.commons.posthog.client;
 
 
-import io.rocketbase.commons.util.UrlParts;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
@@ -51,7 +50,7 @@ public class HttpSender {
 
     private HttpSender(Builder builder) {
         this.apiKey = builder.apiKey;
-        this.host = UrlParts.ensureEndsWithSlash(builder.host);
+        this.host = builder.host.endsWith("/") ? builder.host : builder.host + "/";
         this.restTemplate = new RestTemplate();
     }
 

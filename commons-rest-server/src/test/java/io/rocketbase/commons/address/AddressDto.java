@@ -1,6 +1,5 @@
-package io.rocketbase.commons.dto.address;
+package io.rocketbase.commons.address;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,6 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-@Schema(description = "simple address object")
 public class AddressDto implements Serializable {
 
     /**
@@ -23,7 +21,6 @@ public class AddressDto implements Serializable {
      */
     @Size(max = 40)
     @Nullable
-    @Schema(description = "first address line", example = "Katharinenstraße 30a")
     private String addressLineOne;
 
     /**
@@ -31,27 +28,22 @@ public class AddressDto implements Serializable {
      */
     @Size(max = 40)
     @Nullable
-    @Schema(description = "second address line (optional)", example = "rocketbase.io software productions GmbH")
     private String addressLineTwo;
 
     @Size(max = 50)
     @Nullable
-    @Schema(example = "Hamburg")
     private String city;
 
     @Size(max = 50)
     @Nullable
-    @Schema(example = "Hamburg")
     private String state;
 
     @Size(max = 10)
     @Nullable
-    @Schema(example = "20457")
     private String postalCode;
 
     @Size(max = 2)
     @Nullable
-    @Schema(description = "iso country code 2 letters - ISO 3166-1 alpha-2", example = "de")
     private String countryCode;
 
 }

@@ -1,5 +1,6 @@
 package io.rocketbase.commons.config;
 
+import io.rocketbase.commons.converter.StringToEnumConverterFactory;
 import io.rocketbase.commons.controller.exceptionhandler.BadRequestExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.BeanValidationExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.InsufficientPrivilegesExceptionHandler;
@@ -65,6 +66,18 @@ public class CommonsRestAutoConfiguration {
     @ConditionalOnProperty(name = "handler.insufficientPrivileges.enabled", matchIfMissing = true)
     public InsufficientPrivilegesExceptionHandler insufficientPrivilegesExceptionHandler() {
         return new InsufficientPrivilegesExceptionHandler();
+    }
+
+    /**
+     * Registers the StringToEnumConverterFactory bean.
+     * Spring automatically picks up ConverterFactory beans and registers them.
+     * No need for explicit WebMvcConfigurer registration.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @ConditionalOnProperty(name = "converter.enum.enabled", matchIfMissing = true)
+    public StringToEnumConverterFactory stringToEnumConverterFactory() {
+        return new StringToEnumConverterFactory();
     }
 
 }

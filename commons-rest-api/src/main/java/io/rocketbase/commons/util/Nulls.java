@@ -173,6 +173,69 @@ public final class Nulls {
         return false;
     }
 
+    /**
+     * Extracts a property value from a source object without applying a fallback.
+     * <p>
+     * Returns {@code null} if either the source is {@code null} or the extracted value is {@code null}.
+     * This is useful when you want explicit null handling instead of default fallbacks.
+     * </p>
+     *
+     * @param value    the source object (may be null)
+     * @param provider function to extract the target value from the source
+     * @param <TARGET> the type of the extracted value
+     * @param <SOURCE> the type of the source object
+     * @return the extracted value, or {@code null} if source or result is null
+     * @example <pre>{@code
+     * // Returns null if customer.mainLocation() is null OR if id is null
+     * String locationId = Nulls.get(customer.mainLocation(), CustomerLocation::id);
+     *
+     * // Can be combined with coalesce for fallback chains
+     * Long customerId = Nulls.coalesce(
+     *     Nulls.get(command.customer(), Customer::id),
+     *     Nulls.get(command.customerRef(), CustomerRef::customerId),
+     *     existingOrder.getCustomerId()
+     * );
+     * }</pre>
+     */
+    public static <TARGET, SOURCE> TARGET get(SOURCE value, PropertyValueProvider<SOURCE, TARGET> provider) {
+        if (value == null) {
+            return null;
+        }
+        return provider.apply(value);
+    }
+
+    /**
+     * Returns the first non-null value from the provided arguments.
+     * <p>
+     * Iterates through all values in order and returns the first one that is not {@code null}.
+     * If all values are {@code null}, returns {@code null}.
+     * </p>
+     *
+     * @param values values to check (in order)
+     * @param <T>    the type of values
+     * @return the first non-null value, or {@code null} if all are null
+     * @example <pre>{@code
+     * // Simple coalescing
+     * String name = Nulls.coalesce(firstName, middleName, lastName, "Unknown");
+     *
+     * // With nested object property extraction
+     * String email = Nulls.coalesce(
+     *     Nulls.get(user.primaryContact(), Contact::email),
+     *     Nulls.get(user.secondaryContact(), Contact::email),
+     *     user.getFallbackEmail()
+     * );
+     * }</pre>
+     */
+    @SafeVarargs
+    public static <T> T coalesce(T... values) {
+        for (T value : values) {
+            if (value != null) {
+                return value;
+            }
+        }
+        return null;
+    }
+
     public interface PropertyValueProvider<SOURCE, TARGET> {
         TARGET apply(SOURCE source);
     }
