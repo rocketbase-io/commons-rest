@@ -22,7 +22,7 @@ class ValidationServiceTest {
         ModelConstraint result = validationService.getConstraintsForClass(ContactDto.class, Locale.GERMAN);
         // then
         assertThat(result, notNullValue());
-        assertThat(result.getModel(), equalTo("io.rocketbase.commons.dto.address.ContactDto"));
+        assertThat(result.getModel(), equalTo("io.rocketbase.commons.address.ContactDto"));
         assertThat(result.getConstraints().keySet(), containsInAnyOrder("firstName", "lastName", "cellphone", "salutation", "landline", "title", "email"));
         assertThat(result.getConstraints().get("firstName"), containsInAnyOrder(ValidationConstraint.builder()
                 .type("Size")
