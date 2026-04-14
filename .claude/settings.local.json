@@ -29,7 +29,10 @@
       "Bash(git commit:*)",
       "Bash(mvn test:*)",
       "Bash(npm install:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "WebFetch(domain:mvnrepository.com)",
+      "WebFetch(domain:central.sonatype.com)"
     ],
     "deny": []
   }
