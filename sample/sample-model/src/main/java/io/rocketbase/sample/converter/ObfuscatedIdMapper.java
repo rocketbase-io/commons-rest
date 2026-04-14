@@ -2,18 +2,16 @@ package io.rocketbase.sample.converter;
 
 import io.rocketbase.commons.obfuscated.IdObfuscator;
 import io.rocketbase.commons.obfuscated.ObfuscatedId;
-import jakarta.annotation.Resource;
-import org.mapstruct.Mapper;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
+@Component
+@RequiredArgsConstructor
+public class ObfuscatedIdMapper {
 
-@Mapper(componentModel = "spring")
-public abstract class ObfuscatedIdMapper {
+    private final IdObfuscator idObfuscator;
 
-    @Resource
-    private IdObfuscator idObfuscator;
-
-    public ObfuscatedId convert(long id) {
-        return idObfuscator.obfuscate(id);
+    public ObfuscatedId asObfuscatedId(Long id) {
+        return id != null ? idObfuscator.obfuscate(id) : null;
     }
-
 }

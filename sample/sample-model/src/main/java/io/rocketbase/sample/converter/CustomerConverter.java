@@ -1,21 +1,46 @@
 package io.rocketbase.sample.converter;
 
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
+import io.rocketbase.commons.obfuscated.ObfuscatedId;
 import io.rocketbase.sample.dto.customer.CustomerRead;
 import io.rocketbase.sample.dto.customer.CustomerWrite;
 import io.rocketbase.sample.model.CustomerEntity;
-import org.mapstruct.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-@Mapper(config = CentralConfig.class)
-public interface CustomerConverter extends EntityReadWriteConverter<CustomerEntity, CustomerRead, CustomerWrite> {
+@Component
+@RequiredArgsConstructor
+public class CustomerConverter implements EntityReadWriteConverter<CustomerEntity, CustomerRead, CustomerWrite> {
 
-    CustomerRead fromEntity(CustomerEntity entity);
+    private final ObfuscatedIdMapper obfuscatedIdMapper;
 
-    @Mappings({
-            @Mapping(target = "id", ignore = true),
-    })
-    CustomerEntity newEntity(CustomerWrite workspace);
+    @Override
+    public CustomerRead fromEntity(CustomerEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return CustomerRead.builder()
+                .id(obfuscatedIdMapper.asObfuscatedId(entity.getId()))
+                .name(entity.getName())
+                .build();
+    }
 
-    @InheritConfiguration()
-    CustomerEntity updateEntityFromEdit(CustomerWrite write, @MappingTarget CustomerEntity entity);
+    @Override
+    public CustomerEntity newEntity(CustomerWrite write) {
+        if (write == null) {
+            return null;
+        }
+        return CustomerEntity.builder()
+                .name(write.getName())
+                .build();
+    }
+
+    @Override
+    public CustomerEntity updateEntityFromEdit(CustomerWrite write, CustomerEntity entity) {
+        if (write == null || entity == null) {
+            return entity;
+        }
+        entity.setName(write.getName());
+        return entity;
+    }
 }

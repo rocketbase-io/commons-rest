@@ -4,18 +4,44 @@ import io.rocketbase.commons.converter.EntityReadWriteConverter;
 import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.company.CompanyWrite;
 import io.rocketbase.sample.model.CompanyEntity;
-import org.mapstruct.*;
+import org.springframework.stereotype.Component;
 
-@Mapper(config = CentralConfig.class)
-public interface CompanyConverter extends EntityReadWriteConverter<CompanyEntity, CompanyRead, CompanyWrite> {
+@Component
+public class CompanyConverter implements EntityReadWriteConverter<CompanyEntity, CompanyRead, CompanyWrite> {
 
-    CompanyRead fromEntity(CompanyEntity entity);
+    @Override
+    public CompanyRead fromEntity(CompanyEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return CompanyRead.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .email(entity.getEmail())
+                .url(entity.getUrl())
+                .build();
+    }
 
-    @Mappings({
-            @Mapping(target = "id", ignore = true),
-    })
-    CompanyEntity newEntity(CompanyWrite workspace);
+    @Override
+    public CompanyEntity newEntity(CompanyWrite write) {
+        if (write == null) {
+            return null;
+        }
+        return CompanyEntity.builder()
+                .name(write.getName())
+                .email(write.getEmail())
+                .url(write.getUrl())
+                .build();
+    }
 
-    @InheritConfiguration()
-    CompanyEntity updateEntityFromEdit(CompanyWrite write, @MappingTarget CompanyEntity entity);
+    @Override
+    public CompanyEntity updateEntityFromEdit(CompanyWrite write, CompanyEntity entity) {
+        if (write == null || entity == null) {
+            return entity;
+        }
+        entity.setName(write.getName());
+        entity.setEmail(write.getEmail());
+        entity.setUrl(write.getUrl());
+        return entity;
+    }
 }
