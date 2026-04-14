@@ -1,37 +1,62 @@
 package io.rocketbase.sample.converter;
 
 import io.rocketbase.commons.converter.EntityReadWriteConverter;
-import io.rocketbase.sample.dto.company.CompanyRead;
 import io.rocketbase.sample.dto.employee.EmployeeRead;
 import io.rocketbase.sample.dto.employee.EmployeeWrite;
 import io.rocketbase.sample.model.EmployeeEntity;
 import io.rocketbase.sample.repository.mongo.CompanyRepository;
-import org.mapstruct.InheritConfiguration;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 
-@Mapper(config = CentralConfig.class)
-public abstract class EmployeeConverter implements EntityReadWriteConverter<EmployeeEntity, EmployeeRead, EmployeeWrite> {
+@Component
+@RequiredArgsConstructor
+public class EmployeeConverter implements EntityReadWriteConverter<EmployeeEntity, EmployeeRead, EmployeeWrite> {
 
-    @Autowired
-    protected CompanyRepository companyRepository;
+    private final CompanyRepository companyRepository;
+    private final CompanyConverter companyConverter;
 
-    @Autowired
-    protected CompanyConverter companyConverter;
+    @Override
+    public EmployeeRead fromEntity(EmployeeEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+        return EmployeeRead.builder()
+                .id(entity.getId())
+                .firstName(entity.getFirstName())
+                .lastName(entity.getLastName())
+                .dateOfBirth(entity.getDateOfBirth())
+                .female(entity.isFemale())
+                .email(entity.getEmail())
+                .company(entity.getCompanyId() != null
+                    ? companyConverter.fromEntity(companyRepository.findById(entity.getCompanyId()).orElse(null))
+                    : null)
+                .build();
+    }
 
-    @Mapping(target = "company", expression = "java( convertCompanyId( entity.getCompanyId() ) )")
-    public abstract EmployeeRead fromEntity(EmployeeEntity entity);
+    @Override
+    public EmployeeEntity newEntity(EmployeeWrite write) {
+        if (write == null) {
+            return null;
+        }
+        return EmployeeEntity.builder()
+                .firstName(write.getFirstName())
+                .lastName(write.getLastName())
+                .dateOfBirth(write.getDateOfBirth())
+                .female(write.isFemale())
+                .email(write.getEmail())
+                .build();
+    }
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "companyId", ignore = true)
-    public abstract EmployeeEntity newEntity(EmployeeWrite workspace);
-
-    @InheritConfiguration()
-    public abstract EmployeeEntity updateEntityFromEdit(EmployeeWrite write, @MappingTarget EmployeeEntity entity);
-
-    public CompanyRead convertCompanyId(String companyId) {
-        return companyConverter.fromEntity(companyRepository.findById(companyId).orElseGet(null));
+    @Override
+    public EmployeeEntity updateEntityFromEdit(EmployeeWrite write, EmployeeEntity entity) {
+        if (write == null || entity == null) {
+            return entity;
+        }
+        entity.setFirstName(write.getFirstName());
+        entity.setLastName(write.getLastName());
+        entity.setDateOfBirth(write.getDateOfBirth());
+        entity.setFemale(write.isFemale());
+        entity.setEmail(write.getEmail());
+        return entity;
     }
 }

@@ -1,15 +1,12 @@
 package io.rocketbase.sample.converter;
 
 import io.hypersistence.tsid.TSID;
-import org.mapstruct.Mapper;
+import org.springframework.stereotype.Component;
 
+@Component
+public class TsidMapper {
 
-@Mapper(componentModel = "spring")
-public abstract class TsidMapper {
-
-
-    public TSID convert(long id) {
-        return TSID.from(id);
+    public TSID asTsid(Long id) {
+        return id != null ? TSID.from(id) : null;
     }
-
 }
