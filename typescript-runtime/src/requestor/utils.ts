@@ -83,15 +83,20 @@ export function applyIfNecessary<Options, Result>(
  * @param options - Source options object
  * @returns Object with extracted keys
  */
-export function buildFromKeys<Options extends Record<string, unknown>>(
+export function buildFromKeys<Options extends object>(
   keys: (keyof Options)[],
   options: Options
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
+  // Cast once at the boundary: TypeScript's `extends object` bound matches any
+  // interface / record / class instance, but doesn't permit `obj[key]` indexing
+  // by itself. The cast is internal — callers stay strictly typed via `Options`.
+  const indexable = options as Record<string, unknown>;
 
   for (const key of keys) {
-    if (key in options) {
-      result[String(key)] = options[key];
+    const strKey = String(key);
+    if (strKey in indexable) {
+      result[strKey] = indexable[strKey];
     }
   }
 
