@@ -2,6 +2,8 @@
 // generated {{ timestamp | date("yyyy-MM-dd HH:mm:ss", timeZone="Europe/Berlin") }}
 
 import type { AxiosInstance, AxiosRequestConfig } from "axios";
+import * as React from "react";
+import { useAuth } from "@rocketbase/commons-rest-client";
 
 {% for c in controllers %}
 import { type {{ c.shortName -}}Api, create{{- c.shortName -}}Api  } from "./{{- c.fileName -}}";
@@ -30,3 +32,20 @@ export function create{{ groupName -}}(client?: AxiosInstance, cf?: AxiosRequest
 {% endfor %}
   };
 }
+
+/**
+ * React hook that returns a memoised {{ groupName }} instance wired to the auth
+ * context's pre-configured axios client + base URL. Hooks generated under
+ * `src/hooks/` import this `useApi` directly — consumer apps don't need to
+ * stitch the API instance together themselves.
+ */
+export const useApi = () => {
+  const { axiosClient, baseUrl } = useAuth();
+
+  return React.useMemo(
+    () => ({
+      {{ configuredGroupVar -}}: create{{ groupName -}}(axiosClient, { baseURL: baseUrl() })
+    }),
+    [axiosClient, baseUrl]
+  );
+};

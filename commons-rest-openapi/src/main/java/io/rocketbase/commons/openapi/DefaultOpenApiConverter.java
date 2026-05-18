@@ -14,6 +14,9 @@ import static io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction.MU
 /**
  * Default implementation of OpenApiConverter using manual string manipulation.
  *
+ * @see OpenApiTypeMapper
+ * @see TypeScriptTypeConverter
+ * @see TypeScriptModelGenerator
  * @deprecated This class has been replaced by {@link OpenApiTypeMapper} which uses
  * typescript-generator for automatic type generation. All type conversion is now handled
  * via {@link TypeScriptModelGenerator} and {@link TypeScriptTypeConverter}.
@@ -36,10 +39,6 @@ import static io.rocketbase.commons.openapi.OpenApiControllerMethodExtraction.MU
  * }</pre>
  * <p>
  * This class will be removed in a future major release.
- *
- * @see OpenApiTypeMapper
- * @see TypeScriptTypeConverter
- * @see TypeScriptModelGenerator
  */
 @Deprecated(since = "LATEST-SNAPSHOT", forRemoval = true)
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -301,7 +300,7 @@ public class DefaultOpenApiConverter implements OpenApiConverter {
         }
         if ("Boolean".equalsIgnoreCase(type)) type = "boolean";
 
-        if (type.endsWith("TSID") || "UUID".equalsIgnoreCase(type)) return "string";
+        if (type.toUpperCase().endsWith("TSID") || "UUID".equalsIgnoreCase(type)) return "string";
         if (type.endsWith("JsonNode")) return "any";
 
         for (String java : getJavaToUnknowns()) {

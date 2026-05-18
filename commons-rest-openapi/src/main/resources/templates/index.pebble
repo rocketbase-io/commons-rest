@@ -1,19 +1,8 @@
-import { create{{ groupName -}} } from "./{{- generatorConfig.clientFolder -}}";
-import * as React from "react";
-import { useAuth } from "@rocketbase/commons-rest-client";
-
+// Re-export everything from the generated sub-packages. `useApi` lives in
+// `clients/index.ts` (next to the create* factories) so that hooks under
+// `src/hooks/*.ts` can import it via the same `../clients` path they use for
+// the API type definitions — no separate root-import dance needed.
 export * from "./{{- generatorConfig.clientFolder -}}";
 export * from "./model";
 export * from "./{{- generatorConfig.hookFolder -}}";
-
-export const useApi = () => {
-const { axiosClient, baseUrl} = useAuth();
-
-return React.useMemo(
-() => ({
-{{ configuredGroupVar -}}: create{{ groupName -}}(axiosClient, { baseURL: baseUrl() })
-}),
-[axiosClient]
-);
-};
 

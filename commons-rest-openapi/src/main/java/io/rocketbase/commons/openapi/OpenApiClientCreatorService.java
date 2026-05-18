@@ -15,7 +15,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.utils.Constants;
@@ -76,7 +75,7 @@ public class OpenApiClientCreatorService {
             TypeScriptTypeConverter typeConverter,
             InfiniteOptionsTemplateBuilder templateBuilder) {
         this(springDataWebProperties, openApiGeneratorProperties, openApiWebMvcResource,
-             typeConverter, templateBuilder, Collections.emptyList());
+                typeConverter, templateBuilder, Collections.emptyList());
     }
 
     @SneakyThrows
@@ -101,9 +100,9 @@ public class OpenApiClientCreatorService {
      *
      * @param reactQueryVersion React Query version to generate for
      * @param outputDirectory   Target directory for generated files
-     * @param openAPI          OpenAPI specification
-     * @param baseUrl          Base URL for API calls
-     * @param groupName        Group name for generated client
+     * @param openAPI           OpenAPI specification
+     * @param baseUrl           Base URL for API calls
+     * @param groupName         Group name for generated client
      */
     public void generateClientToFileSystem(ReactQueryVersion reactQueryVersion, Path outputDirectory, OpenAPI openAPI, String baseUrl, String groupName) {
         log.info("Generating TypeScript client to: {}", outputDirectory);
@@ -119,7 +118,8 @@ public class OpenApiClientCreatorService {
         this.tsGenerationResult = tsGenerator.generateFromOpenAPI(openAPI, typesFile);
 
         // STEP 2: Create type mapper with generated types
-        TypeScriptTypeConverter typeConverter = new OpenApiTypeMapper(tsGenerationResult);
+        String modelImportPath = openApiGeneratorProperties.getSrcNavigation() + openApiGeneratorProperties.getModelFolder();
+        TypeScriptTypeConverter typeConverter = new OpenApiTypeMapper(tsGenerationResult, modelImportPath);
 
         // STEP 3: Extract controllers using the type mapper
         List<OpenApiController> controllers = getControllersFromOpenApi(openAPI, typeConverter);
@@ -435,7 +435,7 @@ public class OpenApiClientCreatorService {
             if (!disabled) {
                 map.putIfAbsent(controllerBean, new ArrayList<>());
                 map.get(controllerBean).add(new OpenApiControllerMethodExtraction(
-                    new OpenApiControllerMethodExtraction.ExtractorConfig(pageParams(), typeConverter, httpMethod, path, operation, openApiGeneratorProperties.getDefaultStaleTime())
+                        new OpenApiControllerMethodExtraction.ExtractorConfig(pageParams(), typeConverter, httpMethod, path, operation, openApiGeneratorProperties.getDefaultStaleTime())
                 ));
             }
         }

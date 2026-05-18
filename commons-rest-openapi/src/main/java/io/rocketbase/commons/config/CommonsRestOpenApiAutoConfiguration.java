@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Configuration
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
@@ -34,8 +35,10 @@ public class CommonsRestOpenApiAutoConfiguration {
     @ConditionalOnMissingBean
     public OpenApiClientCreatorService openApiClientCreatorService(@Autowired OpenApiWebMvcResource openApiWebMvcResource,
                                                                    @Autowired TypeScriptTypeConverter typeConverter,
-                                                                   @Autowired InfiniteOptionsTemplateBuilder templateBuilder) {
-        return new OpenApiClientCreatorService(springDataWebProperties, openApiGeneratorProperties, openApiWebMvcResource, typeConverter, templateBuilder);
+                                                                   @Autowired InfiniteOptionsTemplateBuilder templateBuilder,
+                                                                   @Autowired(required = false) List<TypeScriptGeneratorCustomizer> typeScriptCustomizers) {
+        return new OpenApiClientCreatorService(springDataWebProperties, openApiGeneratorProperties, openApiWebMvcResource, typeConverter, templateBuilder,
+                typeScriptCustomizers != null ? typeScriptCustomizers : java.util.Collections.emptyList());
     }
 
     @Bean

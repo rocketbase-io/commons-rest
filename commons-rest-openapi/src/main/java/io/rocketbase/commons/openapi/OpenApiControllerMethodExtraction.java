@@ -154,16 +154,20 @@ public class OpenApiControllerMethodExtraction {
         if (type == null) return "unknown";
 
         switch (type) {
-            case "string": return "string";
+            case "string":
+                return "string";
             case "integer":
-            case "number": return "number";
-            case "boolean": return "boolean";
+            case "number":
+                return "number";
+            case "boolean":
+                return "boolean";
             case "array":
                 if (schema.getItems() != null) {
                     return convertSchemaToTypeScript(schema.getItems()) + "[]";
                 }
                 return "unknown[]";
-            default: return "unknown";
+            default:
+                return "unknown";
         }
     }
 
@@ -301,8 +305,10 @@ public class OpenApiControllerMethodExtraction {
                 .forEach(type -> allTypescriptTypes.addAll(config.getTypeConverter().extractImportTypes(type)));
 
         // Filter out native types
+        Set<String> runtimeImports = Set.of("PageableResult", "PageableResultWithMeta", "PageableRequest");
         Set<String> importTypes = allTypescriptTypes.stream()
                 .filter(type -> !config.getTypeConverter().getNativeTypes().contains(type.toLowerCase()))
+                .filter(type -> !runtimeImports.contains(type))
                 .collect(Collectors.toSet());
 
         // All imports come from the model folder

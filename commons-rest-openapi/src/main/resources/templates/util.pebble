@@ -1,5 +1,5 @@
-import { PageableResult } from "@rocketbase/commons-rest-client";
-import { InfiniteData } from '{{- reactQueryVersion.packageName -}}';
+import type { PageableResult } from "@rocketbase/commons-rest-client";
+import type { InfiniteData } from '{{- reactQueryVersion.packageName -}}';
 
 export function createPaginationOptions<T extends PageableResult<unknown>>() {
   return {
@@ -18,9 +18,7 @@ export function createPaginationOptions<T extends PageableResult<unknown>>() {
 export function infiniteTotalElements<T>(
   data: InfiniteData<PageableResult<T>>
 ): number {
-  if (data && Array.isArray(data?.pages) && data?.pages.length) {
-    return data.pages[0].totalElements;
-  }
-  return 0;
+  const firstPage = data?.pages?.[0];
+  return firstPage ? firstPage.totalElements : 0;
 }
 
