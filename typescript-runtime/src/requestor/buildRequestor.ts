@@ -54,7 +54,7 @@ export function buildDefaultAxiosRequestConfig(): AxiosRequestConfig {
  * });
  * ```
  */
-export function buildRequestor<Options extends Record<string, unknown>, Result>(
+export function buildRequestor<Options extends object, Result>(
   config: RequestorBuildConfig<Options, Result>,
   defaults?: AxiosRequestConfig
 ): RequestorBuilder<Options, Result> {
@@ -150,7 +150,7 @@ export function buildRequestorFactory(
 ) {
   const mergedDefaults = mergeRequestConfig(...defaults);
 
-  return <Options extends Record<string, unknown>, Result>(
+  return <Options extends object, Result>(
     config: Omit<RequestorBuildConfig<Options, Result>, 'client'>
   ): RequestorBuilder<Options, Result> => {
     return buildRequestor<Options, Result>(
