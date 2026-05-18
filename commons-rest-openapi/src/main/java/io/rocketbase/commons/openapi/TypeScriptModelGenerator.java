@@ -24,7 +24,7 @@ public class TypeScriptModelGenerator {
      * Generates ALL TypeScript types from OpenAPI specification.
      * Extracts all Java classes used in the API and converts them to TypeScript.
      *
-     * @param openAPI The OpenAPI specification
+     * @param openAPI    The OpenAPI specification
      * @param outputFile Path to the output .ts file (e.g., "model/types.ts")
      * @return TypeScriptGenerationResult with generated code and type mappings
      */
@@ -58,7 +58,7 @@ public class TypeScriptModelGenerator {
     /**
      * Generates TypeScript interfaces for the given Java classes.
      *
-     * @param classes Set of Java classes to convert to TypeScript
+     * @param classes    Set of Java classes to convert to TypeScript
      * @param outputFile Path to the output .ts file
      * @return The generated TypeScript code
      */
@@ -66,6 +66,12 @@ public class TypeScriptModelGenerator {
         log.info("Generating TypeScript models for {} classes to {}", classes.size(), outputFile);
 
         Settings settings = createSettings();
+        List<String> transitivelyExcluded = collectTransitivelyExcludedFqns(classes);
+        if (!transitivelyExcluded.isEmpty()) {
+            log.info("Excluding {} class(es) from TypeScript via customizer: {}",
+                    transitivelyExcluded.size(), transitivelyExcluded);
+            settings.setExcludeFilter(transitivelyExcluded, Collections.emptyList());
+        }
         TypeScriptGenerator generator = new TypeScriptGenerator(settings);
 
         String result = generator.generateTypeScript(Input.from(classes.toArray(new Class<?>[0])));
@@ -124,6 +130,15 @@ public class TypeScriptModelGenerator {
             mapping.put(javaFqn, tsTypeName);
 
             log.debug("Type mapping: {} -> {}", javaFqn, tsTypeName);
+        }
+
+        for (Map.Entry<String, String> entry : getCustomTypeMappings().entrySet()) {
+            // Hardcoded mappings carry generic placeholders ("<T>", "<T, M>"); strip
+            // those so toTypeScript matches the bare FQN — generics are reconstructed
+            // by the caller.
+            String bareFqn = entry.getKey().replaceAll("<[^>]*>", "").trim();
+            String bareTs = entry.getValue().replaceAll("<[^>]*>", "").trim();
+            mapping.putIfAbsent(bareFqn, bareTs);
         }
 
         return mapping;
@@ -204,22 +219,23 @@ public class TypeScriptModelGenerator {
      */
     private Map<String, String> getCustomTypeMappings() {
         return Map.ofEntries(
-            Map.entry("java.net.URL", "string"),
-            Map.entry("io.hypersistence.tsid.TSID", "string"),
-            Map.entry("java.time.LocalDate", "string"),
-            Map.entry("java.time.LocalTime", "string"),
-            Map.entry("java.time.LocalDateTime", "string"),
-            Map.entry("java.time.Instant", "string"),
-            Map.entry("java.time.OffsetDateTime", "string"),
-            Map.entry("java.time.ZonedDateTime", "string"),
-            Map.entry("java.util.Map<K, V>", "Record<K, V>"),
-            Map.entry("io.rocketbase.commons.obfuscated.ObfuscatedId", "string"),
-            // PageableResult types - imported from @rocketbase/commons-rest-client
-            // These are not generated, but imported from the runtime library
-            Map.entry("io.rocketbase.commons.dto.PageableResult<T>", "PageableResult<T>"),
-            Map.entry("io.rocketbase.commons.dto.PageableResultImpl<T>", "PageableResult<T>"),
-            Map.entry("io.rocketbase.commons.dto.PageableResultWithMeta<T, M>", "PageableResultWithMeta<T, M>")
-            // Let typescript-generator handle DTOs - they will be generated as interfaces
+                Map.entry("java.net.URL", "string"),
+                Map.entry("io.hypersistence.tsid.TSID", "string"),
+                Map.entry("com.github.f4b6a3.tsid.Tsid", "string"),
+                Map.entry("java.time.LocalDate", "string"),
+                Map.entry("java.time.LocalTime", "string"),
+                Map.entry("java.time.LocalDateTime", "string"),
+                Map.entry("java.time.Instant", "string"),
+                Map.entry("java.time.OffsetDateTime", "string"),
+                Map.entry("java.time.ZonedDateTime", "string"),
+                Map.entry("java.util.Map<K, V>", "Record<K, V>"),
+                Map.entry("io.rocketbase.commons.obfuscated.ObfuscatedId", "string"),
+                // PageableResult types - imported from @rocketbase/commons-rest-client
+                // These are not generated, but imported from the runtime library
+                Map.entry("io.rocketbase.commons.dto.PageableResult<T>", "PageableResult<T>"),
+                Map.entry("io.rocketbase.commons.dto.PageableResultImpl<T>", "PageableResult<T>"),
+                Map.entry("io.rocketbase.commons.dto.PageableResultWithMeta<T, M>", "PageableResultWithMeta<T, M>")
+                // Let typescript-generator handle DTOs - they will be generated as interfaces
         );
     }
 
@@ -232,12 +248,12 @@ public class TypeScriptModelGenerator {
 
         // Exclude patterns
         String[] excludePatterns = {
-            "Builder",
-            "BuilderImpl",
-            "Deserializer",
-            "Serializer",
-            "Exception",
-            "Visitor"
+                "Builder",
+                "BuilderImpl",
+                "Deserializer",
+                "Serializer",
+                "Exception",
+                "Visitor"
         };
 
         for (String pattern : excludePatterns) {
@@ -253,7 +269,7 @@ public class TypeScriptModelGenerator {
 
         // Exclude common Java classes
         if (className.equals("java.io.Serializable") ||
-            className.equals("java.lang.Iterable")) {
+                className.equals("java.lang.Iterable")) {
             return true;
         }
 
@@ -271,6 +287,45 @@ public class TypeScriptModelGenerator {
     }
 
     /**
+     * Walks the super-class + super-interface chain of every input class and collects
+     * the FQNs of those that a registered customizer wants excluded. Pushed into
+     * {@code Settings.excludeFilter} so typescript-generator drops them from the output
+     * AND strips the corresponding {@code extends X} clauses from the subtypes that
+     * inherit from them.
+     *
+     * <p>Walked transitively (super of super, etc.) because deep marker-interface
+     * hierarchies (e.g. {@code Aggregate extends Identifiable extends ...}) would
+     * otherwise leak the intermediate interfaces.
+     */
+    private List<String> collectTransitivelyExcludedFqns(Set<Class<?>> roots) {
+        if (customizers == null || customizers.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Set<String> excluded = new LinkedHashSet<>();
+        Deque<Class<?>> queue = new ArrayDeque<>(roots);
+        Set<Class<?>> visited = new HashSet<>();
+        while (!queue.isEmpty()) {
+            Class<?> clazz = queue.poll();
+            if (clazz == null || !visited.add(clazz)) {
+                continue;
+            }
+            for (TypeScriptGeneratorCustomizer customizer : customizers) {
+                if (customizer.shouldExcludeClass(clazz)) {
+                    excluded.add(clazz.getName());
+                    break;
+                }
+            }
+            if (clazz.getSuperclass() != null) {
+                queue.add(clazz.getSuperclass());
+            }
+            for (Class<?> iface : clazz.getInterfaces()) {
+                queue.add(iface);
+            }
+        }
+        return new ArrayList<>(excluded);
+    }
+
+    /**
      * Configuration for TypeScript generation.
      * Allows customization of typescript-generator settings.
      */
@@ -285,8 +340,8 @@ public class TypeScriptModelGenerator {
          * Default: @NotNull and @NotBlank
          */
         private List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations = List.of(
-            jakarta.validation.constraints.NotNull.class,
-            jakarta.validation.constraints.NotBlank.class
+                jakarta.validation.constraints.NotNull.class,
+                jakarta.validation.constraints.NotBlank.class
         );
 
         private Map<String, String> additionalTypeMappings = Map.of();

@@ -17,6 +17,22 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
 
     private final TypeScriptGenerationResult generationResult;
 
+    /** Override of the default "../../model" — supplied by callers that bundle clients
+     *  into a flat src/ layout (clients/, model/, hooks/ as siblings under src/). */
+    private String modelImportPath = "../../model";
+
+    public OpenApiTypeMapper(TypeScriptGenerationResult generationResult, String modelImportPath) {
+        this.generationResult = generationResult;
+        if (modelImportPath != null && !modelImportPath.isBlank()) {
+            this.modelImportPath = modelImportPath;
+        }
+    }
+
+    @Override
+    public String getModelImportPath() {
+        return modelImportPath;
+    }
+
     /**
      * Converts a Java generic type to TypeScript type using the generated type mappings.
      * Example: "io.rocketbase.commons.dto.PageableResult<io.rocketbase.commons.dto.ActivityDto>"

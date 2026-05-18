@@ -70,7 +70,7 @@ export interface {{ controller.shortName -}}Api {
 
    */
 {% endif %}
-  {{ method.methodName }}: RequestorBuilder<{% if method.fields is not empty %}{{ method.shortInputType}}{% elseif method.fieldsExtendsPaging %}PageableRequest{% else %}unknown{% endif %}, {{ method.shortReturnType }}>;
+  {{ method.methodName }}: RequestorBuilder<{% if method.fields is not empty %}{{ method.shortInputType}}{% elseif method.fieldsExtendsPaging %}PageableRequest{% else %}{ overrides?: AxiosRequestConfig }{% endif %}, {{ method.shortReturnType }}>;
 {% endif %}
 {% endfor %}
 }
@@ -83,7 +83,7 @@ export function create{{- controller.shortName -}}Api(client?: AxiosInstance, cf
 
 {% for method in controller.methods %}
 {% if method.isValid %}
-    const {{ method.methodName }}: {{ controller.shortName -}}Api["{{- method.methodName -}}"] = builder({
+    const _{{ method.methodName }}: {{ controller.shortName -}}Api["{{- method.methodName -}}"] = builder({
     method: "{{- method.config.httpMethod | lower -}}",
     url: {% if method.pathFields is not empty %}
 ({ {% for f in method.pathFields %}{{f}}{% if not loop.last %}, {% endif %}{% endfor %} }) => `{{ method.pathJs }}`{% else %}
@@ -98,7 +98,7 @@ export function create{{- controller.shortName -}}Api(client?: AxiosInstance, cf
   return {
 {% for method in controller.methods %}
 {% if method.isValid %}
-    {{ method.methodName }}{% if not loop.last %}, {% endif %}
+    {{ method.methodName }}: _{{- method.methodName -}}{% if not loop.last %}, {% endif %}
 
 {% endif %}
 {% endfor %}
