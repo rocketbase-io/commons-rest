@@ -17,13 +17,13 @@ public class TypeScriptGenerationResult {
     /**
      * Generated TypeScript code
      */
-    private String typeScriptCode;
+    protected String typeScriptCode;
 
     /**
      * Mapping from Java fully qualified names to TypeScript type names.
      * Example: "io.rocketbase.commons.dto.ActivityDto" -> "ActivityDto"
      */
-    private Map<String, String> typeMapping;
+    protected Map<String, String> typeMapping;
 
     /**
      * Gets the TypeScript type name for a Java class name.

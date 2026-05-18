@@ -131,7 +131,7 @@ public class OpenApiControllerMethodExtraction {
     /**
      * Check if this method has a Pageable parameter.
      */
-    private boolean hasPageableParameter() {
+    protected boolean hasPageableParameter() {
         return Nulls.notNull(parameterTypes).contains("org.springframework.data.domain.Pageable");
     }
 
@@ -139,7 +139,7 @@ public class OpenApiControllerMethodExtraction {
      * Convert OpenAPI Schema to TypeScript type.
      * Simple implementation - just uses the $ref or returns basic type.
      */
-    private String convertSchemaToTypeScript(Schema schema) {
+    protected String convertSchemaToTypeScript(Schema schema) {
         if (schema == null) return "unknown";
 
         // If there's a $ref, extract the type name
