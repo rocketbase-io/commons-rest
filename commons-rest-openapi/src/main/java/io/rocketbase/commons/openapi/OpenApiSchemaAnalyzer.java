@@ -3,14 +3,11 @@ package io.rocketbase.commons.openapi;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
-import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
-import io.swagger.v3.oas.models.responses.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Analyzes OpenAPI specification to extract all Java class names used in the API.
@@ -20,9 +17,9 @@ import java.util.stream.Collectors;
 public class OpenApiSchemaAnalyzer {
 
     // Cache PageableResult class reference
-    private static final Class<?> PAGEABLE_RESULT_CLASS;
-    private static final Class<?> PAGEABLE_RESULT_IMPL_CLASS;
-    private static final Class<?> PAGEABLE_RESULT_WITH_META_CLASS;
+    protected static final Class<?> PAGEABLE_RESULT_CLASS;
+    protected static final Class<?> PAGEABLE_RESULT_IMPL_CLASS;
+    protected static final Class<?> PAGEABLE_RESULT_WITH_META_CLASS;
 
     static {
         Class<?> pageableResultClass = null;
@@ -40,7 +37,7 @@ public class OpenApiSchemaAnalyzer {
         PAGEABLE_RESULT_WITH_META_CLASS = pageableResultWithMetaClass;
     }
 
-    private final List<TypeScriptGeneratorCustomizer> customizers;
+    protected final List<TypeScriptGeneratorCustomizer> customizers;
 
     /**
      * Constructor with customizers support.
@@ -114,11 +111,11 @@ public class OpenApiSchemaAnalyzer {
         if (openAPI.getPaths() != null) {
             openAPI.getPaths().forEach((path, pathItem) -> {
                 List<Operation> operations = Arrays.asList(
-                    pathItem.getGet(),
-                    pathItem.getPost(),
-                    pathItem.getPut(),
-                    pathItem.getDelete(),
-                    pathItem.getPatch()
+                        pathItem.getGet(),
+                        pathItem.getPost(),
+                        pathItem.getPut(),
+                        pathItem.getDelete(),
+                        pathItem.getPatch()
                 );
 
                 for (Operation op : operations) {
@@ -156,7 +153,7 @@ public class OpenApiSchemaAnalyzer {
      * Extracts class names from a generic type string like "PageableResult<ActivityDto>".
      * Handles nested generics: "Map<String, List<ActivityDto>>".
      */
-    private void extractClassNamesFromGenericType(String typeStr, Set<String> classNames) {
+    protected void extractClassNamesFromGenericType(String typeStr, Set<String> classNames) {
         if (typeStr == null || typeStr.isEmpty()) return;
 
         // Remove generic brackets and split
@@ -215,8 +212,8 @@ public class OpenApiSchemaAnalyzer {
 
         // Fast path: exact match with known PageableResult classes
         if (clazz == PAGEABLE_RESULT_CLASS ||
-            clazz == PAGEABLE_RESULT_IMPL_CLASS ||
-            clazz == PAGEABLE_RESULT_WITH_META_CLASS) {
+                clazz == PAGEABLE_RESULT_IMPL_CLASS ||
+                clazz == PAGEABLE_RESULT_WITH_META_CLASS) {
             return true;
         }
 
@@ -231,7 +228,7 @@ public class OpenApiSchemaAnalyzer {
             for (TypeScriptGeneratorCustomizer customizer : customizers) {
                 if (customizer.shouldExcludeClass(clazz)) {
                     log.debug("Class {} excluded by customizer: {}",
-                        clazz.getName(), customizer.getClass().getSimpleName());
+                            clazz.getName(), customizer.getClass().getSimpleName());
                     return true;
                 }
             }
@@ -240,17 +237,17 @@ public class OpenApiSchemaAnalyzer {
         return false;
     }
 
-    private boolean isPrimitiveOrCommon(String type) {
+    protected boolean isPrimitiveOrCommon(String type) {
         Set<String> skip = Set.of(
-            "int", "long", "double", "float", "boolean", "char", "byte", "short",
-            "Integer", "Long", "Double", "Float", "Boolean", "Character", "Byte", "Short",
-            "String", "Object", "Void", "void",
-            "?", "E", "T", "K", "V" // Generic type parameters
+                "int", "long", "double", "float", "boolean", "char", "byte", "short",
+                "Integer", "Long", "Double", "Float", "Boolean", "Character", "Byte", "Short",
+                "String", "Object", "Void", "void",
+                "?", "E", "T", "K", "V" // Generic type parameters
         );
         return skip.contains(type);
     }
 
-    private void extractFromPathItem(PathItem pathItem, Set<String> classNames) {
+    protected void extractFromPathItem(PathItem pathItem, Set<String> classNames) {
         if (pathItem.getGet() != null) extractFromOperation(pathItem.getGet(), classNames);
         if (pathItem.getPost() != null) extractFromOperation(pathItem.getPost(), classNames);
         if (pathItem.getPut() != null) extractFromOperation(pathItem.getPut(), classNames);
@@ -258,7 +255,7 @@ public class OpenApiSchemaAnalyzer {
         if (pathItem.getPatch() != null) extractFromOperation(pathItem.getPatch(), classNames);
     }
 
-    private void extractFromOperation(Operation operation, Set<String> classNames) {
+    protected void extractFromOperation(Operation operation, Set<String> classNames) {
         // Request body
         if (operation.getRequestBody() != null && operation.getRequestBody().getContent() != null) {
             operation.getRequestBody().getContent().forEach((mediaType, content) -> {
@@ -288,7 +285,7 @@ public class OpenApiSchemaAnalyzer {
     }
 
     @SuppressWarnings("rawtypes")
-    private void extractFromSchema(Schema schema, Set<String> classNames) {
+    protected void extractFromSchema(Schema schema, Set<String> classNames) {
         if (schema == null) return;
 
         // Check for $ref

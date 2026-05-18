@@ -16,13 +16,13 @@ import java.nio.file.StandardOpenOption;
 @RequiredArgsConstructor
 public class FileSystemClientWriter {
 
-    private final Path outputDirectory;
+    protected final Path outputDirectory;
 
     /**
      * Writes a file to the output directory.
      *
      * @param relativePath The relative path within the output directory (e.g., "src/clients/activity-api.ts")
-     * @param content The file content
+     * @param content      The file content
      */
     public void writeFile(String relativePath, String content) {
         Path targetFile = outputDirectory.resolve(relativePath);
@@ -33,8 +33,8 @@ public class FileSystemClientWriter {
 
             // Write content to file
             Files.writeString(targetFile, content,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING);
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING);
 
             log.debug("Written file: {}", relativePath);
         } catch (IOException e) {
@@ -90,7 +90,7 @@ public class FileSystemClientWriter {
     /**
      * Recursively deletes a directory and all its contents.
      */
-    private void deleteRecursively(Path path) throws IOException {
+    protected void deleteRecursively(Path path) throws IOException {
         if (Files.isDirectory(path)) {
             try (var stream = Files.list(path)) {
                 stream.forEach(child -> {

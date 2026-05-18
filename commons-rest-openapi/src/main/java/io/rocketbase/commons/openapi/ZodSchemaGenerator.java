@@ -5,14 +5,13 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import jakarta.validation.constraints.*;
 import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Generates Zod validation schemas for mutation DTOs (Commands).
@@ -23,8 +22,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ZodSchemaGenerator {
 
-    private final OpenAPI openAPI;
-    private final TypeScriptModelGenerator.TypeScriptGeneratorConfig config;
+    protected final OpenAPI openAPI;
+    protected final TypeScriptModelGenerator.TypeScriptGeneratorConfig config;
 
     /**
      * Generates Zod schemas for all mutation commands (POST, PUT, PATCH, DELETE request bodies).
@@ -70,7 +69,7 @@ public class ZodSchemaGenerator {
     /**
      * Extracts all classes used in mutation request bodies (POST, PUT, PATCH, DELETE).
      */
-    private Set<String> extractMutationClasses() {
+    protected Set<String> extractMutationClasses() {
         Set<String> classes = new HashSet<>();
 
         if (openAPI.getPaths() == null) {
@@ -82,10 +81,10 @@ public class ZodSchemaGenerator {
 
             // Check mutation operations (filter out nulls using Stream)
             List<Operation> operations = java.util.stream.Stream.of(
-                pathItem.getPost(),
-                pathItem.getPut(),
-                pathItem.getPatch(),
-                pathItem.getDelete()
+                    pathItem.getPost(),
+                    pathItem.getPut(),
+                    pathItem.getPatch(),
+                    pathItem.getDelete()
             ).filter(java.util.Objects::nonNull).collect(java.util.stream.Collectors.toList());
 
             for (Operation operation : operations) {
@@ -98,7 +97,7 @@ public class ZodSchemaGenerator {
         return classes;
     }
 
-    private void extractClassFromRequestBody(RequestBody requestBody, Set<String> classes) {
+    protected void extractClassFromRequestBody(RequestBody requestBody, Set<String> classes) {
         if (requestBody.getContent() == null) {
             return;
         }
@@ -131,7 +130,7 @@ public class ZodSchemaGenerator {
         });
     }
 
-    private Set<Class<?>> loadClasses(Set<String> classNames) {
+    protected Set<Class<?>> loadClasses(Set<String> classNames) {
         Set<Class<?>> classes = new HashSet<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
@@ -154,7 +153,7 @@ public class ZodSchemaGenerator {
     /**
      * Generates a Zod schema for a single class.
      */
-    private String generateZodSchemaForClass(Class<?> clazz) {
+    protected String generateZodSchemaForClass(Class<?> clazz) {
         StringBuilder schema = new StringBuilder();
         String schemaName = clazz.getSimpleName() + "Schema";
 
@@ -182,7 +181,7 @@ public class ZodSchemaGenerator {
         return schema.toString();
     }
 
-    private List<Field> getAllFields(Class<?> clazz) {
+    protected List<Field> getAllFields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         Class<?> current = clazz;
 
@@ -197,10 +196,10 @@ public class ZodSchemaGenerator {
     /**
      * Generates Zod validation schema for a single field.
      */
-    private String generateFieldSchema(Field field) {
+    protected String generateFieldSchema(Field field) {
         // Skip static and transient fields
         if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-            java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
+                java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
             return null;
         }
 
@@ -212,7 +211,7 @@ public class ZodSchemaGenerator {
 
         // Check if field is required based on configured requiredAnnotations
         boolean isRequired = config.getRequiredAnnotations().stream()
-            .anyMatch(field::isAnnotationPresent);
+                .anyMatch(field::isAnnotationPresent);
 
         // @NotEmpty - for collections/strings, implies min(1)
         if (field.isAnnotationPresent(NotEmpty.class)) {
@@ -338,7 +337,7 @@ public class ZodSchemaGenerator {
     /**
      * Maps a field's type to Zod, considering generic type information.
      */
-    private String mapFieldTypeToZod(Field field) {
+    protected String mapFieldTypeToZod(Field field) {
         Class<?> type = field.getType();
 
         // Check if it's a Collection/List/Set with generic type parameter
@@ -365,7 +364,7 @@ public class ZodSchemaGenerator {
     /**
      * Maps Java types to Zod types.
      */
-    private String mapTypeToZod(Class<?> type) {
+    protected String mapTypeToZod(Class<?> type) {
         String typeName = type.getSimpleName();
 
         // Primitives and common types
@@ -373,13 +372,13 @@ public class ZodSchemaGenerator {
             return "z.string()";
         }
         if (type == int.class || type == Integer.class ||
-            type == long.class || type == Long.class ||
-            type == short.class || type == Short.class ||
-            type == byte.class || type == Byte.class) {
+                type == long.class || type == Long.class ||
+                type == short.class || type == Short.class ||
+                type == byte.class || type == Byte.class) {
             return "z.number().int()";
         }
         if (type == double.class || type == Double.class ||
-            type == float.class || type == Float.class) {
+                type == float.class || type == Float.class) {
             return "z.number()";
         }
         if (type == boolean.class || type == Boolean.class) {

@@ -16,11 +16,11 @@ import static io.rocketbase.commons.openapi.util.ReflectionPropertyHelper.setFie
 
 /**
  * Standalone tool to generate TypeScript client from OpenAPI spec.
- *
+ * <p>
  * Usage:
  * mvn exec:java -Dexec.mainClass="io.rocketbase.commons.openapi.StandaloneClientGenerator" \
- *               -Dexec.args="path/to/openapi.json output-dir v5 /api MyApi"
- *
+ * -Dexec.args="path/to/openapi.json output-dir v5 /api MyApi"
+ * <p>
  * Or simpler, if openapi.json is in target/:
  * mvn exec:java -Dexec.mainClass="io.rocketbase.commons.openapi.StandaloneClientGenerator"
  */
@@ -72,11 +72,11 @@ public class StandaloneClientGenerator {
         DefaultInfiniteOptionsTemplateBuilder templateBuilder = new DefaultInfiniteOptionsTemplateBuilder();
 
         OpenApiClientCreatorService creatorService = new OpenApiClientCreatorService(
-            springDataProperties,
-            generatorProperties,
-            null, // OpenApiWebMvcResource not available in standalone mode
-            typeConverter,
-            templateBuilder
+                springDataProperties,
+                generatorProperties,
+                null, // OpenApiWebMvcResource not available in standalone mode
+                typeConverter,
+                templateBuilder
         );
 
         // Generate client
@@ -98,7 +98,7 @@ public class StandaloneClientGenerator {
         System.out.println();
     }
 
-    private static OpenApiGeneratorProperties createGeneratorProperties(String baseUrl, String groupName) {
+    protected static OpenApiGeneratorProperties createGeneratorProperties(String baseUrl, String groupName) {
         try {
             OpenApiGeneratorProperties props = OpenApiGeneratorProperties.class.getDeclaredConstructor().newInstance();
             setField(props, "baseUrl", baseUrl);
@@ -109,7 +109,7 @@ public class StandaloneClientGenerator {
         }
     }
 
-    private static SpringDataWebProperties createSpringDataProperties() {
+    protected static SpringDataWebProperties createSpringDataProperties() {
         return ReflectionPropertyHelper.createDefaultSpringDataProperties();
     }
 }

@@ -17,8 +17,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class TypeScriptModelGenerator {
 
-    private final TypeScriptGeneratorConfig config;
-    private final List<TypeScriptGeneratorCustomizer> customizers;
+    protected final TypeScriptGeneratorConfig config;
+    protected final List<TypeScriptGeneratorCustomizer> customizers;
 
     /**
      * Generates ALL TypeScript types from OpenAPI specification.
@@ -93,7 +93,7 @@ public class TypeScriptModelGenerator {
     /**
      * Loads Java classes from class names and applies exclusion filters.
      */
-    private Set<Class<?>> loadClasses(Set<String> classNames) {
+    protected Set<Class<?>> loadClasses(Set<String> classNames) {
         Set<Class<?>> classes = new HashSet<>();
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
@@ -121,7 +121,7 @@ public class TypeScriptModelGenerator {
      * Builds a mapping from Java class FQN to TypeScript type name.
      * Example: "io.rocketbase.commons.dto.ActivityDto" -> "ActivityDto"
      */
-    private Map<String, String> buildTypeMapping(Set<Class<?>> classes) {
+    protected Map<String, String> buildTypeMapping(Set<Class<?>> classes) {
         Map<String, String> mapping = new HashMap<>();
 
         for (Class<?> clazz : classes) {
@@ -148,7 +148,7 @@ public class TypeScriptModelGenerator {
      * Creates typescript-generator settings based on configuration.
      * Applies customizers after default settings are created.
      */
-    private Settings createSettings() {
+    protected Settings createSettings() {
         Settings settings = new Settings();
 
         // Output configuration
@@ -192,7 +192,7 @@ public class TypeScriptModelGenerator {
      * Applies all registered customizers to the settings.
      * Customizers are sorted by their order (lower values first).
      */
-    private void applyCustomizers(Settings settings) {
+    protected void applyCustomizers(Settings settings) {
         if (customizers == null || customizers.isEmpty()) {
             log.debug("No TypeScript generator customizers found");
             return;
@@ -217,7 +217,7 @@ public class TypeScriptModelGenerator {
      * Custom type mappings for common types.
      * Note: For generic types, you MUST include the generic parameter!
      */
-    private Map<String, String> getCustomTypeMappings() {
+    protected Map<String, String> getCustomTypeMappings() {
         return Map.ofEntries(
                 Map.entry("java.net.URL", "string"),
                 Map.entry("io.hypersistence.tsid.TSID", "string"),
@@ -243,7 +243,7 @@ public class TypeScriptModelGenerator {
      * Determines if a class should be excluded from generation.
      * Checks both built-in exclusion rules and registered customizers.
      */
-    private boolean shouldExcludeClass(Class<?> clazz) {
+    protected boolean shouldExcludeClass(Class<?> clazz) {
         String className = clazz.getName();
 
         // Exclude patterns
@@ -297,7 +297,7 @@ public class TypeScriptModelGenerator {
      * hierarchies (e.g. {@code Aggregate extends Identifiable extends ...}) would
      * otherwise leak the intermediate interfaces.
      */
-    private List<String> collectTransitivelyExcludedFqns(Set<Class<?>> roots) {
+    protected List<String> collectTransitivelyExcludedFqns(Set<Class<?>> roots) {
         if (customizers == null || customizers.isEmpty()) {
             return Collections.emptyList();
         }
@@ -330,21 +330,21 @@ public class TypeScriptModelGenerator {
      * Allows customization of typescript-generator settings.
      */
     public static class TypeScriptGeneratorConfig {
-        private EnumMapping mapEnum = EnumMapping.asUnion;
-        private DateMapping mapDate = DateMapping.asString;
-        private boolean nonConstEnums = false;
+        protected EnumMapping mapEnum = EnumMapping.asUnion;
+        protected DateMapping mapDate = DateMapping.asString;
+        protected boolean nonConstEnums = false;
 
         /**
          * Annotations that mark fields as required in TypeScript.
          * Only fields with these annotations will be required, all others will be optional.
          * Default: @NotNull and @NotBlank
          */
-        private List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations = List.of(
+        protected List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations = List.of(
                 jakarta.validation.constraints.NotNull.class,
                 jakarta.validation.constraints.NotBlank.class
         );
 
-        private Map<String, String> additionalTypeMappings = Map.of();
+        protected Map<String, String> additionalTypeMappings = Map.of();
 
         public EnumMapping getMapEnum() {
             return mapEnum;

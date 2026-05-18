@@ -3,7 +3,9 @@ package io.rocketbase.commons.openapi;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,11 +17,13 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class OpenApiTypeMapper implements TypeScriptTypeConverter {
 
-    private final TypeScriptGenerationResult generationResult;
+    protected final TypeScriptGenerationResult generationResult;
 
-    /** Override of the default "../../model" — supplied by callers that bundle clients
-     *  into a flat src/ layout (clients/, model/, hooks/ as siblings under src/). */
-    private String modelImportPath = "../../model";
+    /**
+     * Override of the default "../../model" — supplied by callers that bundle clients
+     * into a flat src/ layout (clients/, model/, hooks/ as siblings under src/).
+     */
+    protected String modelImportPath = "../../model";
 
     public OpenApiTypeMapper(TypeScriptGenerationResult generationResult, String modelImportPath) {
         this.generationResult = generationResult;
@@ -36,7 +40,7 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
     /**
      * Converts a Java generic type to TypeScript type using the generated type mappings.
      * Example: "io.rocketbase.commons.dto.PageableResult<io.rocketbase.commons.dto.ActivityDto>"
-     *       -> "PageableResult<ActivityDto>"
+     * -> "PageableResult<ActivityDto>"
      */
     public String toTypeScript(String javaType) {
         if (javaType == null || javaType.isEmpty()) {
@@ -84,11 +88,11 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
 
         // Remove array brackets, Record, Promise, etc.
         String cleaned = tsType
-            .replaceAll("\\[\\]", "")
-            .replaceAll("Record<[^,]+,\\s*", "")
-            .replaceAll("Promise<", "")
-            .replaceAll("\\|\\s*null", "")
-            .replaceAll("[<>,]", " ");
+                .replaceAll("\\[\\]", "")
+                .replaceAll("Record<[^,]+,\\s*", "")
+                .replaceAll("Promise<", "")
+                .replaceAll("\\|\\s*null", "")
+                .replaceAll("[<>,]", " ");
 
         String[] parts = cleaned.split("\\s+");
         for (String part : parts) {
@@ -108,33 +112,33 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
     /**
      * Handle primitive types mapping.
      */
-    private String handlePrimitives(String type) {
+    protected String handlePrimitives(String type) {
         // Java primitives to TypeScript
         Map<String, String> primitives = Map.ofEntries(
-            Map.entry("int", "number"),
-            Map.entry("Integer", "number"),
-            Map.entry("long", "number"),
-            Map.entry("Long", "number"),
-            Map.entry("double", "number"),
-            Map.entry("Double", "number"),
-            Map.entry("float", "number"),
-            Map.entry("Float", "number"),
-            Map.entry("short", "number"),
-            Map.entry("Short", "number"),
-            Map.entry("byte", "number"),
-            Map.entry("Byte", "number"),
-            Map.entry("boolean", "boolean"),
-            Map.entry("Boolean", "boolean"),
-            Map.entry("String", "string"),
-            Map.entry("UUID", "string"),
-            Map.entry("LocalDate", "string"),
-            Map.entry("LocalDateTime", "string"),
-            Map.entry("LocalTime", "string"),
-            Map.entry("Instant", "string"),
-            Map.entry("OffsetDateTime", "string"),
-            Map.entry("ZonedDateTime", "string"),
-            Map.entry("Date", "string"),
-            Map.entry("Object", "any")
+                Map.entry("int", "number"),
+                Map.entry("Integer", "number"),
+                Map.entry("long", "number"),
+                Map.entry("Long", "number"),
+                Map.entry("double", "number"),
+                Map.entry("Double", "number"),
+                Map.entry("float", "number"),
+                Map.entry("Float", "number"),
+                Map.entry("short", "number"),
+                Map.entry("Short", "number"),
+                Map.entry("byte", "number"),
+                Map.entry("Byte", "number"),
+                Map.entry("boolean", "boolean"),
+                Map.entry("Boolean", "boolean"),
+                Map.entry("String", "string"),
+                Map.entry("UUID", "string"),
+                Map.entry("LocalDate", "string"),
+                Map.entry("LocalDateTime", "string"),
+                Map.entry("LocalTime", "string"),
+                Map.entry("Instant", "string"),
+                Map.entry("OffsetDateTime", "string"),
+                Map.entry("ZonedDateTime", "string"),
+                Map.entry("Date", "string"),
+                Map.entry("Object", "any")
         );
 
         for (Map.Entry<String, String> entry : primitives.entrySet()) {
@@ -148,7 +152,7 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
     /**
      * Handle Java collections to TypeScript arrays.
      */
-    private String handleCollections(String type) {
+    protected String handleCollections(String type) {
         // List<T>, Set<T>, Collection<T> -> T[]
         Pattern collectionPattern = Pattern.compile("(List|Set|Collection|ArrayList|HashSet)<([^>]+)>");
         Matcher matcher = collectionPattern.matcher(type);
@@ -163,7 +167,7 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
     /**
      * Handle Java Optional to TypeScript union.
      */
-    private String handleOptionals(String type) {
+    protected String handleOptionals(String type) {
         // Optional<T> -> T | null
         Pattern optionalPattern = Pattern.compile("Optional<([^>]+)>");
         Matcher matcher = optionalPattern.matcher(type);
@@ -178,10 +182,10 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
     /**
      * Check if a type is a native TypeScript type.
      */
-    private boolean isNativeType(String type) {
+    protected boolean isNativeType(String type) {
         Set<String> nativeTypes = Set.of(
-            "string", "number", "boolean", "any", "unknown", "void", "null", "undefined",
-            "Promise", "Record", "Map", "Set", "Array"
+                "string", "number", "boolean", "any", "unknown", "void", "null", "undefined",
+                "Promise", "Record", "Map", "Set", "Array"
         );
         return nativeTypes.contains(type);
     }
@@ -191,7 +195,7 @@ public class OpenApiTypeMapper implements TypeScriptTypeConverter {
      */
     public Set<String> getNativeTypes() {
         return Set.of(
-            "string", "number", "boolean", "any", "unknown", "void", "null", "undefined"
+                "string", "number", "boolean", "any", "unknown", "void", "null", "undefined"
         );
     }
 }
