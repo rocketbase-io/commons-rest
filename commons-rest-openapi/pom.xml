@@ -45,7 +45,7 @@
         <dependency>
             <groupId>cz.habarta.typescript-generator</groupId>
             <artifactId>typescript-generator-spring</artifactId>
-            <version>3.2.1263</version>
+            <version>${typescript-generator.version}</version>
         </dependency>
 
         <dependency>
@@ -81,17 +81,4 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-plugin-plugin</artifactId>
-                <version>3.11.0</version>
-                <configuration>
-                    <goalPrefix>typescript-client</goalPrefix>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

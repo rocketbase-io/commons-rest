@@ -90,8 +90,8 @@ SOFTWARE.
 
         <pebble.version>3.2.4</pebble.version>
         <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
-        <lombok.version>1.18.42</lombok.version>
-        <swagger-annotations.version>2.2.24</swagger-annotations.version>
+        <lombok.version>1.18.46</lombok.version>
+        <swagger-annotations.version>2.2.50</swagger-annotations.version>
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
         <tsid.version>5.2.6</tsid.version>
         <typescript-generator.version>3.2.1263</typescript-generator.version>
@@ -130,7 +130,7 @@ SOFTWARE.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.4</version>
+                    <version>3.5.5</version>
                 </plugin>
                 <plugin>
                     <groupId>org.jacoco</groupId>
@@ -168,7 +168,7 @@ SOFTWARE.
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.0</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <annotationProcessorPaths>
                             <path>
@@ -192,7 +192,7 @@ SOFTWARE.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.14.0</version>
+                <version>3.15.0</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
@@ -207,7 +207,7 @@ SOFTWARE.
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -228,7 +228,7 @@ SOFTWARE.
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.0</version>
+                        <version>0.10.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>
@@ -242,7 +242,7 @@ SOFTWARE.
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.11.2</version>
+                        <version>3.12.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
