@@ -93,6 +93,7 @@ SOFTWARE.
         <lombok.version>1.18.42</lombok.version>
         <swagger-annotations.version>2.2.24</swagger-annotations.version>
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
+        <tsid.version>5.2.6</tsid.version>
         <typescript-generator.version>3.2.1263</typescript-generator.version>
     </properties>
 
@@ -105,6 +106,11 @@ SOFTWARE.
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.github.f4b6a3</groupId>
+                <artifactId>tsid-creator</artifactId>
+                <version>${tsid.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

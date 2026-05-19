@@ -75,6 +75,11 @@
             <version>${hypersistence-tsid.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.f4b6a3</groupId>
+            <artifactId>tsid-creator</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
