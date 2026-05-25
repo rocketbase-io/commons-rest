@@ -1,6 +1,7 @@
 package io.rocketbase.commons.openapi;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.rocketbase.commons.generator.ZodSchema;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
@@ -38,6 +39,19 @@ public class ZodSchemaGenerator {
      */
     protected final Map<String, String> typeMapping;
 
+    /**
+     * Per-run resolution context, populated at the start of {@link #generateZodSchemas(Path)}.
+     * {@code schemaClasses} are the complex object types that get their own {@code …Schema}
+     * const (so a field referencing them emits {@code XSchema} instead of an unvalidated
+     * {@code z.custom<Types.X>()}); {@code emissionOrder} records the final output position
+     * of each so the field mapper can decide when a forward reference needs {@code z.lazy(...)}.
+     * Both are instance state because the generator is used single-threaded per run.
+     */
+    protected Map<String, Class<?>> schemaClasses = Collections.emptyMap();
+    protected Map<String, Integer> emissionOrder = Collections.emptyMap();
+    /** Emission index of the schema currently being rendered (for forward-reference detection). */
+    protected int currentEmissionIndex = -1;
+
     public ZodSchemaGenerator(OpenAPI openAPI, TypeScriptModelGenerator.TypeScriptGeneratorConfig config) {
         this(openAPI, config, Collections.emptyMap());
     }
@@ -67,14 +81,43 @@ public class ZodSchemaGenerator {
     public String generateZodSchemas(Path outputFile) {
         log.info("Generating Zod schemas for mutation commands");
 
-        // 1. Extract all mutation request body classes
+        // 1. Extract the root mutation request-body classes (POST/PUT/PATCH/DELETE).
         Set<String> mutationClasses = extractMutationClasses();
         log.info("Found {} mutation classes", mutationClasses.size());
+        Set<Class<?>> roots = new LinkedHashSet<>(loadClasses(mutationClasses));
 
-        // 2. Load classes
-        Set<Class<?>> classes = loadClasses(mutationClasses);
+        // 1b. Add explicit @ZodSchema(INCLUDE) roots. These are types a project wants a Zod
+        //     schema for even though no mutation endpoint references them. Discovery is
+        //     limited to types already known to the TypeScript generator (typeMapping) to
+        //     avoid a full classpath scan — i.e. the type must appear somewhere in the API
+        //     surface (a response, a query param, …). Types referenced nowhere in the API
+        //     are out of scope for this opt-in.
+        Set<Class<?>> includeRoots = discoverIncludeRoots();
+        if (!includeRoots.isEmpty()) {
+            log.info("Adding {} @ZodSchema(INCLUDE) root(s)", includeRoots.size());
+            roots.addAll(includeRoots);
+        }
 
-        // 3. Generate Zod schemas
+        // 2. Transitively discover every complex object type reachable through the roots'
+        //    field graph (nested DTOs + Cmd alike). Each of these gets its own …Schema so
+        //    nested validation is preserved instead of degrading to an unvalidated
+        //    z.custom<Types.X>(). Types annotated @ZodSchema(IGNORE) are pruned.
+        Set<Class<?>> allSchemaClasses = discoverSchemaClasses(roots);
+        this.schemaClasses = new LinkedHashMap<>();
+        for (Class<?> c : allSchemaClasses) {
+            this.schemaClasses.put(c.getName(), c);
+        }
+
+        // 3. Order the schemas so a referenced schema is declared before its referrer where
+        //    possible (const has no hoisting). Real cycles are detected and broken later via
+        //    z.lazy(...) at the offending field.
+        List<Class<?>> ordered = topologicallyOrder(allSchemaClasses);
+        this.emissionOrder = new HashMap<>();
+        for (int i = 0; i < ordered.size(); i++) {
+            this.emissionOrder.put(ordered.get(i).getName(), i);
+        }
+
+        // 4. Generate.
         StringBuilder output = new StringBuilder();
         output.append("// Auto-generated Zod schemas for mutation commands\n");
         output.append("// DO NOT EDIT MANUALLY\n\n");
@@ -86,7 +129,8 @@ public class ZodSchemaGenerator {
         // using 'import type'").
         output.append("import * as Types from \"./types\";\n\n");
 
-        for (Class<?> clazz : classes) {
+        for (Class<?> clazz : ordered) {
+            this.currentEmissionIndex = this.emissionOrder.get(clazz.getName());
             String zodSchema = generateZodSchemaForClass(clazz);
             output.append(zodSchema).append("\n\n");
         }
@@ -102,6 +146,170 @@ public class ZodSchemaGenerator {
         }
 
         return output.toString();
+    }
+
+    /**
+     * BFS over the field graph of the root request-body classes, collecting every complex
+     * object type that should get its own Zod schema. A type is a "schema class" when it is
+     * a plain object DTO/record/command — i.e. NOT a JDK type, NOT mapped to a TS primitive
+     * (via {@link #typeMapping}), NOT an enum/array/collection/map, and NOT a Date-like type.
+     * Those leaf categories are handled inline by {@link #mapTypeToZod(Class)}.
+     */
+    protected Set<Class<?>> discoverSchemaClasses(Set<Class<?>> roots) {
+        Set<Class<?>> result = new LinkedHashSet<>();
+        Deque<Class<?>> queue = new ArrayDeque<>(roots);
+        while (!queue.isEmpty()) {
+            Class<?> clazz = queue.poll();
+            // A root annotated @ZodSchema(IGNORE) is honoured even if it slipped into the
+            // root set — never generate a schema for an explicitly-ignored type.
+            if (isZodIgnored(clazz) || !result.add(clazz)) {
+                continue;
+            }
+            for (Class<?> referenced : referencedComplexTypes(clazz)) {
+                if (!result.contains(referenced)) {
+                    queue.add(referenced);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Finds types annotated {@code @ZodSchema(INCLUDE)} among the classes the TypeScript
+     * generator already knows about ({@link #typeMapping}), to add as extra generation roots.
+     * Limited to API-surface types on purpose — discovering types referenced nowhere in the
+     * API would require a full classpath scan, which the generator deliberately avoids.
+     */
+    protected Set<Class<?>> discoverIncludeRoots() {
+        Set<Class<?>> roots = new LinkedHashSet<>();
+        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+        for (String fqn : typeMapping.keySet()) {
+            try {
+                Class<?> clazz = Class.forName(fqn, false, cl);
+                ZodSchema annotation = clazz.getAnnotation(ZodSchema.class);
+                if (annotation != null && annotation.value() == ZodSchema.Mode.INCLUDE) {
+                    roots.add(clazz);
+                }
+            } catch (ClassNotFoundException | LinkageError e) {
+                // Not loadable here (e.g. a TS-primitive mapping like "string") — skip.
+            }
+        }
+        return roots;
+    }
+
+    /** True when the type carries {@code @ZodSchema(IGNORE)}. */
+    protected boolean isZodIgnored(Class<?> type) {
+        ZodSchema annotation = type.getAnnotation(ZodSchema.class);
+        return annotation != null && annotation.value() == ZodSchema.Mode.IGNORE;
+    }
+
+    /**
+     * Returns the distinct complex object types referenced by a class's instance fields,
+     * unwrapping collection/array element types. Leaf categories (primitives, enums,
+     * TS-primitive-mapped types, Date-likes, maps) are intentionally excluded — they never
+     * need their own schema.
+     */
+    protected Set<Class<?>> referencedComplexTypes(Class<?> clazz) {
+        Set<Class<?>> referenced = new LinkedHashSet<>();
+        for (Field field : getAllFields(clazz)) {
+            if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                    || java.lang.reflect.Modifier.isTransient(field.getModifiers())
+                    || field.isSynthetic()) {
+                continue;
+            }
+            Class<?> elementType = complexElementType(field);
+            if (elementType != null) {
+                referenced.add(elementType);
+            }
+        }
+        return referenced;
+    }
+
+    /**
+     * Resolves the underlying complex object type of a field — unwrapping a single
+     * collection/array type parameter — or {@code null} if the field is a leaf category
+     * that {@link #mapTypeToZod(Class)} renders inline (primitive, enum, Date, map,
+     * TS-primitive-mapped type, or a type whose element couldn't be resolved).
+     */
+    protected Class<?> complexElementType(Field field) {
+        Class<?> type = field.getType();
+        if (Collection.class.isAssignableFrom(type)) {
+            java.lang.reflect.Type generic = field.getGenericType();
+            if (generic instanceof java.lang.reflect.ParameterizedType) {
+                java.lang.reflect.Type[] args = ((java.lang.reflect.ParameterizedType) generic).getActualTypeArguments();
+                if (args.length > 0 && args[0] instanceof Class<?>) {
+                    return complexOrNull((Class<?>) args[0]);
+                }
+            }
+            return null;
+        }
+        if (type.isArray()) {
+            return complexOrNull(type.getComponentType());
+        }
+        return complexOrNull(type);
+    }
+
+    /** Returns {@code type} if it is a complex object worth its own schema, else {@code null}. */
+    protected Class<?> complexOrNull(Class<?> type) {
+        if (type.isPrimitive() || type.isEnum() || type.isArray()) {
+            return null;
+        }
+        if (type == String.class || type == CharSequence.class || Number.class.isAssignableFrom(type)
+                || type == Boolean.class || type == Character.class) {
+            return null;
+        }
+        if (Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type)) {
+            return null;
+        }
+        String pkg = type.getPackageName();
+        if (pkg.startsWith("java.") || pkg.startsWith("javax.") || pkg.startsWith("jakarta.")) {
+            return null; // JDK / Date-like / framework leaf types
+        }
+        // Mapped to a TS primitive by a customizer (e.g. Tsid → "string") — leaf.
+        String tsTypeName = typeMapping.get(type.getName());
+        if (tsTypeName != null && TS_PRIMITIVES.contains(tsTypeName)) {
+            return null;
+        }
+        // Explicitly excluded — don't generate a schema; the referrer degrades to z.any().
+        if (isZodIgnored(type)) {
+            return null;
+        }
+        return type;
+    }
+
+    /**
+     * Orders schema classes so that, ignoring cycles, a class appears after the schemas it
+     * depends on. Uses a DFS post-order over the dependency edges; back-edges (cycles) are
+     * tolerated and later broken with {@code z.lazy(...)} at the referencing field.
+     */
+    protected List<Class<?>> topologicallyOrder(Set<Class<?>> classes) {
+        List<Class<?>> ordered = new ArrayList<>();
+        Set<Class<?>> visited = new HashSet<>();
+        Set<Class<?>> onStack = new HashSet<>();
+        for (Class<?> clazz : classes) {
+            topoVisit(clazz, classes, visited, onStack, ordered);
+        }
+        return ordered;
+    }
+
+    private void topoVisit(
+            Class<?> clazz,
+            Set<Class<?>> universe,
+            Set<Class<?>> visited,
+            Set<Class<?>> onStack,
+            List<Class<?>> ordered) {
+        if (visited.contains(clazz)) {
+            return;
+        }
+        visited.add(clazz);
+        onStack.add(clazz);
+        for (Class<?> dep : referencedComplexTypes(clazz)) {
+            if (universe.contains(dep) && !onStack.contains(dep)) {
+                topoVisit(dep, universe, visited, onStack, ordered);
+            }
+        }
+        onStack.remove(clazz);
+        ordered.add(clazz);
     }
 
     /**
@@ -287,21 +495,45 @@ public class ZodSchemaGenerator {
      * Generates Zod validation schema for a single field.
      */
     protected String generateFieldSchema(Field field) {
-        // Skip static and transient fields
-        if (java.lang.reflect.Modifier.isStatic(field.getModifiers()) ||
-                java.lang.reflect.Modifier.isTransient(field.getModifiers())) {
+        // Skip static, transient and synthetic fields. Synthetic fields ($jacocoData,
+        // outer-class references, Lombok internals on @SuperBuilder hierarchies) would
+        // otherwise leak phantom properties into the schema.
+        if (java.lang.reflect.Modifier.isStatic(field.getModifiers())
+                || java.lang.reflect.Modifier.isTransient(field.getModifiers())
+                || field.isSynthetic()) {
+            return null;
+        }
+
+        ZodSchema fieldAnnotation = field.getAnnotation(ZodSchema.class);
+
+        // @ZodSchema(IGNORE) on a field — drop it from the parent schema entirely.
+        if (fieldAnnotation != null && fieldAnnotation.value() == ZodSchema.Mode.IGNORE) {
             return null;
         }
 
         String fieldName = field.getName();
+        boolean isRequired = config.getRequiredAnnotations().stream()
+                .anyMatch(field::isAnnotationPresent);
+
+        // @ZodSchema(ANY) on a field — keep it but emit z.any(), skipping all type mapping
+        // and validation. The escape hatch for shapes too complex/opaque to model in Zod.
+        if (fieldAnnotation != null && fieldAnnotation.value() == ZodSchema.Mode.ANY) {
+            return "  " + fieldName + ": z.any()" + (isRequired ? "" : ".nullish()");
+        }
+
         String zodType = mapFieldTypeToZod(field);
+
+        // Zod v4: prefer the top-level string-format constructor z.email() over the
+        // deprecated .email() string method. Only swap the base when the field maps to a
+        // plain string — for non-string types @Email is meaningless and left untouched.
+        boolean emailHandledInBase = false;
+        if (field.isAnnotationPresent(Email.class) && "z.string()".equals(zodType)) {
+            zodType = "z.email()";
+            emailHandledInBase = true;
+        }
 
         // Collect all validations
         List<String> validations = new ArrayList<>();
-
-        // Check if field is required based on configured requiredAnnotations
-        boolean isRequired = config.getRequiredAnnotations().stream()
-                .anyMatch(field::isAnnotationPresent);
 
         // @NotEmpty - for collections/strings, implies min(1)
         if (field.isAnnotationPresent(NotEmpty.class)) {
@@ -378,8 +610,10 @@ public class ZodSchemaGenerator {
             }
         }
 
-        // @Email
-        if (field.isAnnotationPresent(Email.class)) {
+        // @Email — already folded into the z.email() base above for string fields. Only
+        // fall back to the chained .email() when the base wasn't swapped (defensive; should
+        // not normally happen for a String field).
+        if (field.isAnnotationPresent(Email.class) && !emailHandledInBase) {
             validations.add(".email()");
         }
 
@@ -510,25 +744,46 @@ public class ZodSchemaGenerator {
             return "z.enum([" + enumConstantsAsLiterals(type) + "])";
         }
 
-        if (tsTypeName != null) {
+        if (tsTypeName != null && TS_PRIMITIVES.contains(tsTypeName)) {
             // Customizer-mapped to a TS primitive — emit the matching Zod primitive
             // instead of z.custom<Types.string>() which would not exist in types.ts.
-            if (TS_PRIMITIVES.contains(tsTypeName)) {
-                if ("number".equals(tsTypeName)) return "z.number()";
-                if ("boolean".equals(tsTypeName)) return "z.boolean()";
-                if ("any".equals(tsTypeName)) return "z.any()";
-                if ("unknown".equals(tsTypeName)) return "z.unknown()";
-                return "z.string()";
-            }
-            // Complex object that DID end up in types.ts — reference it through Types.
-            return "z.custom<Types." + tsTypeName + ">()";
+            if ("number".equals(tsTypeName)) return "z.number()";
+            if ("boolean".equals(tsTypeName)) return "z.boolean()";
+            if ("any".equals(tsTypeName)) return "z.any()";
+            if ("unknown".equals(tsTypeName)) return "z.unknown()";
+            return "z.string()";
         }
 
-        // No mapping known (no TypeScriptGenerationResult passed in, or class wasn't
-        // picked up by the analyzer). Fall back to qualifying through the Types
-        // namespace, which is the safer assumption for DTO-like classes that
-        // typescript-generator typically emits.
-        return "z.custom<Types." + typeName + ">()";
+        // Complex object that has its own generated schema — reference it so the nested
+        // validation is actually enforced (a plain z.custom<>() validates nothing).
+        if (schemaClasses.containsKey(type.getName())) {
+            return schemaReference(type);
+        }
+
+        // @ZodSchema(IGNORE) on the type — caller asked to skip modelling it; emit z.any()
+        // so the field is accepted without an unresolvable Types.X reference.
+        if (isZodIgnored(type)) {
+            return "z.any()";
+        }
+
+        // No schema for this complex type (no TypeScriptGenerationResult passed in, or the
+        // type is a value object typescript-generator emits but we don't generate a schema
+        // for). Fall back to a type-only custom validator through the Types namespace.
+        String fallbackName = tsTypeName != null ? tsTypeName : typeName;
+        return "z.custom<Types." + fallbackName + ">()";
+    }
+
+    /**
+     * Emits the reference to another class's generated schema. When the referenced schema is
+     * declared later than the current one (forward reference, including the back-edge of a
+     * dependency cycle), it is wrapped in {@code z.lazy(() => …)} so the {@code const} is
+     * resolved at call time rather than at module-evaluation time.
+     */
+    protected String schemaReference(Class<?> type) {
+        String schemaConst = type.getSimpleName() + "Schema";
+        Integer refIndex = emissionOrder.get(type.getName());
+        boolean forwardReference = refIndex == null || currentEmissionIndex < 0 || refIndex >= currentEmissionIndex;
+        return forwardReference ? "z.lazy(() => " + schemaConst + ")" : schemaConst;
     }
 
     /**
