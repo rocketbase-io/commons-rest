@@ -225,12 +225,15 @@ public class OpenApiClientCreatorService {
     }
 
     /**
-     * Generates Zod schemas for mutation commands.
+     * Generates Zod schemas for mutation commands. Passes the {@link TypeScriptGenerationResult}
+     * so the Zod generator knows which Java types were remapped to TS primitives (e.g. Tsid → string)
+     * vs. kept as TS enums/interfaces — without it, the output references {@code Types.Tsid} or bare
+     * enum names that don't exist in {@code types.ts}.
      */
     protected void generateZodSchemasToFileSystem(FileSystemClientWriter writer, OpenAPI openAPI, Path outputDirectory, TypeScriptModelGenerator.TypeScriptGeneratorConfig tsConfig) {
         try {
             log.info("Generating Zod schemas for mutations");
-            ZodSchemaGenerator zodGenerator = new ZodSchemaGenerator(openAPI, tsConfig);
+            ZodSchemaGenerator zodGenerator = new ZodSchemaGenerator(openAPI, tsConfig, tsGenerationResult);
             Path zodFile = outputDirectory.resolve("src/model/zod-schemas.ts");
             zodGenerator.generateZodSchemas(zodFile);
         } catch (Exception e) {

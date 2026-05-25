@@ -1,12 +1,12 @@
 package io.rocketbase.commons.openapi;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.PathItem;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.RequestBody;
 import jakarta.validation.constraints.*;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -17,13 +17,46 @@ import java.util.*;
  * Generates Zod validation schemas for mutation DTOs (Commands).
  * Maps Java validation annotations (@NotNull, @Size, @Min, @Max, etc.) to Zod validators.
  * Uses the same requiredAnnotations configuration as TypeScriptModelGenerator for consistency.
+ *
+ * <p>Pass the {@link TypeScriptGenerationResult} from {@link TypeScriptModelGenerator}
+ * to get correct schema output for fields whose Java type maps to a TS primitive (e.g.
+ * {@code Tsid → string}) or whose enum type lives in {@code ./types}: the generator then
+ * emits {@code z.string()} / {@code z.nativeEnum(Types.X)} instead of the fallback
+ * {@code z.custom<Types.X>()} that references a non-existent or unimported name.
  */
 @Slf4j
-@RequiredArgsConstructor
 public class ZodSchemaGenerator {
+
+    /** Set of TypeScript primitives the generator special-cases when emitting field schemas. */
+    private static final Set<String> TS_PRIMITIVES = Set.of("string", "number", "boolean", "any", "unknown");
 
     protected final OpenAPI openAPI;
     protected final TypeScriptModelGenerator.TypeScriptGeneratorConfig config;
+    /**
+     * Java FQN → TypeScript type name, as produced by {@link TypeScriptModelGenerator}.
+     * Empty when the no-arg constructor variant is used (back-compat).
+     */
+    protected final Map<String, String> typeMapping;
+
+    public ZodSchemaGenerator(OpenAPI openAPI, TypeScriptModelGenerator.TypeScriptGeneratorConfig config) {
+        this(openAPI, config, Collections.emptyMap());
+    }
+
+    public ZodSchemaGenerator(
+            OpenAPI openAPI,
+            TypeScriptModelGenerator.TypeScriptGeneratorConfig config,
+            TypeScriptGenerationResult tsGenerationResult) {
+        this(openAPI, config, tsGenerationResult != null ? tsGenerationResult.getTypeMapping() : Collections.emptyMap());
+    }
+
+    private ZodSchemaGenerator(
+            OpenAPI openAPI,
+            TypeScriptModelGenerator.TypeScriptGeneratorConfig config,
+            Map<String, String> typeMapping) {
+        this.openAPI = openAPI;
+        this.config = config;
+        this.typeMapping = typeMapping != null ? typeMapping : Collections.emptyMap();
+    }
 
     /**
      * Generates Zod schemas for all mutation commands (POST, PUT, PATCH, DELETE request bodies).
@@ -46,7 +79,12 @@ public class ZodSchemaGenerator {
         output.append("// Auto-generated Zod schemas for mutation commands\n");
         output.append("// DO NOT EDIT MANUALLY\n\n");
         output.append("import { z } from \"zod\";\n");
-        output.append("import type * as Types from \"./types\";\n\n");
+        // Value import (no `type` modifier): enums in types.ts are emitted by
+        // typescript-generator as runtime values, and z.nativeEnum(Types.X) references
+        // them at runtime. A type-only import would compile-fail at every nativeEnum
+        // call site with TS1361 ("cannot be used as a value because it was imported
+        // using 'import type'").
+        output.append("import * as Types from \"./types\";\n\n");
 
         for (Class<?> clazz : classes) {
             String zodSchema = generateZodSchemaForClass(clazz);
@@ -68,6 +106,19 @@ public class ZodSchemaGenerator {
 
     /**
      * Extracts all classes used in mutation request bodies (POST, PUT, PATCH, DELETE).
+     *
+     * <p>Two sources are consulted, in this order:
+     * <ol>
+     *   <li>The operation extension {@link OpenApiCustomExtractor#REQUEST_BODY_TYPE_NAME}
+     *       — emitted by {@link OpenApiCustomExtractor} for every {@code @MutationHook}
+     *       endpoint and carrying the fully-qualified Java type name of the
+     *       {@code @RequestBody} parameter. This is the path used when commons-rest is
+     *       wired into a live Spring Boot application via its auto-configuration.</li>
+     *   <li>The {@code x-java-type} extension on the request-body schema itself.
+     *       Kept as a fallback for setups that populate the extension via a custom
+     *       OpenAPI customizer and for the existing unit-test fixtures, which
+     *       construct synthetic schemas with this extension.</li>
+     * </ol>
      */
     protected Set<String> extractMutationClasses() {
         Set<String> classes = new HashSet<>();
@@ -88,6 +139,7 @@ public class ZodSchemaGenerator {
             ).filter(java.util.Objects::nonNull).collect(java.util.stream.Collectors.toList());
 
             for (Operation operation : operations) {
+                extractClassFromOperationExtensions(operation, classes);
                 if (operation.getRequestBody() != null) {
                     extractClassFromRequestBody(operation.getRequestBody(), classes);
                 }
@@ -95,6 +147,44 @@ public class ZodSchemaGenerator {
         }
 
         return classes;
+    }
+
+    /**
+     * Reads the {@link OpenApiCustomExtractor#REQUEST_BODY_TYPE_NAME} operation
+     * extension (set by {@link OpenApiCustomExtractor} for every {@code @MutationHook}
+     * endpoint) and collects fully-qualified Java type names found there.
+     */
+    protected void extractClassFromOperationExtensions(Operation operation, Set<String> classes) {
+        if (operation.getExtensions() == null) {
+            return;
+        }
+        Object reqBodyType = operation.getExtensions().get(OpenApiCustomExtractor.REQUEST_BODY_TYPE_NAME);
+        if (reqBodyType instanceof String) {
+            extractFullyQualifiedClassNames((String) reqBodyType, classes);
+        }
+    }
+
+    /**
+     * Pulls fully-qualified class names out of a generic type string such as
+     * {@code "io.example.MyCmd"} or {@code "java.util.List<io.example.MyCmd>"}.
+     * Mirrors {@link OpenApiSchemaAnalyzer#extractClassNamesFromGenericType(String, Set)}
+     * but without the customizer-based exclusion (Zod schema generation already
+     * filters in {@link #loadClasses(Set)} via the {@code Cmd} suffix check).
+     */
+    protected void extractFullyQualifiedClassNames(String typeStr, Set<String> classNames) {
+        if (typeStr == null || typeStr.isEmpty()) {
+            return;
+        }
+        String cleaned = typeStr.replaceAll("[<>]", " ");
+        for (String part : cleaned.split("[,\\s]+")) {
+            String trimmed = part.trim();
+            if (trimmed.isEmpty()) {
+                continue;
+            }
+            if (trimmed.contains(".") && !trimmed.startsWith("java.lang.") && !trimmed.startsWith("java.util.")) {
+                classNames.add(trimmed);
+            }
+        }
     }
 
     protected void extractClassFromRequestBody(RequestBody requestBody, Set<String> classes) {
@@ -404,12 +494,91 @@ public class ZodSchemaGenerator {
             return "z.record(z.string(), z.any())";
         }
 
-        // Enums
+        // Consult the TypeScript type-mapping from the model generator so we don't emit
+        // dangling references to types that were stripped (TypeScriptGeneratorCustomizer)
+        // or remapped to a primitive (customTypeMappings, e.g. Tsid → "string").
+        String tsTypeName = typeMapping.get(type.getName());
+
+        // Enums: emit z.enum([...string literals...]) using the Java enum constants.
+        // typescript-generator's default (EnumMapping.asUnion) renders Java enums as
+        // string-literal unions like `type X = "a" | "b"` — runtime-erased, so
+        // z.nativeEnum(Types.X) would fail with "Property 'X' does not exist on type
+        // typeof import('./types')". Using the constant names directly side-steps the
+        // typescript-generator mode entirely and matches the JSON wire format that
+        // Jackson produces for plain Java enums.
         if (type.isEnum()) {
-            return "z.nativeEnum(" + typeName + ")";
+            return "z.enum([" + enumConstantsAsLiterals(type) + "])";
         }
 
-        // Complex objects - reference the TypeScript type
+        if (tsTypeName != null) {
+            // Customizer-mapped to a TS primitive — emit the matching Zod primitive
+            // instead of z.custom<Types.string>() which would not exist in types.ts.
+            if (TS_PRIMITIVES.contains(tsTypeName)) {
+                if ("number".equals(tsTypeName)) return "z.number()";
+                if ("boolean".equals(tsTypeName)) return "z.boolean()";
+                if ("any".equals(tsTypeName)) return "z.any()";
+                if ("unknown".equals(tsTypeName)) return "z.unknown()";
+                return "z.string()";
+            }
+            // Complex object that DID end up in types.ts — reference it through Types.
+            return "z.custom<Types." + tsTypeName + ">()";
+        }
+
+        // No mapping known (no TypeScriptGenerationResult passed in, or class wasn't
+        // picked up by the analyzer). Fall back to qualifying through the Types
+        // namespace, which is the safer assumption for DTO-like classes that
+        // typescript-generator typically emits.
         return "z.custom<Types." + typeName + ">()";
+    }
+
+    /**
+     * Renders the Java enum constants as comma-separated, double-quoted string literals
+     * for use inside {@code z.enum([...])}. The literals must match the wire format
+     * Jackson produces, so the method honours any {@code @JsonValue}-annotated accessor
+     * on the enum (frequent pattern: lowercase external value, uppercase Java constant
+     * name) and falls back to {@code Enum#name()} when none is declared.
+     */
+    protected String enumConstantsAsLiterals(Class<?> enumType) {
+        java.lang.reflect.Method jsonValueAccessor = findJsonValueAccessor(enumType);
+        StringBuilder out = new StringBuilder();
+        Object[] constants = enumType.getEnumConstants();
+        for (int i = 0; i < constants.length; i++) {
+            if (i > 0) out.append(", ");
+            String literal;
+            if (jsonValueAccessor != null) {
+                try {
+                    Object value = jsonValueAccessor.invoke(constants[i]);
+                    literal = value != null ? value.toString() : ((Enum<?>) constants[i]).name();
+                } catch (ReflectiveOperationException e) {
+                    log.warn("@JsonValue accessor on {} failed for {} — falling back to name()",
+                            enumType.getName(), ((Enum<?>) constants[i]).name(), e);
+                    literal = ((Enum<?>) constants[i]).name();
+                }
+            } else {
+                literal = ((Enum<?>) constants[i]).name();
+            }
+            out.append('"').append(literal.replace("\\", "\\\\").replace("\"", "\\\"")).append('"');
+        }
+        return out.toString();
+    }
+
+    /**
+     * Returns the first {@code @JsonValue}-annotated zero-arg method declared on the
+     * enum type (or its superclasses), or {@code null} if none is present. Mirrors
+     * Jackson's discovery of the externalised value used for serialisation.
+     */
+    protected java.lang.reflect.Method findJsonValueAccessor(Class<?> enumType) {
+        Class<?> current = enumType;
+        while (current != null && current != Object.class) {
+            for (java.lang.reflect.Method m : current.getDeclaredMethods()) {
+                if (m.getParameterCount() == 0
+                        && m.isAnnotationPresent(JsonValue.class)) {
+                    m.setAccessible(true);
+                    return m;
+                }
+            }
+            current = current.getSuperclass();
+        }
+        return null;
     }
 }

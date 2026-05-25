@@ -43,7 +43,7 @@ class ZodSchemaGeneratorTest {
 
         // Check imports
         assertContains(content, "import { z } from \"zod\"");
-        assertContains(content, "import type * as Types from \"./types\"");
+        assertContains(content, "import * as Types from \"./types\"");
 
         // Check schema export
         assertContains(content, "export const CreateUserCmdSchema = z.object({");
@@ -51,7 +51,7 @@ class ZodSchemaGeneratorTest {
         // Check required fields (with @NotBlank, @NotNull, @NotEmpty)
         assertContains(content, "username: z.string().trim().min(1).min(3).max(50)");  // @NotBlank @Size
         assertContains(content, "email: z.string().email()");            // @NotNull @Email
-        assertContains(content, "role: z.nativeEnum(UserRole)");         // @NotNull enum
+        assertContains(content, "role: z.enum([\"ADMIN\", \"USER\", \"GUEST\", \"MODERATOR\"])");   // @NotNull enum, rendered as Zod string-literal union
         assertContains(content, "addresses: z.array(");                  // @NotEmpty
 
         // Check optional fields (no required annotation)
@@ -128,7 +128,7 @@ class ZodSchemaGeneratorTest {
 
         // @NotNull - required
         assertContains(content, "email: z.string().email()");
-        assertContains(content, "role: z.nativeEnum(UserRole)");
+        assertContains(content, "role: z.enum([\"ADMIN\", \"USER\", \"GUEST\", \"MODERATOR\"])");
 
         // @NotBlank but not @NotNull - now optional!
         assertContains(content, "username: z.string().trim().min(1).min(3).max(50).nullish()");
@@ -152,7 +152,7 @@ class ZodSchemaGeneratorTest {
         String content = Files.readString(outputFile);
 
         assertContains(content, "import { z } from \"zod\"");
-        assertContains(content, "import type * as Types from \"./types\"");
+        assertContains(content, "import * as Types from \"./types\"");
         assertFalse(content.contains("export const"), "Should not contain any schema exports");
     }
 
@@ -198,6 +198,72 @@ class ZodSchemaGeneratorTest {
         assertContains(content, "balance: z.number().int().nonpositive()");
     }
 
+    @Test
+    void testEnumWithJsonValueRendersWireFormatLiterals() throws Exception {
+        // Given: a command whose Status enum exposes lowercase wire values via @JsonValue.
+        // The Zod schema must validate the wire format Jackson produces, NOT the Java
+        // constant name — otherwise the deserialised "active" string would fail Zod
+        // validation that expects "ACTIVE".
+        OpenAPI openAPI = createOpenAPIWithCommand(JsonValueStatusCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        Path outputFile = tempDir.resolve("zod-schemas-jsonvalue-enum.ts");
+        generator.generateZodSchemas(outputFile);
+
+        String content = Files.readString(outputFile);
+        assertContains(content, "status: z.enum([\"active\", \"disabled\"])");
+    }
+
+    @Test
+    void testCustomerTypeMappingsCollapseToZodPrimitives() throws Exception {
+        // Given: a TypeScriptGenerationResult that maps a complex Java type (here we
+        // reuse String → "string" as a stand-in for the real-world case of Tsid → "string"
+        // applied by a TypeScriptGeneratorCustomizer in consumer projects). The Zod
+        // generator must NOT emit z.custom<Types.String>() — Types.string does not exist
+        // in the generated types.ts and the consumer's pnpm typecheck would break.
+        OpenAPI openAPI = createOpenAPIWithCommand(UpdateProfileCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+
+        Map<String, String> typeMapping = new HashMap<>();
+        typeMapping.put("java.lang.String", "string");
+        TypeScriptGenerationResult tsResult = new TypeScriptGenerationResult("", typeMapping);
+
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config, tsResult);
+
+        // When
+        Path outputFile = tempDir.resolve("zod-schemas-primitive-mapping.ts");
+        generator.generateZodSchemas(outputFile);
+
+        // Then: String fields render as z.string(), not z.custom<Types.string>()
+        String content = Files.readString(outputFile);
+        assertContains(content, "displayName: z.string().trim().min(1).min(1).max(100)");
+        assertFalse(content.contains("z.custom<Types.String>()"), "must not emit z.custom<Types.String>()");
+        assertFalse(content.contains("z.custom<Types.string>()"), "must not emit z.custom<Types.string>()");
+    }
+
+    @Test
+    void testGenerateZodSchemaFromOperationExtension() throws Exception {
+        // Given: OpenAPI where the request body schema has NO x-java-type extension,
+        // but the operation itself carries OpenApiCustomExtractor.REQUEST_BODY_TYPE_NAME.
+        // This mirrors the real spec produced by OpenApiCustomExtractor for every
+        // @MutationHook endpoint — springdoc-openapi does not populate x-java-type on
+        // request body schemas, so the generator must rely on the operation extension.
+        OpenAPI openAPI = createOpenAPIWithCommandViaOperationExtension(CreateUserCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        // When: Generate Zod schemas
+        Path outputFile = tempDir.resolve("zod-schemas-from-operation-extension.ts");
+        generator.generateZodSchemas(outputFile);
+
+        // Then: The command class is discovered and its schema is emitted.
+        String content = Files.readString(outputFile);
+        assertContains(content, "export const CreateUserCmdSchema = z.object({");
+        assertContains(content, "email: z.string().email()");
+        assertContains(content, "export type CreateUserCmd = z.infer<typeof CreateUserCmdSchema>");
+    }
+
     // Helper methods
 
     private OpenAPI createOpenAPIWithCommand(Class<?> commandClass) {
@@ -223,6 +289,38 @@ class ZodSchemaGeneratorTest {
         pathItem.setPost(postOperation);
 
         openAPI.getPaths().addPathItem("/test", pathItem);
+
+        return openAPI;
+    }
+
+    /**
+     * Builds an OpenAPI fixture that matches what {@link OpenApiCustomExtractor}
+     * emits at runtime: the request body schema carries no {@code x-java-type},
+     * and the operation has {@link OpenApiCustomExtractor#REQUEST_BODY_TYPE_NAME}
+     * set to the fully-qualified command class name.
+     */
+    private OpenAPI createOpenAPIWithCommandViaOperationExtension(Class<?> commandClass) {
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setPaths(new io.swagger.v3.oas.models.Paths());
+
+        PathItem pathItem = new PathItem();
+        Operation postOperation = new Operation();
+
+        Map<String, Object> operationExtensions = new HashMap<>();
+        operationExtensions.put(OpenApiCustomExtractor.REQUEST_BODY_TYPE_NAME, commandClass.getName());
+        postOperation.setExtensions(operationExtensions);
+
+        RequestBody requestBody = new RequestBody();
+        Content content = new Content();
+        MediaType mediaType = new MediaType();
+        Schema schema = new Schema();
+        mediaType.setSchema(schema);
+        content.addMediaType("application/json", mediaType);
+        requestBody.setContent(content);
+        postOperation.setRequestBody(requestBody);
+        pathItem.setPost(postOperation);
+
+        openAPI.getPaths().addPathItem("/test-operation-extension", pathItem);
 
         return openAPI;
     }
