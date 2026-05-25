@@ -227,26 +227,34 @@ public class ZodSchemaGenerator {
 
     /**
      * Resolves the underlying complex object type of a field — unwrapping a single
-     * collection/array type parameter — or {@code null} if the field is a leaf category
-     * that {@link #mapTypeToZod(Class)} renders inline (primitive, enum, Date, map,
+     * collection/array element type or a map value type — or {@code null} if the field is a
+     * leaf category that {@link #mapTypeToZod(Class)} renders inline (primitive, enum, Date,
      * TS-primitive-mapped type, or a type whose element couldn't be resolved).
      */
     protected Class<?> complexElementType(Field field) {
         Class<?> type = field.getType();
         if (Collection.class.isAssignableFrom(type)) {
-            java.lang.reflect.Type generic = field.getGenericType();
-            if (generic instanceof java.lang.reflect.ParameterizedType) {
-                java.lang.reflect.Type[] args = ((java.lang.reflect.ParameterizedType) generic).getActualTypeArguments();
-                if (args.length > 0 && args[0] instanceof Class<?>) {
-                    return complexOrNull((Class<?>) args[0]);
-                }
-            }
-            return null;
+            return complexTypeArg(field.getGenericType(), 0);
+        }
+        if (Map.class.isAssignableFrom(type)) {
+            // Maps surface as z.record(z.string(), <value>); the value type is arg index 1.
+            return complexTypeArg(field.getGenericType(), 1);
         }
         if (type.isArray()) {
             return complexOrNull(type.getComponentType());
         }
         return complexOrNull(type);
+    }
+
+    /** Extracts the i-th type argument as a complex schema class, or {@code null}. */
+    protected Class<?> complexTypeArg(java.lang.reflect.Type generic, int index) {
+        if (generic instanceof java.lang.reflect.ParameterizedType) {
+            java.lang.reflect.Type[] args = ((java.lang.reflect.ParameterizedType) generic).getActualTypeArguments();
+            if (args.length > index && args[index] instanceof Class<?>) {
+                return complexOrNull((Class<?>) args[index]);
+            }
+        }
+        return null;
     }
 
     /** Returns {@code type} if it is a complex object worth its own schema, else {@code null}. */
@@ -568,26 +576,20 @@ public class ZodSchemaGenerator {
             validations.add(".max(" + max.value() + ")");
         }
 
-        // @DecimalMin
+        // @DecimalMin — emit the literal value verbatim (via BigDecimal#toPlainString) rather
+        // than routing through Double.parseDouble, which loses precision for money-like values
+        // (e.g. "0.01" → 0.009999999...).
         if (field.isAnnotationPresent(DecimalMin.class)) {
             DecimalMin decimalMin = field.getAnnotation(DecimalMin.class);
-            double minValue = Double.parseDouble(decimalMin.value());
-            if (decimalMin.inclusive()) {
-                validations.add(".min(" + minValue + ")");
-            } else {
-                validations.add(".gt(" + minValue + ")");
-            }
+            String minValue = decimalLiteral(decimalMin.value());
+            validations.add((decimalMin.inclusive() ? ".min(" : ".gt(") + minValue + ")");
         }
 
         // @DecimalMax
         if (field.isAnnotationPresent(DecimalMax.class)) {
             DecimalMax decimalMax = field.getAnnotation(DecimalMax.class);
-            double maxValue = Double.parseDouble(decimalMax.value());
-            if (decimalMax.inclusive()) {
-                validations.add(".max(" + maxValue + ")");
-            } else {
-                validations.add(".lt(" + maxValue + ")");
-            }
+            String maxValue = decimalLiteral(decimalMax.value());
+            validations.add((decimalMax.inclusive() ? ".max(" : ".lt(") + maxValue + ")");
         }
 
         // @Digits - validates number of digits
@@ -620,9 +622,9 @@ public class ZodSchemaGenerator {
         // @Pattern
         if (field.isAnnotationPresent(Pattern.class)) {
             Pattern pattern = field.getAnnotation(Pattern.class);
-            // In JavaScript regex literals, backslashes are already escaped in the source
-            // So we don't need to double-escape them
-            String regex = pattern.regexp();
+            // A bare '/' terminates the JS regex literal — escape any that aren't already
+            // escaped so the generated z.string().regex(/.../) stays syntactically valid.
+            String regex = escapeForJsRegexLiteral(pattern.regexp());
             validations.add(".regex(/" + regex + "/)");
         }
 
@@ -679,6 +681,21 @@ public class ZodSchemaGenerator {
             }
             // Fallback to z.any() if we can't determine the type
             return "z.array(z.any())";
+        }
+
+        // Map with a resolvable value type → z.record(z.string(), <value>). The value zod
+        // type goes through the same mapping, so a nested DTO value becomes a schema reference
+        // (e.g. Map<String, FooDto> → z.record(z.string(), FooDtoSchema)).
+        if (Map.class.isAssignableFrom(type)) {
+            java.lang.reflect.Type genericType = field.getGenericType();
+            if (genericType instanceof java.lang.reflect.ParameterizedType) {
+                java.lang.reflect.Type[] typeArgs = ((java.lang.reflect.ParameterizedType) genericType).getActualTypeArguments();
+                if (typeArgs.length == 2 && typeArgs[1] instanceof Class<?>) {
+                    String valueZodType = mapTypeToZod((Class<?>) typeArgs[1]);
+                    return "z.record(z.string(), " + valueZodType + ")";
+                }
+            }
+            return "z.record(z.string(), z.any())";
         }
 
         // For all other types, use the regular mapping
@@ -784,6 +801,45 @@ public class ZodSchemaGenerator {
         Integer refIndex = emissionOrder.get(type.getName());
         boolean forwardReference = refIndex == null || currentEmissionIndex < 0 || refIndex >= currentEmissionIndex;
         return forwardReference ? "z.lazy(() => " + schemaConst + ")" : schemaConst;
+    }
+
+    /**
+     * Normalises a {@code @DecimalMin}/{@code @DecimalMax} value string into a JS numeric
+     * literal without precision loss. Bean Validation guarantees the string is a valid
+     * {@link java.math.BigDecimal}; {@code toPlainString()} avoids scientific notation
+     * (e.g. {@code 1E-2}) that, while valid JS, reads worse than {@code 0.01}. Falls back to
+     * the raw value if it somehow doesn't parse.
+     */
+    protected String decimalLiteral(String value) {
+        try {
+            return new java.math.BigDecimal(value.trim()).toPlainString();
+        } catch (NumberFormatException e) {
+            log.warn("@DecimalMin/@DecimalMax value '{}' is not a valid decimal — emitting verbatim", value);
+            return value.trim();
+        }
+    }
+
+    /**
+     * Escapes a Java regex so it can be embedded in a JavaScript regex literal
+     * ({@code /.../}). Only the literal-terminating {@code '/'} needs escaping, and only when
+     * it isn't already escaped — backslash sequences in {@code @Pattern} are passed through
+     * unchanged (they are valid in JS regex too).
+     */
+    protected String escapeForJsRegexLiteral(String regex) {
+        StringBuilder out = new StringBuilder(regex.length() + 4);
+        for (int i = 0; i < regex.length(); i++) {
+            char c = regex.charAt(i);
+            if (c == '\\' && i + 1 < regex.length()) {
+                // Preserve escape sequences verbatim (incl. an already-escaped slash).
+                out.append(c).append(regex.charAt(i + 1));
+                i++;
+            } else if (c == '/') {
+                out.append("\\/");
+            } else {
+                out.append(c);
+            }
+        }
+        return out.toString();
     }
 
     /**

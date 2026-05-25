@@ -64,7 +64,7 @@ class ZodSchemaGeneratorTest {
         assertContains(content, "phoneNumber: z.string().regex(/^\\+?[1-9]\\d{1,14}$/).nullish()");  // @Pattern but not @NotNull
         assertContains(content, "birthDate: z.coerce.date().nullish()");  // no validation
         assertContains(content, "tags: z.array(z.string()).min(1).max(10).nullish()");  // @Size but not @NotNull
-        assertContains(content, "metadata: z.record(z.string(), z.any()).nullish()");  // no validation
+        assertContains(content, "metadata: z.record(z.string(), z.string()).nullish()");  // Map<String,String> value resolved
         assertContains(content, "departmentId: z.number().int().positive().nullish()");  // @Positive but not @NotNull
         assertContains(content, "active: z.boolean().nullish()");  // no validation
 
@@ -288,6 +288,29 @@ class ZodSchemaGeneratorTest {
         assertContains(content, "export const CreateUserCmdSchema = z.object({");
         assertContains(content, "email: z.email()");
         assertContains(content, "export type CreateUserCmd = z.infer<typeof CreateUserCmdSchema>");
+    }
+
+    @Test
+    void testPatternDecimalAndMapEdgeCases() throws Exception {
+        OpenAPI openAPI = createOpenAPIWithCommand(EdgeCaseCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        Path outputFile = tempDir.resolve("zod-schemas-edge-cases.ts");
+        generator.generateZodSchemas(outputFile);
+
+        String content = Files.readString(outputFile);
+
+        // #3: forward slashes in the @Pattern are escaped for the JS regex literal
+        assertContains(content, "path: z.string().regex(/^\\/api\\/[a-z]+$/).nullish()");
+
+        // #4: @DecimalMin value emitted verbatim, no Double precision loss
+        assertContains(content, "preciseMin: z.custom<Types.BigDecimal>().min(0.10000000000000001)");
+        assertFalse(content.contains("0.1)"), "decimal must not collapse to a lossy double");
+
+        // #6: Map<String, AddressDto> value type resolves to the nested schema reference
+        assertContains(content, "attributes: z.record(z.string(), AddressDtoSchema).nullish()");
+        assertContains(content, "export const AddressDtoSchema = z.object({");
     }
 
     @Test
