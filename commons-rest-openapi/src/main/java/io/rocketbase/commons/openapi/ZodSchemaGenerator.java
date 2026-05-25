@@ -481,8 +481,19 @@ public class ZodSchemaGenerator {
         schema.append(String.join(",\n", fieldSchemas));
         schema.append("\n");
 
-        schema.append("});\n\n");
-        schema.append("export type ").append(clazz.getSimpleName()).append(" = z.infer<typeof ").append(schemaName).append(">;");
+        schema.append("});");
+
+        // Optional inferred type alias. Off by default: the bare type name would collide with
+        // the same-named interface in types.ts (both describe the identical shape), breaking a
+        // barrel that re-exports both. When enabled, a suffix keeps the names distinct.
+        if (config.isZodInferTypeExport()) {
+            String typeName = clazz.getSimpleName() + config.getZodInferTypeSuffix();
+            schema.append("\n\nexport type ")
+                    .append(typeName)
+                    .append(" = z.infer<typeof ")
+                    .append(schemaName)
+                    .append(">;");
+        }
 
         return schema.toString();
     }

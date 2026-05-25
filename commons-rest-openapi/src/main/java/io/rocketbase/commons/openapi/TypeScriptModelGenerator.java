@@ -346,6 +346,27 @@ public class TypeScriptModelGenerator {
 
         protected Map<String, String> additionalTypeMappings = Map.of();
 
+        /**
+         * Whether the Zod generator emits an inferred TypeScript type alias next to each schema
+         * ({@code export type X = z.infer<typeof XSchema>}). Default {@code false}: the type
+         * name X would otherwise collide with the interface of the same name already exported
+         * from {@code types.ts} (both describe the same shape), which breaks a barrel that
+         * re-exports both files (TS2308). Enable only together with {@link #zodInferTypeSuffix}
+         * if you genuinely need the inferred type — e.g. when a {@code z.coerce}-based schema's
+         * input differs from the {@code types.ts} shape.
+         */
+        protected boolean zodInferTypeExport = false;
+
+        /**
+         * Suffix appended to the inferred Zod type name when {@link #zodInferTypeExport} is on.
+         * E.g. suffix {@code "Zod"} for command {@code UserCreateCmd} yields
+         * {@code export type UserCreateCmdZod = z.infer<typeof UserCreateCmdSchema>}, avoiding a
+         * clash with the {@code UserCreateCmd} interface in {@code types.ts}. Empty by default;
+         * an empty suffix reuses the bare name and is only safe when {@code types.ts} is not
+         * re-exported alongside the Zod schemas.
+         */
+        protected String zodInferTypeSuffix = "";
+
         public EnumMapping getMapEnum() {
             return mapEnum;
         }
@@ -384,6 +405,22 @@ public class TypeScriptModelGenerator {
 
         public void setAdditionalTypeMappings(Map<String, String> additionalTypeMappings) {
             this.additionalTypeMappings = additionalTypeMappings;
+        }
+
+        public boolean isZodInferTypeExport() {
+            return zodInferTypeExport;
+        }
+
+        public void setZodInferTypeExport(boolean zodInferTypeExport) {
+            this.zodInferTypeExport = zodInferTypeExport;
+        }
+
+        public String getZodInferTypeSuffix() {
+            return zodInferTypeSuffix;
+        }
+
+        public void setZodInferTypeSuffix(String zodInferTypeSuffix) {
+            this.zodInferTypeSuffix = zodInferTypeSuffix;
         }
     }
 }
