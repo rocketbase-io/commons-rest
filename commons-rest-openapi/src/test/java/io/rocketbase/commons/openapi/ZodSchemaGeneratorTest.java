@@ -50,9 +50,13 @@ class ZodSchemaGeneratorTest {
 
         // Check required fields (with @NotBlank, @NotNull, @NotEmpty)
         assertContains(content, "username: z.string().trim().min(1).min(3).max(50)");  // @NotBlank @Size
-        assertContains(content, "email: z.string().email()");            // @NotNull @Email
+        assertContains(content, "email: z.email()");                     // @NotNull @Email — Zod v4 top-level
         assertContains(content, "role: z.enum([\"ADMIN\", \"USER\", \"GUEST\", \"MODERATOR\"])");   // @NotNull enum, rendered as Zod string-literal union
-        assertContains(content, "addresses: z.array(");                  // @NotEmpty
+        // @NotEmpty List<AddressDto> — nested DTO gets its own schema, referenced (not z.custom)
+        assertContains(content, "addresses: z.array(AddressDtoSchema).min(1)");
+        // The nested AddressDto schema is emitted too, with its own field validation
+        assertContains(content, "export const AddressDtoSchema = z.object({");
+        assertContains(content, "zipCode: z.string().trim().min(1).max(10)");
 
         // Check optional fields (no required annotation)
         assertContains(content, "password: z.string().min(8).max(100).nullish()");  // @Size but not @NotNull
@@ -99,11 +103,16 @@ class ZodSchemaGeneratorTest {
         Path outputFile = tempDir.resolve("zod-schemas-nested.ts");
         String result = generator.generateZodSchemas(outputFile);
 
-        // Then: Nested types should use custom type reference
+        // Then: nested DTOs get their own validated schema and are referenced (not z.custom)
         String content = Files.readString(outputFile);
 
-        // CreateUserCmd should reference AddressDto as custom type
-        assertContains(content, "addresses: z.array(z.custom<Types.AddressDto>())");
+        // CreateUserCmd references the generated AddressDtoSchema for its nested list
+        assertContains(content, "addresses: z.array(AddressDtoSchema)");
+        // ...and that schema is emitted with the nested field constraints intact
+        assertContains(content, "export const AddressDtoSchema = z.object({");
+        assertContains(content, "street: z.string().trim().min(1)");
+        assertFalse(content.contains("z.custom<Types.AddressDto>()"),
+                "nested DTO must be a validated schema reference, not an unvalidated z.custom");
     }
 
     @Test
@@ -127,14 +136,14 @@ class ZodSchemaGeneratorTest {
         String content = Files.readString(outputFile);
 
         // @NotNull - required
-        assertContains(content, "email: z.string().email()");
+        assertContains(content, "email: z.email()");
         assertContains(content, "role: z.enum([\"ADMIN\", \"USER\", \"GUEST\", \"MODERATOR\"])");
 
         // @NotBlank but not @NotNull - now optional!
         assertContains(content, "username: z.string().trim().min(1).min(3).max(50).nullish()");
 
-        // @NotEmpty but not @NotNull - now optional!
-        assertContains(content, "addresses: z.array(z.custom<Types.AddressDto>()).min(1).nullish()");
+        // @NotEmpty but not @NotNull - now optional! Nested DTO referenced by schema.
+        assertContains(content, "addresses: z.array(AddressDtoSchema).min(1).nullish()");
     }
 
     @Test
@@ -199,6 +208,23 @@ class ZodSchemaGeneratorTest {
     }
 
     @Test
+    void testRecursiveNestedTypeUsesZodLazy() throws Exception {
+        // Given: a self-referential command (TreeNodeCmd.children: List<TreeNodeCmd>).
+        OpenAPI openAPI = createOpenAPIWithCommand(TreeNodeCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        Path outputFile = tempDir.resolve("zod-schemas-recursive.ts");
+        generator.generateZodSchemas(outputFile);
+
+        // Then: the self-reference is wrapped in z.lazy so the const can reference itself.
+        String content = Files.readString(outputFile);
+        assertContains(content, "export const TreeNodeCmdSchema = z.object({");
+        assertContains(content, "children: z.array(z.lazy(() => TreeNodeCmdSchema))");
+        assertContains(content, "label: z.string().trim().min(1)");
+    }
+
+    @Test
     void testEnumWithJsonValueRendersWireFormatLiterals() throws Exception {
         // Given: a command whose Status enum exposes lowercase wire values via @JsonValue.
         // The Zod schema must validate the wire format Jackson produces, NOT the Java
@@ -260,8 +286,71 @@ class ZodSchemaGeneratorTest {
         // Then: The command class is discovered and its schema is emitted.
         String content = Files.readString(outputFile);
         assertContains(content, "export const CreateUserCmdSchema = z.object({");
-        assertContains(content, "email: z.string().email()");
+        assertContains(content, "email: z.email()");
         assertContains(content, "export type CreateUserCmd = z.infer<typeof CreateUserCmdSchema>");
+    }
+
+    @Test
+    void testFieldLevelZodSchemaAnyAndIgnore() throws Exception {
+        // Given: a command with @ZodSchema(ANY) and @ZodSchema(IGNORE) fields.
+        OpenAPI openAPI = createOpenAPIWithCommand(ZodAnnotatedCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        Path outputFile = tempDir.resolve("zod-schemas-field-annotations.ts");
+        generator.generateZodSchemas(outputFile);
+
+        String content = Files.readString(outputFile);
+        // ANY field → z.any() regardless of its Java type
+        assertContains(content, "rawPayload: z.any()");
+        // IGNORE field → omitted from the schema entirely
+        assertFalse(content.contains("internalNote"), "@ZodSchema(IGNORE) field must be dropped");
+        // unrelated field is still validated normally
+        assertContains(content, "name: z.string().trim().min(1)");
+    }
+
+    @Test
+    void testTypeLevelZodSchemaIgnoreDegradesToAny() throws Exception {
+        // Given: a command whose field type is annotated @ZodSchema(IGNORE) at type level.
+        OpenAPI openAPI = createOpenAPIWithCommand(IgnoredValueHolderCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        Path outputFile = tempDir.resolve("zod-schemas-type-ignore.ts");
+        generator.generateZodSchemas(outputFile);
+
+        String content = Files.readString(outputFile);
+        // The ignored value object must NOT get its own schema...
+        assertFalse(content.contains("export const IgnoredValueSchema"),
+                "type-level @ZodSchema(IGNORE) must not produce a schema");
+        // ...and the referencing field degrades to z.any() (not z.custom<Types.IgnoredValue>())
+        assertContains(content, "payload: z.any()");
+        assertFalse(content.contains("z.custom<Types.IgnoredValue>()"),
+                "ignored type must not be referenced via z.custom");
+    }
+
+    @Test
+    void testTypeLevelZodSchemaIncludeAddsRoot() throws Exception {
+        // Given: an OpenAPI with NO mutation endpoints, but a TypeScriptGenerationResult whose
+        // type-mapping contains a @ZodSchema(INCLUDE) class — i.e. the class appears in the API
+        // surface (a response/param) but is not a mutation request body.
+        OpenAPI openAPI = new OpenAPI();
+        openAPI.setPaths(new io.swagger.v3.oas.models.Paths());
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+
+        Map<String, String> typeMapping = new HashMap<>();
+        typeMapping.put(StandaloneIncludeCmd.class.getName(), "StandaloneIncludeCmd");
+        TypeScriptGenerationResult tsResult = new TypeScriptGenerationResult("", typeMapping);
+
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config, tsResult);
+
+        Path outputFile = tempDir.resolve("zod-schemas-include-root.ts");
+        generator.generateZodSchemas(outputFile);
+
+        String content = Files.readString(outputFile);
+        assertContains(content, "export const StandaloneIncludeCmdSchema = z.object({");
+        assertContains(content, "sku: z.string().trim().min(1)");
+        assertContains(content, "quantity: z.number().int().positive()");
     }
 
     // Helper methods
