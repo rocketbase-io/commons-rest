@@ -68,8 +68,10 @@ class ZodSchemaGeneratorTest {
         assertContains(content, "departmentId: z.number().int().positive().nullish()");  // @Positive but not @NotNull
         assertContains(content, "active: z.boolean().nullish()");  // no validation
 
-        // Check type export
-        assertContains(content, "export type CreateUserCmd = z.infer<typeof CreateUserCmdSchema>");
+        // By default no inferred type alias is emitted — it would collide with the
+        // same-named interface in types.ts.
+        assertFalse(content.contains("export type CreateUserCmd"),
+                "inferred type export must be off by default");
     }
 
     @Test
@@ -287,7 +289,42 @@ class ZodSchemaGeneratorTest {
         String content = Files.readString(outputFile);
         assertContains(content, "export const CreateUserCmdSchema = z.object({");
         assertContains(content, "email: z.email()");
-        assertContains(content, "export type CreateUserCmd = z.infer<typeof CreateUserCmdSchema>");
+    }
+
+    @Test
+    void testInferTypeExportToggleAndSuffix() throws Exception {
+        OpenAPI openAPI = createOpenAPIWithCommand(UpdateProfileCmd.class);
+
+        // Default: no inferred type export.
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig off =
+                new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        Path offFile = tempDir.resolve("zod-infer-off.ts");
+        new ZodSchemaGenerator(openAPI, off).generateZodSchemas(offFile);
+        String offContent = Files.readString(offFile);
+        assertContains(offContent, "export const UpdateProfileCmdSchema = z.object({");
+        assertFalse(offContent.contains("export type UpdateProfileCmd"),
+                "type export must be off by default");
+
+        // Enabled, no suffix → bare name.
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig on =
+                new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        on.setZodInferTypeExport(true);
+        Path onFile = tempDir.resolve("zod-infer-on.ts");
+        new ZodSchemaGenerator(openAPI, on).generateZodSchemas(onFile);
+        assertContains(Files.readString(onFile),
+                "export type UpdateProfileCmd = z.infer<typeof UpdateProfileCmdSchema>");
+
+        // Enabled with suffix → distinct name, no collision with types.ts.
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig suffixed =
+                new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        suffixed.setZodInferTypeExport(true);
+        suffixed.setZodInferTypeSuffix("Zod");
+        Path suffixFile = tempDir.resolve("zod-infer-suffix.ts");
+        new ZodSchemaGenerator(openAPI, suffixed).generateZodSchemas(suffixFile);
+        String suffixContent = Files.readString(suffixFile);
+        assertContains(suffixContent, "export type UpdateProfileCmdZod = z.infer<typeof UpdateProfileCmdSchema>");
+        assertFalse(suffixContent.contains("export type UpdateProfileCmd ="),
+                "with a suffix the bare name must not be emitted");
     }
 
     @Test
