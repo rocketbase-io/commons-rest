@@ -14,6 +14,6 @@ public class TsidSerializer extends StdSerializer<TSID> {
 
     @Override
     public void serialize(TSID tsid, JsonGenerator jsonGenerator, SerializationContext serializerProvider) {
-        jsonGenerator.writeString(tsid.toString());
+        jsonGenerator.writeString(tsid.toLowerCase());
     }
 }

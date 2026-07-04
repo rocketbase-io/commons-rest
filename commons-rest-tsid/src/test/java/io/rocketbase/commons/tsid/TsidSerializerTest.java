@@ -29,7 +29,7 @@ class TsidSerializerTest extends BaseTest {
 
         // then
         assertThat(result, notNullValue());
-        assertThat(result, equalTo("{\"id\":\"" + id.toString() + "\",\"name\":\"name\"}"));
+        assertThat(result, equalTo("{\"id\":\"" + id.toLowerCase() + "\",\"name\":\"name\"}"));
     }
 
     @Data
