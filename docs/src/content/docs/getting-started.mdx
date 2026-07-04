@@ -1,0 +1,140 @@
+---
+title: Getting Started
+description: Install commons-rest and build your first Spring Boot REST service with typed errors, pagination and clean DTOs in minutes.
+sidebar:
+  order: 1
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+`commons-rest` is a set of small, focused Spring Boot libraries for building REST services.
+It gives you the pieces every service needs — typed exceptions with [RFC 9457 problem
+details](/error-handling/), a serializable [pagination wrapper](/pagination/), i18n-aware
+translations, obfuscated ids and generated TypeScript clients — without forcing a framework
+on top of Spring.
+
+## Requirements
+
+- Java 17 or newer
+- Spring Boot 4 / Spring Framework 7 (v4.x) — for Spring Boot 3 stay on the 3.5.x line
+- Jackson 3 (`tools.jackson`) — v4 is fully migrated, only the annotations remain on
+  `com.fasterxml.jackson.annotation`
+
+## Installation
+
+For a typical Spring MVC service you add `commons-rest-server` — it pulls in
+`commons-rest-api` (DTOs, exceptions, annotations) transitively:
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-server</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-server:4.0.0-M2")
+		```
+	</TabItem>
+</Tabs>
+
+If you only consume REST services (client side) or share DTOs between services, the
+lightweight `commons-rest-api` module is enough:
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-api</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-api:4.0.0-M2")
+		```
+	</TabItem>
+</Tabs>
+
+## What you get out of the box
+
+`commons-rest-server` ships a Spring Boot auto-configuration — no `@Enable...` annotation, no
+configuration class. As soon as the dependency is on the classpath:
+
+- `NotFoundException`, `BadRequestException` and `InsufficientPrivilegesException` thrown
+  anywhere in your controllers are rendered as `application/problem+json` responses
+  (404 / 400 / 403)
+- Bean-validation errors (`@Valid` failures) become a structured problem response with a
+  per-field error map
+- An `AcceptHeaderLocaleResolver` is configured so error messages can be translated
+- Enum request parameters are converted case-insensitively
+
+Every part can be [switched off with a property](/configuration/) and every bean is
+`@ConditionalOnMissingBean` — your own beans always win.
+
+## A first endpoint
+
+```java
+@RestController
+@RequestMapping("/api/employee")
+@RequiredArgsConstructor
+public class EmployeeController {
+
+    private final EmployeeRepository repository;
+    private final EmployeeConverter converter;
+
+    @GetMapping
+    public PageableResult<EmployeeRead> list(
+            @PageableDefault(size = 25) Pageable pageable) {
+        return PageableResult.fromPage(repository.findAll(pageable), converter::fromEntity);
+    }
+
+    @GetMapping("/{id}")
+    public EmployeeRead getById(@PathVariable String id) {
+        EmployeeEntity entity = repository.findById(id)
+                .orElseThrow(() -> new NotFoundException("employee not found"));
+        return converter.fromEntity(entity);
+    }
+
+    @PostMapping
+    public EmployeeRead create(@RequestBody @Valid EmployeeWrite write) {
+        return converter.fromEntity(repository.save(converter.newEntity(write)));
+    }
+}
+```
+
+Three things to notice:
+
+- **`PageableResult`** wraps the Spring Data `Page` into a serializable, framework-neutral
+  DTO — the JSON shape is stable and clients don't need Spring Data types.
+- **`NotFoundException`** just gets thrown — the auto-configured handler turns it into a
+  proper `404` problem response.
+- **`EmployeeRead` / `EmployeeWrite`** are separate DTOs: the response structure and the
+  create/update structure evolve independently — see [Concepts](/concepts/).
+
+A failing `@Valid` request answers like this, without any code on your side:
+
+```json
+{
+  "type": "urn:problem-type:form-error",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "invalid form",
+  "fields": {
+    "email": ["must not be empty"]
+  }
+}
+```
+
+## Next steps
+
+- Understand the [Entity / Read / Write separation](/concepts/)
+- Return paged results with [PageableResult](/pagination/)
+- See how [error handling](/error-handling/) works end to end
+- Generate [TypeScript clients & react-query hooks](/typescript-clients/) from your controllers

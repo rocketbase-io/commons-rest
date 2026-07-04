@@ -1,0 +1,107 @@
+---
+title: Obfuscated Ids
+description: Expose hashids-obfuscated strings instead of raw numeric database ids — decoded transparently in path variables, params and JSON.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Sequential numeric ids leak information: how many customers you have, how fast you grow, and
+they invite enumeration. `commons-rest-hashids` exposes your `Long` ids as short opaque
+strings (e.g. `gY6Nl0Vx`) using the [hashids](https://hashids.org/) algorithm — reversible
+server-side, meaningless to clients.
+
+## Installation
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-hashids</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-hashids:4.0.0-M2")
+		```
+	</TabItem>
+</Tabs>
+
+The auto-configuration registers everything: an `IdObfuscator` bean, a Spring MVC formatter
+for `ObfuscatedId` parameters, a Jackson deserializer for JSON bodies and an exception handler
+mapping invalid ids to `404`.
+
+<Aside type="caution" title="Set a salt!">
+	Without a project-specific `hashids.salt` the encoding uses the default (empty) salt — the
+	same id produces the same hash across all installations. Always configure a secret salt.
+</Aside>
+
+```yaml
+hashids:
+  salt: your-project-secret
+```
+
+## Usage
+
+The Read DTO exposes `ObfuscatedId` instead of `Long` — it serializes to the obfuscated
+string automatically:
+
+```java
+public class CustomerRead {
+    private ObfuscatedId id;    // → "id": "gY6Nl0Vx"
+    private String name;
+}
+```
+
+Producing the id in your converter, via the injected `IdObfuscator`:
+
+```java
+@Component
+@RequiredArgsConstructor
+public class CustomerConverter
+        implements EntityReadWriteConverter<CustomerEntity, CustomerRead, CustomerWrite> {
+
+    private final IdObfuscator idObfuscator;
+
+    @Override
+    public CustomerRead fromEntity(CustomerEntity entity) {
+        return CustomerRead.builder()
+                .id(idObfuscator.obfuscate(entity.getId()))
+                .name(entity.getName())
+                .build();
+    }
+    // ...
+}
+```
+
+Path variables and request params are decoded transparently — just type them as
+`ObfuscatedId`:
+
+```java
+@GetMapping("/api/customer/{id}")
+public CustomerRead getById(@PathVariable ObfuscatedId id) {
+    return converter.fromEntity(repository.findById(id.getId())   // the real Long
+            .orElseThrow(NotFoundException::new));
+}
+```
+
+An undecodable string (tampered, wrong salt) raises `ObfuscatedDecodeException`, which the
+bundled handler renders as `404 – invalid id`. JSON body fields of type `ObfuscatedId` are
+decoded the same way.
+
+## Configuration
+
+| Property | Default | Explanation |
+|---|---|---|
+| `hashids.salt` | *(empty)* | salt for hashids — **set this** |
+| `hashids.minHashLength` | `8` | minimum length of the generated hash |
+| `hashids.alphabet` | `abcdefghijklmnopqrstuvwxyz1234567890` | encoding alphabet (uppercase skipped by default) |
+| `hashids.invalid.allowed` | `false` | when `true`, invalid input is injected as `ObfuscatedId` with the raw text but `id = null` instead of a 404 |
+| `hashids.handler.enabled` | `true` | toggle the 404 exception handler |
+
+<Aside type="tip">
+	Prefer time-sorted ids that are unique across your cluster? Have a look at
+	[TSID support](/tsid/) as an alternative id strategy.
+</Aside>

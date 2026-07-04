@@ -1,0 +1,82 @@
+---
+title: commons-rest
+description: Spring Boot library for CRUD REST services — Read/Write DTO separation, RFC 9457 problem details, obfuscated ids and generated TypeScript clients.
+template: splash
+hero:
+  tagline: Focus on tough problems, not on CRUD — small, focused Spring Boot modules for REST services with clean DTOs, typed errors and generated TypeScript clients.
+  image:
+    html: '<img class="light-only" src="/logo-light.svg" alt="commons-rest logo" width="450" height="200" /><img class="dark-only" src="/logo-dark.svg" alt="commons-rest logo" width="450" height="200" />'
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+    - text: View on GitHub
+      link: https://github.com/rocketbase-io/commons-rest
+      icon: github
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<div class="badges">
+	<a href="https://mvnrepository.com/artifact/io.rocketbase.commons/commons-rest">
+		<img
+			src="https://badgen.net/maven/v/maven-central/io.rocketbase.commons/commons-rest"
+			alt="Maven Central"
+		/>
+	</a>
+	<a href="https://github.com/rocketbase-io/commons-rest/actions/workflows/ci.yml">
+		<img
+			src="https://github.com/rocketbase-io/commons-rest/actions/workflows/ci.yml/badge.svg"
+			alt="build status"
+		/>
+	</a>
+</div>
+
+<CardGrid stagger>
+	<Card title="Stable pagination DTO" icon="list-format">
+		`PageableResult` wraps Spring Data pages into a serializable, framework-neutral JSON shape —
+		with factories, mapping and an optional `meta` extension.
+
+		<a class="card-link" href="/pagination/">Paginate results →</a>
+	</Card>
+	<Card title="TypeScript clients for free" icon="seti:typescript">
+		Annotate your controllers with `@QueryHook` / `@MutationHook` and generate axios clients,
+		react-query hooks and Zod schemas straight from your OpenAPI doc.
+
+		<a class="card-link" href="/typescript-clients/">Generate a client →</a>
+	</Card>
+	<Card title="Ids that don't leak" icon="seti:lock">
+		Expose hashids-obfuscated or time-sorted TSID identifiers instead of raw database ids —
+		decoded transparently in path variables, params and JSON.
+
+		<a class="card-link" href="/obfuscated-ids/">Obfuscate your ids →</a>
+	</Card>
+	<Card title="Auto-configured & optional" icon="rocket">
+		Every module is a Spring Boot auto-configuration: add the dependency and it works. Every
+		bean is `@ConditionalOnMissingBean`, every feature has an off-switch property.
+
+		<a class="card-link" href="/configuration/">Browse all properties →</a>
+	</Card>
+	<Card title="Problem details built in" icon="error">
+		Throw `NotFoundException` anywhere — auto-configured handlers render RFC 9457
+		`application/problem+json` responses, including a per-field map for bean-validation
+		errors.
+
+		<a class="card-link" href="/error-handling/">See error handling →</a>
+	</Card>
+	<Card title="Clean DTO separation" icon="puzzle">
+		Entity, Read and Write are separate types with a tiny converter interface between them —
+		response shape and create/update payload evolve independently.
+
+		<a class="card-link" href="/concepts/">Understand the concepts →</a>
+	</Card>
+</CardGrid>
+
+## Why commons-rest?
+
+We at [rocketbase.io](https://www.rocketbase.io) build many microservices. Tools like
+spring-data-rest take flexibility away the moment you leave the happy path, and full-blown
+generators bring a mountain of dependencies. `commons-rest` takes a different approach: it
+provides the small building blocks every REST service needs — and stays out of your way for
+everything else. Your controllers remain plain Spring MVC; you keep full control.

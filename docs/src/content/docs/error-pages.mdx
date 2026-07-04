@@ -1,0 +1,56 @@
+---
+title: Error Pages
+description: Cleanly styled static HTML error pages for 400, 401, 403, 404 and 500 — replace the Spring Boot whitelabel page with one dependency.
+---
+
+import { Tabs, TabItem } from '@astrojs/starlight/components';
+
+`commons-rest-errorpage` is the simplest module of the family: a resources-only jar that
+replaces Spring Boot's whitelabel error page with cleanly styled static HTML pages (built on
+[Bulma](https://bulma.io/)).
+
+## Installation
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-errorpage</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-errorpage:4.0.0-M2")
+		```
+	</TabItem>
+</Tabs>
+
+That's it — no configuration, no properties, no auto-configuration class. The pages live
+under `META-INF/resources/error/`, which Spring Boot picks up automatically for browser
+(HTML-accepting) requests.
+
+## Included pages
+
+| Status | Page |
+|---|---|
+| 400 | Bad Request |
+| 401 | Unauthorized |
+| 403 | Access Denied |
+| 404 | Resource not found |
+| 500 | Webservice currently unavailable |
+
+API clients are unaffected: requests accepting `application/json` still receive the
+[problem+json error bodies](/error-handling/) — the HTML pages only answer browser
+navigation.
+
+## Overriding a page
+
+Place your own file at the same path in your application — application resources win over
+library resources:
+
+```
+src/main/resources/META-INF/resources/error/404.html
+```

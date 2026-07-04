@@ -1,0 +1,115 @@
+---
+title: Utilities
+description: Small helpers that ship with commons-rest-api — null handling, case-insensitive enums, id generation, profiling and time helpers.
+---
+
+`commons-rest-api` bundles a few zero-dependency helpers that come in handy in almost every
+service.
+
+## Nulls — null-safe coalescing
+
+```java
+Nulls.notNull(value, "fallback");        // value or fallback
+Nulls.notNull(text);                     // "" instead of null (typed overloads for
+                                         // boolean, int, long, BigDecimal, collections...)
+Nulls.notEmpty(list, defaultList);       // fallback also on empty
+Nulls.coalesce(a, b, c);                 // first non-null
+Nulls.get(customer, Customer::getName);  // null-safe property access
+Nulls.noneNullValue(a, b, c);            // true when all non-null
+```
+
+## Case-insensitive enums
+
+Two pieces work together so enum request parameters and JSON values never fail on casing:
+
+**`StringToEnumConverterFactory`** (auto-configured by `commons-rest-server`, toggle
+`converter.enum.enabled`) converts `@RequestParam` / `@PathVariable` enum values
+case-insensitively — `?status=active`, `?status=ACTIVE` and `?status=Active` all bind.
+
+**`EnumValue`** lets an enum carry a custom wire value:
+
+```java
+public enum Status implements EnumValue {
+    ACTIVE("active"), IN_REVIEW("in-review");
+
+    private final String value;
+    Status(String value) { this.value = value; }
+
+    @JsonValue
+    @Override
+    public String getValue() { return value; }
+
+    @JsonCreator
+    public static Status fromValue(String value) {
+        return EnumValue.fromValue(Status.class, value);
+    }
+}
+```
+
+jOOQ's `EnumType` literals are recognized as well when jOOQ is on the classpath.
+
+## Snowflake — distributed id generation
+
+A Twitter-snowflake style 64-bit id generator (time + node + sequence, custom epoch
+2020-01-01) — ids are unique across nodes and roughly time-sorted:
+
+```java
+Snowflake snowflake = new Snowflake();   // one instance per node
+long id = snowflake.nextId();
+```
+
+For ids that face clients, consider [TSID](/tsid/) or [ObfuscatedId](/obfuscated-ids/).
+
+## StopwatchParts — quick profiling
+
+Measure the parts of a longer operation and log one compact line:
+
+```java
+StopwatchParts watch = StopwatchParts.start();
+syncValues();
+watch.part("syncValues");
+recalculate();
+watch.part("recalculate");
+log.info(watch.print());
+// ⏱ 4109 ms [71% syncValues: 2917 ms | 29% recalculate: 1192 ms]
+```
+
+## TimeUtil
+
+Min/max and comparison helpers for `LocalDate`, `LocalTime`, `LocalDateTime` and `Instant`,
+plus duration formatting:
+
+```java
+TimeUtil.max(dateA, dateB);
+TimeUtil.isBeforeOrEquals(instantA, instantB);
+TimeUtil.firstDayOfYear(2026);
+TimeUtil.convertMillisToMinSecFormat(129000);   // "2 min 9 sec"
+```
+
+## StringShorten
+
+```java
+StringShorten.left("a very long text", 10);          // "a very lo…"
+StringShorten.left("a very long text", 10, "...");   // custom ellipsis
+```
+
+## ValidationService — export constraints
+
+`ValidationService` (in `commons-rest-server`) exports the bean-validation constraints of a
+model as a DTO — useful when a frontend wants to mirror validation rules without duplicating
+them. It is not auto-registered; declare the bean yourself:
+
+```java
+@Bean
+ValidationService validationService() {
+    return new ValidationServiceImpl();
+}
+```
+
+```java
+ModelConstraint constraints = validationService.getConstraintsForClass(CompanyWrite.class);
+// { "model": "...CompanyWrite", "constraints": { "email": [ {"type": "NotNull", ...}, {"type": "Email", ...} ] } }
+```
+
+For TypeScript frontends the generated [Zod schemas](/typescript-clients/#the-annotations)
+are usually the more convenient route.

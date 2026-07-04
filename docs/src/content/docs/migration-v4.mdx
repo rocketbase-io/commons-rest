@@ -1,0 +1,91 @@
+---
+title: Migration to v4
+description: What changed in the v4 breaking release — Spring Boot 4, Jackson 3, RFC 9457 problem details and removed classes.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+v4 is a breaking release built on **Spring Boot 4 / Spring Framework 7**. This site documents
+v4 — if you stay on Spring Boot 3, use the latest 3.5.x release and the
+[GitHub wiki](https://github.com/rocketbase-io/commons-rest/wiki).
+
+## Requirements
+
+| | v3.5.x | v4.x |
+|---|---|---|
+| Java | 17+ | 17+ |
+| Spring Boot | 3.x | 4.x |
+| Jackson | 2.x (`com.fasterxml.jackson`) | 3.x (`tools.jackson`) |
+
+## Jackson 3
+
+Core and databind moved to the `tools.jackson.*` packages — only the annotations stay at
+`com.fasterxml.jackson.annotation` (as intended by Jackson 3). If you registered custom
+serializers for commons types, port them to the new `ValueSerializer` / `ValueDeserializer`
+base classes.
+
+## ErrorResponse follows RFC 9457
+
+Error bodies are now [problem details](/error-handling/) delivered as
+`application/problem+json`. `message` was renamed to `detail`; the new optional members
+`type`, `title` and `instance` were added. The `fields` validation map stays as an extension
+member:
+
+```json
+// before (v3)
+{ "status": 400, "message": "invalid form", "fields": { "email": ["not empty"] } }
+
+// after (v4)
+{
+  "type": "urn:problem-type:form-error",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "invalid form",
+  "fields": { "email": ["not empty"] }
+}
+```
+
+Migration aids:
+
+- Java consumers can keep calling the deprecated `getMessage()` bridge for a transition
+  period — it delegates to `detail`.
+- Inbound payloads with the old `message` key still deserialize (`@JsonAlias`).
+- Recommendation: also enable `spring.mvc.problemdetails.enabled=true` so Spring's own errors
+  (unknown route, 405, malformed JSON) render as problem+json too.
+
+## Nullability annotations
+
+Switched from `org.springframework.lang.Nullable` to
+[JSpecify](https://jspecify.dev/) (`org.jspecify.annotations.Nullable`) — in line with Spring
+Framework 7 itself.
+
+## Removed classes & modules
+
+| Removed | Replacement |
+|---|---|
+| `BaseRestResource`, `BaseController` | plain `RestTemplate`/HTTP-interface clients + [`BasicResponseErrorHandler`](/error-handling/#client-side-resttemplate); shared [Api interfaces](/concepts/#shared-api-interfaces) |
+| `QueryParamBuilder`, `QueryParamParser`, `UrlParts` | Spring's `UriComponentsBuilder` |
+| `EntityWithKeyValue`, `HasKeyValue`, `HasFirstAndLastName` model helpers | model your own types |
+| `commons-rest-posthog` module | use the official [PostHog Java SDK](https://posthog.com/docs/libraries/java) directly |
+
+The old v3 deprecation note on `BadRequestExceptionHandler` ("will get replaced by
+javax.ws.rs.BadRequestException") was dropped — JAX-RS never made sense in a Spring MVC app.
+`BadRequestException` stays a first-class citizen for
+[checks bean validation can't express](/error-handling/#checks-bean-validation-cant-express).
+
+<Aside type="note" title="swagger annotations">
+	v4 temporarily depends on the <code>io.github.vpelikh</code> fork of the swagger
+	annotations/springdoc starter — a Jackson-3-compatible build, until official Jackson 3
+	support lands in swagger-core/springdoc (see swagger-api/swagger-core#4991). This is
+	transparent for consumers.
+</Aside>
+
+## Checklist
+
+1. Upgrade to Spring Boot 4 first (with your app still on commons-rest 3.5.x it will fail —
+   do both together).
+2. Bump `io.rocketbase.commons:*` to `4.0.0-M2`.
+3. Replace `com.fasterxml.jackson.databind`/`core` imports with `tools.jackson.*`.
+4. Search for `getMessage()` calls on `ErrorResponse` — switch to `getDetail()`.
+5. Update API consumers/tests that assert on the old error JSON (`message` → `detail`).
+6. Enable `spring.mvc.problemdetails.enabled=true`.

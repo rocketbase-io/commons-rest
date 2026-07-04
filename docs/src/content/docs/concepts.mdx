@@ -1,0 +1,110 @@
+---
+title: Concepts
+description: The ideas behind commons-rest — building blocks instead of a framework, and Read/Write separation at the API boundary.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`commons-rest` is intentionally small. It doesn't prescribe an architecture — it provides the
+pieces every REST service needs (typed errors, a stable pagination DTO, id handling, client
+generation) and leaves the inside of your service to you. Whether you build classic layered
+CRUD, CQRS with commands and projections, or hexagonal with ports and adapters: the building
+blocks fit, because they all live at the **API boundary**, not in your domain.
+
+## Read & Write: two models per resource
+
+The one opinion the library does have: the response shape and the create/update payload are
+**different types**.
+
+| Type | Purpose | Typical content |
+|---|---|---|
+| `CompanyRead` | responses (query side) | everything the client may see, including `id` |
+| `CompanyWrite` | create & update payload (command side) | no `id`, bean-validation annotations |
+
+This is command/query separation applied to the API contract — and it pays off regardless of
+what's behind it:
+
+- **Separation of concerns** — an internal field never leaks into responses by accident, and
+  clients can't send values they aren't supposed to control.
+- **Validation lives on the Write type** — `@NotNull`, `@Email`, `@Size` belong to the input,
+  not to the response.
+- **Reference in, object out** — a Write payload references other resources by id, while the
+  Read response embeds the resolved object.
+- **Independent evolution** — the query side can grow (computed fields, embedded relations)
+  without ever touching the command side, and vice versa.
+
+```java
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class CompanyRead implements Serializable {
+    private String id;
+    private String name;
+    private String email;
+    private String url;
+}
+
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class CompanyWrite implements Serializable {
+    private String name;
+    @NotNull @Email
+    private String email;
+    private String url;
+}
+```
+
+<Aside type="tip" title="In CQRS terms">
+	A `Write` DTO is the payload of your command, a `Read` DTO is what your query/projection
+	returns — [`PageableResult`](/pagination/) wraps list projections. commons-rest doesn't care
+	whether one entity, an aggregate plus a read model, or an event store sits behind them.
+</Aside>
+
+For classic CRUD-style services there's an optional helper,
+`EntityReadWriteConverter<Entity, Read, Write>` — three methods (`fromEntity`, `newEntity`,
+`updateEntityFromEdit`) that formalize the mapping between an entity and its two DTOs, hand
+written or via [MapStruct](https://mapstruct.org/). If you separate read models from write
+models anyway, you won't need it — map your projections directly. The
+[sample application](/sample-application/) shows the converter in action.
+
+## Shared Api interfaces
+
+The REST contract lives in a plain Java interface — Spring MVC mapping annotations included —
+in a lightweight api module. The controller (or whatever dispatches to your command/query
+handlers) implements it:
+
+```java
+public interface CompanyApi {
+
+    @GetMapping(path = "/company", produces = APPLICATION_JSON_VALUE)
+    PageableResult<CompanyRead> find(@ParameterObject Pageable pageable);
+
+    @GetMapping(path = "/company/{id}", produces = APPLICATION_JSON_VALUE)
+    CompanyRead findById(@PathVariable("id") String id);
+
+    @PostMapping(path = "/company", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
+    CompanyRead create(@RequestBody @NotNull @Valid CompanyWrite write);
+}
+```
+
+Why an interface?
+
+- The **api module** (interface + DTOs) is a dependency-light artifact you can share with
+  other services — an HTTP-interface or Feign client can be built from the exact same
+  contract.
+- The generator annotations for [TypeScript clients](/typescript-clients/) go on the
+  interface too, since they are `@Inherited`.
+- The implementation stays free: a thin `@RestController` delegating to repositories, or a
+  dispatcher translating calls into commands and queries — the contract doesn't change.
+
+## Module overview
+
+| Module | What it adds |
+|---|---|
+| [`commons-rest-api`](/getting-started/) | DTOs, exceptions, converter interface, annotations — safe to share between services |
+| [`commons-rest-server`](/error-handling/) | auto-configured exception handlers, locale resolver, enum converter |
+| [`commons-rest-hashids`](/obfuscated-ids/) | hashids-obfuscated ids for path variables, params and JSON |
+| [`commons-rest-tsid`](/tsid/) | TSID (time-sorted id) support for Jackson and Spring MVC |
+| [`commons-rest-openapi`](/typescript-clients/) | TypeScript client + react-query hook generation |
+| [`commons-rest-logging-aspect`](/logging/) | request & method logging via AOP |
+| [`commons-rest-errorpage`](/error-pages/) | styled static HTML error pages |

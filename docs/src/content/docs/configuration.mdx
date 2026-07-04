@@ -1,0 +1,88 @@
+---
+title: Configuration Reference
+description: All configuration properties of the commons-rest modules — every feature auto-configured, every feature optional.
+---
+
+All modules use Spring Boot auto-configuration: add the dependency and the beans are there.
+Every bean is `@ConditionalOnMissingBean` (your own definitions always win) and every feature
+has an off-switch. This page lists all properties in one place.
+
+## commons-rest-server
+
+| Property | Default | Explanation |
+|---|---|---|
+| `locale.resolver.enabled` | `true` | configure an `AcceptHeaderLocaleResolver` |
+| `locale.resolver.default` | `en` | fallback locale |
+| `locale.resolver.supported` | *(unset)* | comma-separated list of supported locales |
+| `handler.badRequest.enabled` | `true` | ExceptionHandler for `BadRequestException` → 400 |
+| `handler.notFound.enabled` | `true` | ExceptionHandler for `NotFoundException` → 404 |
+| `handler.beanValidation.enabled` | `true` | ExceptionHandler for bean-validation errors → 400 with `fields` map |
+| `handler.insufficientPrivileges.enabled` | `true` | ExceptionHandler for `InsufficientPrivilegesException` → 403 |
+| `converter.enum.enabled` | `true` | case-insensitive enum binding for request params |
+
+Recommended companion setting so Spring's own errors (unknown route, 405, malformed JSON) are
+rendered as problem+json too:
+
+```yaml
+spring:
+  mvc:
+    problemdetails:
+      enabled: true
+```
+
+## commons-rest-hashids
+
+| Property | Default | Explanation |
+|---|---|---|
+| `hashids.salt` | *(empty)* | salt — set a project-specific secret |
+| `hashids.minHashLength` | `8` | minimum hash length |
+| `hashids.alphabet` | `abcdefghijklmnopqrstuvwxyz1234567890` | encoding alphabet |
+| `hashids.invalid.allowed` | `false` | inject invalid ids with `id = null` instead of responding 404 |
+| `hashids.handler.enabled` | `true` | 404 handler for `ObfuscatedDecodeException` |
+
+## commons-rest-tsid
+
+| Property | Default | Explanation |
+|---|---|---|
+| `tsid.handler.enabled` | `true` | 404 handler for `TsidDecodeException` |
+
+## commons-rest-logging-aspect
+
+| Property | Default | Explanation |
+|---|---|---|
+| `commons.logging.mvc.enabled` | `true` | log all RestController mappings |
+| `commons.logging.logLevel` | `DEBUG` | level for successful calls |
+| `commons.logging.errorLogLevel` | `WARN` | level for failures (`NONE` disables) |
+| `commons.logging.duration` | `true` | track duration |
+| `commons.logging.audit` | `true` | log `AuditorAware` value when present |
+| `commons.logging.args` | `false` | log arguments |
+| `commons.logging.result` | `false` | log result |
+| `commons.logging.query` | `true` | add query parameters to the url |
+| `commons.logging.trim` | `true` | trim long values |
+| `commons.logging.trimLength` | `100` | trim after string length |
+
+## commons-rest-openapi
+
+Prefix `commons.openapi.generator`:
+
+| Property | Default | Explanation |
+|---|---|---|
+| `base-url` | `/api` | prefix for all generated urls |
+| `group-name` | `ModuleApi` | method group name in the generated client |
+| `package-name` | `openapi-module` | generated package.json name |
+| `client-folder` | `clients` | folder for axios clients |
+| `hook-folder` | `hooks` | folder for react-query hooks |
+| `model-folder` | `model` | folder for model types |
+| `model-imports` | *(unset)* | extra imports added to `model/index.ts` |
+| `default-stale-time` | `2` | default staleTime for hooks (used when annotation is `-1`) |
+| `enable-file-system-generation` | `true` | write client to `output-directory` |
+| `output-directory` | `typescript-client` | file-system output target |
+| `src-navigation` | `../../` | relative path prefix inside generated sources |
+| `create-pagination-options` | `../util` | import path for `createPaginationOptions` |
+| `class-patterns` | *(empty)* | restrict scanned classes, e.g. `io.rocketbase.**.dto.**` |
+| `custom-type-mappings` | *(empty)* | map Java FQN → TypeScript type |
+
+## commons-rest-errorpage
+
+No properties — resources only. Override single pages by shipping your own
+`META-INF/resources/error/<status>.html`.

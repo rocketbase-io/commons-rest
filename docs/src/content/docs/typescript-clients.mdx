@@ -1,0 +1,199 @@
+---
+title: TypeScript Clients
+description: Generate axios clients, react-query hooks and Zod schemas straight from your annotated Spring controllers.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+`commons-rest-openapi` turns your Spring controllers into a complete, typed TypeScript
+client: **axios clients**, **react-query hooks** (v3/v4/v5), **model types** and **Zod
+schemas** — generated from the springdoc OpenAPI document plus a handful of annotations.
+No hand-written fetch code, no drift between backend and frontend.
+
+## Installation
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-openapi</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-openapi:4.0.0-M2")
+		```
+	</TabItem>
+</Tabs>
+
+The generator annotations themselves live in `commons-rest-api` — your api module doesn't
+need the generator on its classpath.
+
+## Annotating endpoints
+
+Put the annotations on your [Api interface](/concepts/#shared-api-interfaces) (they are
+`@Inherited`) next to the Spring mappings:
+
+```java
+@Tag(name = "activity")
+@RequestMapping(path = "/activity", produces = APPLICATION_JSON_VALUE)
+public interface ActivityApi {
+
+    @InfiniteHook(value = "findAll", cacheKeys = "activity,list")
+    @GetMapping
+    ResponseEntity<PageableResult<Activity>> loadActivities(
+            @ParameterObject Pageable pageable,
+            @RequestParam(value = "query", required = false) Optional<String> query);
+
+    @QueryHook(value = "findById", cacheKeys = "activity,detail,${id}")
+    @GetMapping(path = "/{id}")
+    ResponseEntity<Activity> findById(@PathVariable("id") String id);
+}
+```
+
+```java
+public interface PermissionApi {
+
+    @MutationHook(invalidateKeys = {"element,detail,${body.objectId}", "activities,${body.objectId}"})
+    @PutMapping(value = "/element/set-permission", consumes = APPLICATION_JSON_VALUE)
+    ResponseEntity<Void> setPermission(@Valid @NotNull @RequestBody PermissionCmd cmd);
+}
+```
+
+### The annotations
+
+| Annotation | Target | Generates | Key attributes |
+|---|---|---|---|
+| `@QueryHook` | method | `useQuery` hook + query options | `value` (method name), `cacheKeys`, `staleTime` (seconds, `0` disables caching) |
+| `@InfiniteHook` | method | `useInfiniteQuery` hook | `value`, `cacheKeys` (required), `staleTime` |
+| `@MutationHook` | method | `useMutation` hook | `value`, `invalidateKeys` |
+| `@ClientModule` | type | groups methods under a module name | `value`, `disable` |
+| `@ZodSchema` | type / field | controls Zod schema generation | `INCLUDE` / `IGNORE` / `ANY` |
+
+Cache-key layouts reference path variables and params as `${name}` — a `@RequestBody`
+parameter is always named `body` (`${body.objectId}`); mutation `invalidateKeys` can also
+reference the *response* with `@{...}`.
+
+Zod schemas are discovered automatically from every `@MutationHook` request body and its
+reachable object graph. Fine-tune with `@ZodSchema`:
+
+```java
+public class ZodAnnotatedCmd {
+    @ZodSchema(ZodSchema.Mode.ANY)      // keep the field, validate as z.any()
+    private Map<String, Object> rawPayload;
+
+    @ZodSchema(ZodSchema.Mode.IGNORE)   // drop from the schema entirely
+    private String internalNote;
+}
+```
+
+## Running the generation
+
+Two entry points produce the same output:
+
+<Tabs>
+	<TabItem label="Standalone (offline)">
+		Fetch the OpenAPI doc once, then generate to the file system — no running app needed
+		afterwards:
+
+		```bash
+		curl http://localhost:8080/v3/api-docs > target/openapi.json
+		mvn compile
+		mvn exec:java \
+		  -Dexec.mainClass=io.rocketbase.commons.openapi.StandaloneClientGenerator \
+		  -Dexec.args="target/openapi.json target/typescript-client v5 /api ModuleApi"
+		```
+
+		Arguments: openapi file, output directory, react-query version (`v3`/`v4`/`v5`), base
+		url, group name.
+	</TabItem>
+	<TabItem label="HTTP endpoint (ZIP)">
+		With the module on the classpath every running app exposes a (swagger-hidden) generator
+		controller:
+
+		```bash
+		curl -o client.zip http://localhost:8080/generator/client/v5/client.zip
+		```
+
+		`GET /generator/{version}` additionally returns the extracted controller metadata as
+		JSON.
+	</TabItem>
+</Tabs>
+
+The generated package is ready to build:
+
+```
+src/
+├── clients/        # one axios client per controller
+├── hooks/          # react-query hooks (queryOptions, useQuery, useInfiniteQuery, useMutation)
+├── model/          # types.ts, index.ts, request.ts, zod-schemas.ts
+├── util.ts
+└── index.ts
+package.json
+```
+
+```bash
+cd target/typescript-client && npm install && npm run build
+```
+
+## Using the generated client
+
+```tsx
+import { useQueryActivityFindById, useInfiniteActivityFindAll } from 'openapi-module';
+
+function ActivityDetail({ id }: { id: string }) {
+  const { data, isLoading } = useQueryActivityFindById({ id });
+  // cacheKey: ['activity', 'detail', id] — staleTime from the annotation or the default
+  ...
+}
+```
+
+Mutations invalidate the configured keys automatically, so lists and details refresh after a
+write — the cache choreography is defined once, in Java, next to the endpoint.
+
+## The runtime package
+
+Generated code depends on the small runtime
+[`@rocketbase/commons-rest-client`](https://www.npmjs.com/package/@rocketbase/commons-rest-client)
+(peer deps: `axios`, `react`):
+
+- `PageableResult<T>` / `PageableResultWithMeta<T, M>` and `ErrorResponse` types matching the
+  [server-side DTOs](/pagination/)
+- `buildRequestorFactory` — axios-backed request functions with abort-signal support
+- `AuthProvider` / `useAuth` / `TokenService` — Bearer-token handling and (multi-)base-url
+  resolution via React context
+- `createPaginationOptions()`, `infiniteItems()`, `infiniteTotalElements()` — glue for
+  infinite queries over `PageableResult`
+
+```tsx
+<AuthProvider baseUrl="https://api.example.com" tokenService={myTokenService}>
+  <App />
+</AuthProvider>
+```
+
+## Configuration
+
+Prefix `commons.openapi.generator`:
+
+| Property | Default | Explanation |
+|---|---|---|
+| `base-url` | `/api` | prefix for all generated urls |
+| `group-name` | `ModuleApi` | name of the generated method group |
+| `package-name` | `openapi-module` | name in the generated package.json |
+| `client-folder` | `clients` | folder for axios clients |
+| `hook-folder` | `hooks` | folder for react-query hooks |
+| `model-folder` | `model` | folder for types & schemas |
+| `model-imports` | *(unset)* | extra lines added to `model/index.ts` |
+| `default-stale-time` | `2` | default staleTime (used when annotation says `-1`) |
+| `enable-file-system-generation` | `true` | write directly to `output-directory` |
+| `output-directory` | `typescript-client` | file-system output target |
+| `class-patterns` | *(empty)* | restrict scanned types, e.g. `io.rocketbase.**.dto.**` |
+| `custom-type-mappings` | *(empty)* | Java FQN → TypeScript type overrides |
+
+<Aside type="note">
+	Custom types like <code>TSID</code> or <code>ObfuscatedId</code> map to
+	<code>string</code> on the TypeScript side — path variables and JSON fields just work.
+</Aside>

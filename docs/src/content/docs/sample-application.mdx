@@ -1,0 +1,202 @@
+---
+title: Sample Application
+description: A complete walkthrough of the sample app — entity, Read/Write DTOs, converter, controller and parent-child resources.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+The repository ships a runnable demo under
+[`sample/`](https://github.com/rocketbase-io/commons-rest/tree/master/sample) that exercises
+all modules: Mongo and JPA side by side, plain String ids, [hashids](/obfuscated-ids/) and
+[TSID](/tsid/) ids, parent-child resources and Testcontainers-based integration tests.
+
+<Aside type="note">
+	The sample uses a classic CRUD service layout to keep the demo small. That's one way to use
+	commons-rest, not the way — the building blocks work just as well behind a CQRS or
+	hexagonal design, see [Concepts](/concepts/).
+</Aside>
+
+| Domain | Store | ID exposed as | Shows |
+|---|---|---|---|
+| Company | MongoDB | plain String | flat CRUD |
+| Employee | MongoDB | plain String | parent-child under Company |
+| Customer | JPA (H2) | `ObfuscatedId` (hashids) | id obfuscation |
+| Location | JPA (H2) | `TSID` | time-sorted ids, read-only resource |
+
+## A resource end to end — Company
+
+**Entity** — persistence only:
+
+```java
+@Document(collection = "company")
+@Data @Builder @NoArgsConstructor @AllArgsConstructor
+public class CompanyEntity implements Serializable {
+    @Id
+    private String id;
+    private String name;
+    private String email;
+    private String url;
+}
+```
+
+**Read / Write DTOs** — see [Concepts](/concepts/#read--write-two-models-per-resource) for
+the shape and the reasoning.
+
+**Converter** — implements `EntityReadWriteConverter`; `fromEntities(List)` comes free as a
+default method:
+
+```java
+@Component
+public class CompanyConverter
+        implements EntityReadWriteConverter<CompanyEntity, CompanyRead, CompanyWrite> {
+
+    @Override
+    public CompanyRead fromEntity(CompanyEntity entity) {
+        if (entity == null) return null;
+        return CompanyRead.builder()
+                .id(entity.getId()).name(entity.getName())
+                .email(entity.getEmail()).url(entity.getUrl())
+                .build();
+    }
+
+    @Override
+    public CompanyEntity newEntity(CompanyWrite write) {
+        return CompanyEntity.builder()
+                .name(write.getName()).email(write.getEmail()).url(write.getUrl())
+                .build();
+    }
+
+    @Override
+    public CompanyEntity updateEntityFromEdit(CompanyWrite write, CompanyEntity entity) {
+        entity.setName(write.getName());
+        entity.setEmail(write.getEmail());
+        entity.setUrl(write.getUrl());
+        return entity;
+    }
+}
+```
+
+**Controller** — implements the shared [`CompanyApi` interface](/concepts/#shared-api-interfaces):
+
+```java
+@RestController
+@RequestMapping(path = "/api")
+@RequiredArgsConstructor
+public class CompanyController implements CompanyApi {
+
+    private final CompanyRepository repository;
+    private final CompanyConverter converter;
+
+    @Override
+    public PageableResult<CompanyRead> find(Pageable pageable) {
+        Page<CompanyEntity> page = repository.findAll(pageable);
+        return PageableResult.contentPage(converter.fromEntities(page.getContent()), page);
+    }
+
+    @Override
+    public CompanyRead findById(String id) {
+        return converter.fromEntity(getEntity(id));
+    }
+
+    @Override
+    public CompanyRead create(CompanyWrite write) {
+        return converter.fromEntity(repository.save(converter.newEntity(write)));
+    }
+
+    @Override
+    public CompanyRead update(String id, CompanyWrite write) {
+        CompanyEntity entity = converter.updateEntityFromEdit(write, getEntity(id));
+        return converter.fromEntity(repository.save(entity));
+    }
+
+    @Override
+    public void delete(String id) {
+        repository.delete(getEntity(id));
+    }
+
+    protected CompanyEntity getEntity(String id) {
+        return repository.findById(id)
+                .orElseThrow(NotFoundException::new);
+    }
+}
+```
+
+## Parent-child resources — Employee
+
+Nested resources live under the parent path; the Write payload doesn't carry the parent id
+(it comes from the URL), and the Read type embeds the resolved parent:
+
+```java
+public interface EmployeeApi {
+
+    @GetMapping(path = "/company/{parentId}/employee")
+    PageableResult<EmployeeRead> find(@PathVariable("parentId") String parentId,
+                                      @ParameterObject Pageable pageable);
+
+    @PostMapping(path = "/company/{parentId}/employee")
+    @ResponseStatus(HttpStatus.CREATED)
+    EmployeeRead create(@PathVariable("parentId") String parentId,
+                        @RequestBody @NotNull @Valid EmployeeWrite write);
+}
+```
+
+```java
+public class EmployeeRead implements Serializable {
+    private String id;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private CompanyRead company;   // resolved parent, embedded in the response
+}
+```
+
+The repository scopes every access to the parent — fetching a child through the wrong parent
+yields a 404:
+
+```java
+public interface EmployeeRepository extends MongoRepository<EmployeeEntity, String> {
+    Optional<EmployeeEntity> findFirstByCompanyIdAndId(String companyId, String id);
+    Page<EmployeeEntity> findAllByCompanyId(String companyId, Pageable pageable);
+}
+```
+
+```java
+protected EmployeeEntity getEntity(String parentId, String id) {
+    return repository.findFirstByCompanyIdAndId(parentId, id)
+            .orElseThrow(NotFoundException::new);
+}
+```
+
+## Integration tests
+
+The sample's tests combine rest-assured (MockMvc) with Testcontainers — Spring Boot's
+`@ServiceConnection` wires the Mongo container without any manual property plumbing:
+
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Testcontainers
+public abstract class BaseIntegrationTest {
+
+    @Container @ServiceConnection
+    protected static final MongoDBContainer mongoDBContainer =
+            new MongoDBContainer(DockerImageName.parse("mongo:8"));
+}
+```
+
+Patterns worth copying:
+
+- assert the [problem details](/error-handling/) shape on validation errors:
+  `.body("fields.email", not(emptyString()))`
+- deserialize paged responses into `PageableResult<T>` via a rest-assured `TypeRef` and
+  assert `totalElements` / `page` / `totalPages`
+- verify parent-child isolation: the right child id under the wrong parent id must yield 404
+
+## Running it
+
+```bash
+cd sample/sample-server
+mvn spring-boot:run
+```
+
+An H2 in-memory database covers the JPA entities; a `DataInitializer` seeds demo data on
+first start.

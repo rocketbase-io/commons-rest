@@ -1,0 +1,167 @@
+---
+title: Error Handling
+description: Typed runtime exceptions rendered as RFC 9457 problem details — including a per-field map for bean-validation errors.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+`commons-rest` treats errors as part of the API contract. You throw a typed
+`RuntimeException`; auto-configured handlers render it as an [RFC 9457 problem
+details](https://www.rfc-editor.org/rfc/rfc9457) response with content type
+`application/problem+json`.
+
+## The exceptions
+
+The exceptions live in `commons-rest-api` and can be thrown from anywhere — controller,
+service, converter:
+
+| Exception | Status | |
+|---|---|---|
+| `NotFoundException` | 404 | resource does not exist |
+| `BadRequestException` | 400 | invalid input beyond bean validation |
+| `InsufficientPrivilegesException` | 403 | authenticated but not allowed |
+
+`NotFoundException` is the workhorse: Spring has no simple "throw and get a problem+json 404"
+exception of its own, so this fills the gap — perfect for `orElseThrow`:
+
+```java
+CompanyEntity entity = repository.findById(id)
+        .orElseThrow(NotFoundException::new);
+```
+
+Each exception has three constructors — empty, message, or a full `ErrorResponse`:
+
+```java
+throw new NotFoundException();
+throw new NotFoundException("employee not found");
+throw new NotFoundException(ErrorResponse.builder()
+        .detail("employee not found")
+        .instance("/api/employee/4711")
+        .build());
+```
+
+### Checks bean validation can't express
+
+Reach for `BadRequestException` when a rule needs code — a uniqueness check, a state
+transition, a cross-field rule with repository access. Thanks to the `fields` map the client
+receives the error in exactly the same shape as a [bean-validation
+failure](#bean-validation), so the frontend handles both identically:
+
+```java
+if (repository.existsByEmail(write.getEmail())) {
+    throw new BadRequestException(ErrorResponse.builder()
+            .detail("invalid form")
+            .addField("email", "already taken")
+            .build());
+}
+```
+
+For simple annotation-expressible rules, prefer [bean validation](#bean-validation) — it
+documents itself in the OpenAPI doc and feeds the generated
+[Zod schemas](/typescript-clients/#the-annotations).
+
+## The problem details body
+
+`ErrorResponse` follows RFC 9457 — `@JsonInclude(NON_NULL)`, so unset members are omitted:
+
+| Member | Type | Meaning |
+|---|---|---|
+| `type` | string (URI) | problem type, e.g. `urn:problem-type:form-error`; clients assume `about:blank` when absent |
+| `title` | string | short summary, defaults to the HTTP reason phrase |
+| `status` | int | HTTP status code |
+| `detail` | string | human-readable explanation of this occurrence |
+| `instance` | string (URI) | which resource/request the problem occurred on |
+| `fields` | map | **extension member**: field path → list of validation messages |
+
+```json
+{
+  "type": "urn:problem-type:form-error",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "invalid form",
+  "fields": {
+    "email": ["must not be empty"]
+  }
+}
+```
+
+Handy helpers on the DTO: `addField(path, message)`, `hasField(path)`,
+`getFirstFieldValue(path)`.
+
+<Aside type="note" title="v3 compatibility">
+	In v3 the explanation member was called `message`. `detail` carries a
+	`@JsonAlias("message")`, so old payloads still deserialize, and the deprecated
+	`getMessage()`/`setMessage()` bridges keep old Java code compiling during migration —
+	responses only ever emit `detail`.
+</Aside>
+
+## Bean validation
+
+A failing `@Valid` / `@Validated` request body is handled by the
+`BeanValidationExceptionHandler` — no code needed on your side. Every field error lands in the
+`fields` map; messages are translated through your `MessageSource` using the key
+`error.form.<constraint>` (e.g. `error.form.NotNull`) with the constraint's default message as
+fallback.
+
+```java
+@PostMapping("/company")
+CompanyRead create(@RequestBody @NotNull @Valid CompanyWrite write);
+```
+
+```json
+{
+  "type": "urn:problem-type:form-error",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "invalid form",
+  "fields": {
+    "email": ["must be a well-formed email address", "must not be null"]
+  }
+}
+```
+
+The locale is resolved per request via the auto-configured `AcceptHeaderLocaleResolver` — see
+[i18n](/i18n/).
+
+## Let Spring speak problem+json too
+
+The handlers above cover *your* exceptions. For Spring's own errors — unknown route, 405,
+malformed JSON — enable Spring's built-in problem details support so the whole API speaks one
+error language:
+
+```yaml
+spring:
+  mvc:
+    problemdetails:
+      enabled: true
+```
+
+## Client side: RestTemplate
+
+When consuming a service that speaks this error format, register the
+`BasicResponseErrorHandler` — it converts 400/404/403 responses back into the same typed
+exceptions, with the parsed `ErrorResponse` attached:
+
+```java
+RestTemplate restTemplate = new RestTemplate();
+restTemplate.setErrorHandler(new BasicResponseErrorHandler());
+
+try {
+    restTemplate.getForObject(url, CompanyRead.class);
+} catch (NotFoundException e) {
+    ErrorResponse body = e.getErrorResponse();
+}
+```
+
+## Switching handlers off
+
+Every handler bean is `@ConditionalOnMissingBean` — define your own and it wins. Or disable
+per property:
+
+```yaml
+handler:
+  notFound.enabled: true
+  badRequest.enabled: true
+  beanValidation.enabled: true
+  insufficientPrivileges.enabled: true
+```
