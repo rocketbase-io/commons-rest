@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Singular;
 import lombok.experimental.SuperBuilder;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class ErrorResponse {
      */
     @Singular
     @Nullable
-    @Schema(description = "in case of form validations details related to properties. key is the filed value list of related errors", example = "[\"status\": [\"not empty\"]]")
+    @Schema(description = "in case of form validations details related to properties. key is the filed value list of related errors", example = "{\"status\": [\"not empty\"]}")
     private Map<String, List<String>> fields;
 
     public ErrorResponse() {

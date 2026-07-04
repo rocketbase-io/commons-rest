@@ -5,7 +5,7 @@ import io.rocketbase.commons.openapi.model.ReactQueryVersion;
 import io.rocketbase.commons.openapi.util.ReflectionPropertyHelper;
 import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -65,7 +65,7 @@ public class StandaloneClientGenerator {
 
         // Create configuration
         OpenApiGeneratorProperties generatorProperties = createGeneratorProperties(baseUrl, groupName);
-        SpringDataWebProperties springDataProperties = createSpringDataProperties();
+        DataWebProperties springDataProperties = createSpringDataProperties();
 
         // Create services (without Spring context)
         TypeScriptTypeConverter typeConverter = new OpenApiTypeMapper(new TypeScriptGenerationResult("", new HashMap<>()));
@@ -109,7 +109,7 @@ public class StandaloneClientGenerator {
         }
     }
 
-    protected static SpringDataWebProperties createSpringDataProperties() {
+    protected static DataWebProperties createSpringDataProperties() {
         return ReflectionPropertyHelper.createDefaultSpringDataProperties();
     }
 }

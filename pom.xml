@@ -83,18 +83,18 @@ SOFTWARE.
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <spring-boot.version>3.5.14</spring-boot.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
         <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
-        <jacoco.version>0.8.14</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <hashids.version>1.0.3</hashids.version>
 
-        <pebble.version>3.2.4</pebble.version>
-        <springdoc-openapi.version>2.8.15</springdoc-openapi.version>
+        <pebble.version>4.1.2</pebble.version>
+        <!-- Jackson 3 compatible fork until swagger-core / springdoc release official Jackson 3 support (swagger-api/swagger-core#4991) -->
+        <springdoc-openapi.version>4.0.0</springdoc-openapi.version>
+        <swagger.version>3.0.0</swagger.version>
         <lombok.version>1.18.46</lombok.version>
-        <swagger-annotations.version>2.2.50</swagger-annotations.version>
         <hypersistence-tsid.version>2.1.4</hypersistence-tsid.version>
-        <tsid.version>5.2.6</tsid.version>
-        <typescript-generator.version>3.2.1263</typescript-generator.version>
+        <typescript-generator.version>4.1.1</typescript-generator.version>
     </properties>
 
     <dependencyManagement>
@@ -106,11 +106,6 @@ SOFTWARE.
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.github.f4b6a3</groupId>
-                <artifactId>tsid-creator</artifactId>
-                <version>${tsid.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -228,7 +223,7 @@ SOFTWARE.
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.10.0</version>
+                        <version>0.11.0</version>
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>central</publishingServerId>

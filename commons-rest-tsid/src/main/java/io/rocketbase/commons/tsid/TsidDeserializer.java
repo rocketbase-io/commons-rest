@@ -1,13 +1,10 @@
 package io.rocketbase.commons.tsid;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.deser.std.StdDeserializer;
 import io.hypersistence.tsid.TSID;
 import org.springframework.util.StringUtils;
-
-import java.io.IOException;
 
 public class TsidDeserializer extends StdDeserializer<TSID> {
 
@@ -17,7 +14,7 @@ public class TsidDeserializer extends StdDeserializer<TSID> {
 
 
     @Override
-    public TSID deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
+    public TSID deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) {
         String value = jsonParser.getValueAsString();
         if (StringUtils.hasText(value) && TSID.isValid(value)) {
             return TSID.from(value);

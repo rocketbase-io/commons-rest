@@ -1,19 +1,17 @@
 package io.rocketbase.commons.obfuscated;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.jsontype.TypeDeserializer;
 import io.rocketbase.commons.exception.ObfuscatedDecodeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.boot.jackson.JacksonComponent;
 import org.springframework.util.StringUtils;
 
-import java.io.IOException;
-
-@JsonComponent
-public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
+@JacksonComponent
+public class ObfuscatedIdDeserializer extends ValueDeserializer<ObfuscatedId> {
 
     private final IdObfuscator idObfuscator;
     private final boolean invalidAllowed;
@@ -24,7 +22,7 @@ public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
     }
 
     @Override
-    public ObfuscatedId deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
+    public ObfuscatedId deserialize(JsonParser jsonParser, DeserializationContext ctxt) {
         String value = jsonParser.getValueAsString();
         if (StringUtils.hasText(value)) {
             try {
@@ -40,7 +38,7 @@ public class ObfuscatedIdDeserializer extends JsonDeserializer<ObfuscatedId> {
     }
 
     @Override
-    public Object deserializeWithType(JsonParser p, DeserializationContext ctxt, TypeDeserializer typeDeserializer) throws IOException {
+    public Object deserializeWithType(JsonParser p, DeserializationContext ctxt, TypeDeserializer typeDeserializer) {
         return deserialize(p, ctxt);
     }
 

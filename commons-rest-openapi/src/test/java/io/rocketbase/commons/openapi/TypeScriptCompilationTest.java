@@ -6,7 +6,7 @@ import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.BufferedReader;
@@ -34,7 +34,7 @@ class TypeScriptCompilationTest {
     private OpenApiGeneratorProperties generatorProperties;
 
     @Autowired
-    private SpringDataWebProperties springDataProperties;
+    private DataWebProperties springDataProperties;
 
     @TempDir
     Path tempDir;

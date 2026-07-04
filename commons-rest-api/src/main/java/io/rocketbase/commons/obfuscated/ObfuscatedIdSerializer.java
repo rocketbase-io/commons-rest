@@ -1,16 +1,14 @@
 package io.rocketbase.commons.obfuscated;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
+import tools.jackson.databind.jsontype.TypeSerializer;
 
-import java.io.IOException;
-
-public class ObfuscatedIdSerializer extends JsonSerializer<ObfuscatedId> {
+public class ObfuscatedIdSerializer extends ValueSerializer<ObfuscatedId> {
 
     @Override
-    public void serialize(ObfuscatedId value, JsonGenerator jsonGenerator, SerializerProvider serializers) throws IOException {
+    public void serialize(ObfuscatedId value, JsonGenerator jsonGenerator, SerializationContext serializers) {
         if (value != null) {
             jsonGenerator.writeString(value.getObfuscated());
         } else {
@@ -19,7 +17,7 @@ public class ObfuscatedIdSerializer extends JsonSerializer<ObfuscatedId> {
     }
 
     @Override
-    public void serializeWithType(ObfuscatedId value, JsonGenerator jsonGenerator, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
+    public void serializeWithType(ObfuscatedId value, JsonGenerator jsonGenerator, SerializationContext serializers, TypeSerializer typeSer) {
         serialize(value, jsonGenerator, serializers);
     }
 
