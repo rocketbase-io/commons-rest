@@ -41,7 +41,13 @@ public class BasicResponseErrorHandler extends DefaultResponseErrorHandler {
             }
             throw new BadRequestException(errorResponse);
         } else if (response.getStatusCode().equals(NOT_FOUND)) {
-            throw new NotFoundException();
+            ErrorResponse errorResponse = null;
+            try {
+                errorResponse = getObjectMapper().readValue(response.getBody(), ErrorResponse.class);
+            } catch (Exception e) {
+                errorResponse = new ErrorResponse(NOT_FOUND.value(), NOT_FOUND.getReasonPhrase());
+            }
+            throw new NotFoundException(errorResponse);
         } else {
             super.handleError(url, method, response);
         }

@@ -14,13 +14,13 @@ public class InsufficientPrivilegesException extends RuntimeException {
     }
 
     public InsufficientPrivilegesException(ErrorResponse errorResponse) {
-        super(errorResponse.getMessage());
+        super(errorResponse.getDetail());
         this.errorResponse = errorResponse;
     }
 
     public InsufficientPrivilegesException(String message) {
         super(message);
-        this.errorResponse = ErrorResponse.builder().message(message).build();
+        this.errorResponse = ErrorResponse.builder().detail(message).build();
     }
 
 }
