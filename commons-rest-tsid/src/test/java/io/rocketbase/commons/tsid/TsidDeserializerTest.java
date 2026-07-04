@@ -1,6 +1,6 @@
 package io.rocketbase.commons.tsid;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.hypersistence.tsid.TSID;
 import io.rocketbase.commons.BaseTest;
 import jakarta.annotation.Resource;

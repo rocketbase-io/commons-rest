@@ -1,6 +1,6 @@
 package io.rocketbase.commons.obfuscated;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.junit.jupiter.api.Test;

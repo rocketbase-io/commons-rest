@@ -1,7 +1,7 @@
 package io.rocketbase.commons.translation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.i18n.LocaleContextHolder;
 
@@ -149,7 +149,7 @@ public class TranslationTest {
     }
 
     @Test
-    public void checkEqualsAfterSerialize() throws JsonProcessingException {
+    public void checkEqualsAfterSerialize() throws JacksonException {
         // given
         Translation serialized = new ObjectMapper()
                 .readValue("{\"en\":\"blue\", \"de\":\"blau\"}", Translation.class);

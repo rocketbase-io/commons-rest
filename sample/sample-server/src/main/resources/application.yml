@@ -15,8 +15,11 @@ spring:
   # json configuration
   jackson:
     serialization:
-      WRITE_DATES_AS_TIMESTAMPS: false
       INDENT_OUTPUT: true
+    # Jackson 3 moved WRITE_DATES_AS_TIMESTAMPS from SerializationFeature to DateTimeFeature
+    datatype:
+      datetime:
+        WRITE_DATES_AS_TIMESTAMPS: false
     default-property-inclusion: non_null
 
 logging:

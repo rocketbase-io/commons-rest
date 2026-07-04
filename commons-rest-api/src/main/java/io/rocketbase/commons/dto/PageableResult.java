@@ -2,7 +2,7 @@ package io.rocketbase.commons.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonDeserialize;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;

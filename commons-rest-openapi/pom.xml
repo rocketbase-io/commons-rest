@@ -29,6 +29,12 @@
             <artifactId>spring-data-commons</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- Spring Boot 4 moved DataWebProperties (former SpringDataWebProperties) into spring-boot-data-commons -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-data-commons</artifactId>
+            <scope>provided</scope>
+        </dependency>
 
         <dependency>
             <groupId>io.pebbletemplates</groupId>
@@ -49,7 +55,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springdoc</groupId>
+            <groupId>io.github.vpelikh</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
             <version>${springdoc-openapi.version}</version>
         </dependency>
@@ -74,11 +80,6 @@
             <artifactId>hypersistence-tsid</artifactId>
             <version>${hypersistence-tsid.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.f4b6a3</groupId>
-            <artifactId>tsid-creator</artifactId>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

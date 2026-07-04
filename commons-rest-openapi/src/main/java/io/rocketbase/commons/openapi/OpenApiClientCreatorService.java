@@ -19,7 +19,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springdoc.core.utils.Constants;
 import org.springdoc.webmvc.api.OpenApiWebMvcResource;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 
 import java.beans.Introspector;
 import java.io.IOException;
@@ -35,7 +35,7 @@ import java.util.zip.ZipOutputStream;
 @Slf4j
 public class OpenApiClientCreatorService {
 
-    protected final SpringDataWebProperties springDataWebProperties;
+    protected final DataWebProperties springDataWebProperties;
     protected final OpenApiGeneratorProperties openApiGeneratorProperties;
     protected final OpenApiWebMvcResource openApiWebMvcResource;
     protected final TypeScriptTypeConverter typeConverter; // NEW: Simple type converter
@@ -51,7 +51,7 @@ public class OpenApiClientCreatorService {
      * Constructor with customizers (injected by Spring).
      */
     public OpenApiClientCreatorService(
-            SpringDataWebProperties springDataWebProperties,
+            DataWebProperties springDataWebProperties,
             OpenApiGeneratorProperties openApiGeneratorProperties,
             OpenApiWebMvcResource openApiWebMvcResource,
             TypeScriptTypeConverter typeConverter,
@@ -69,7 +69,7 @@ public class OpenApiClientCreatorService {
      * Constructor without customizers (for backward compatibility and standalone use).
      */
     public OpenApiClientCreatorService(
-            SpringDataWebProperties springDataWebProperties,
+            DataWebProperties springDataWebProperties,
             OpenApiGeneratorProperties openApiGeneratorProperties,
             OpenApiWebMvcResource openApiWebMvcResource,
             TypeScriptTypeConverter typeConverter,

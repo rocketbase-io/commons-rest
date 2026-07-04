@@ -1,6 +1,6 @@
 package io.rocketbase.commons.openapi.util;
 
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 
 import java.lang.reflect.Field;
 
@@ -31,15 +31,15 @@ public class ReflectionPropertyHelper {
     }
 
     /**
-     * Creates and configures SpringDataWebProperties with default pagination settings.
+     * Creates and configures DataWebProperties with default pagination settings.
      *
-     * @return Configured SpringDataWebProperties
+     * @return Configured DataWebProperties
      */
-    public static SpringDataWebProperties createDefaultSpringDataProperties() {
+    public static DataWebProperties createDefaultSpringDataProperties() {
         try {
-            SpringDataWebProperties props = SpringDataWebProperties.class.getDeclaredConstructor().newInstance();
-            SpringDataWebProperties.Pageable pageable = SpringDataWebProperties.Pageable.class.getDeclaredConstructor().newInstance();
-            SpringDataWebProperties.Sort sort = SpringDataWebProperties.Sort.class.getDeclaredConstructor().newInstance();
+            DataWebProperties props = DataWebProperties.class.getDeclaredConstructor().newInstance();
+            DataWebProperties.Pageable pageable = DataWebProperties.Pageable.class.getDeclaredConstructor().newInstance();
+            DataWebProperties.Sort sort = DataWebProperties.Sort.class.getDeclaredConstructor().newInstance();
 
             setField(pageable, "pageParameter", "page");
             setField(pageable, "sizeParameter", "size");
@@ -49,7 +49,7 @@ public class ReflectionPropertyHelper {
 
             return props;
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create SpringDataWebProperties", e);
+            throw new RuntimeException("Failed to create DataWebProperties", e);
         }
     }
 }

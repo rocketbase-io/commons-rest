@@ -1,6 +1,6 @@
 package io.rocketbase.commons.openapi.sample.dto;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import io.rocketbase.commons.generator.ZodSchema;
 import jakarta.validation.constraints.NotBlank;
 

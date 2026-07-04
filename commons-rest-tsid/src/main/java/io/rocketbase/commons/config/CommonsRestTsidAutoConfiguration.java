@@ -1,6 +1,6 @@
 package io.rocketbase.commons.config;
 
-import com.fasterxml.jackson.databind.Module;
+import tools.jackson.databind.JacksonModule;
 import io.hypersistence.tsid.TSID;
 import io.rocketbase.commons.controller.exceptionhandler.TsidDecodeExceptionHandler;
 import io.rocketbase.commons.exception.TsidDecodeException;
@@ -34,7 +34,7 @@ public class CommonsRestTsidAutoConfiguration {
     }
 
     @Bean
-    public Module tsidModule() {
+    public JacksonModule tsidModule() {
         return new TsidModule();
     }
 

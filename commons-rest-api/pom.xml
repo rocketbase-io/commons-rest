@@ -38,10 +38,11 @@ SOFTWARE.
     <name>Commons REST API</name>
 
     <dependencies>
+        <!-- Jackson 3 compatible swagger-annotations fork (swagger-api/swagger-core#4991) -->
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-annotations</artifactId>
-            <version>${swagger-annotations.version}</version>
+            <groupId>io.github.vpelikh</groupId>
+            <artifactId>swagger-annotations-jakarta</artifactId>
+            <version>${swagger.version}</version>
             <scope>provided</scope>
         </dependency>
 
@@ -50,13 +51,14 @@ SOFTWARE.
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
+        <!-- Jackson annotations stay on com.fasterxml.jackson.annotation even in Jackson 3 -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
+            <groupId>tools.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
         </dependency>

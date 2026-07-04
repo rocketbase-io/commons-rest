@@ -1,33 +1,32 @@
 package io.rocketbase.commons.translation;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.jsontype.TypeDeserializer;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.jsontype.TypeDeserializer;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-public class TranslationDeserializer extends JsonDeserializer<Translation> {
+public class TranslationDeserializer extends ValueDeserializer<Translation> {
 
     @Override
-    public Translation deserialize(JsonParser jsonParser, DeserializationContext ctxt) throws IOException {
+    public Translation deserialize(JsonParser jsonParser, DeserializationContext ctxt) {
         Map<Locale, String> translations = new HashMap<>();
 
         String language = null;
-        JsonToken currentToken = jsonParser.getCurrentToken();
+        JsonToken currentToken = jsonParser.currentToken();
         if (currentToken.equals(JsonToken.VALUE_STRING)) {
-            return Translation.translation(jsonParser.getText());
+            return Translation.translation(jsonParser.getString());
         }
         while (currentToken != JsonToken.END_OBJECT) {
             currentToken = jsonParser.nextToken();
-            if (currentToken == JsonToken.FIELD_NAME) {
-                language = jsonParser.getText();
+            if (currentToken == JsonToken.PROPERTY_NAME) {
+                language = jsonParser.currentName();
             } else if (currentToken == JsonToken.VALUE_STRING) {
-                translations.put(parseLanguageTag(language), jsonParser.getText());
+                translations.put(parseLanguageTag(language), jsonParser.getString());
             }
         }
         return Translation.builder()
@@ -36,7 +35,7 @@ public class TranslationDeserializer extends JsonDeserializer<Translation> {
     }
 
     @Override
-    public Object deserializeWithType(JsonParser p, DeserializationContext ctxt, TypeDeserializer typeDeserializer) throws IOException {
+    public Object deserializeWithType(JsonParser p, DeserializationContext ctxt, TypeDeserializer typeDeserializer) {
         return deserialize(p, ctxt);
     }
 

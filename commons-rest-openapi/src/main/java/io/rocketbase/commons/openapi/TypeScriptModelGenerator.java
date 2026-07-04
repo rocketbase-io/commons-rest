@@ -154,7 +154,7 @@ public class TypeScriptModelGenerator {
         // Output configuration
         settings.outputKind = TypeScriptOutputKind.module;
         settings.outputFileType = TypeScriptFileType.implementationFile;
-        settings.jsonLibrary = JsonLibrary.jackson2;
+        settings.jsonLibrary = JsonLibrary.jackson3;
 
         // Code style
         settings.noFileComment = true;
@@ -165,7 +165,7 @@ public class TypeScriptModelGenerator {
         settings.indentString = "  ";
 
         // Type mappings - use config values
-        Map<String, String> typeMappings = new HashMap<>(getCustomTypeMappings());
+        Map<String, String> typeMappings = new HashMap<>(filterAvailableTypeMappings(getCustomTypeMappings()));
         if (config.getAdditionalTypeMappings() != null) {
             typeMappings.putAll(config.getAdditionalTypeMappings());
         }
@@ -237,6 +237,26 @@ public class TypeScriptModelGenerator {
                 Map.entry("io.rocketbase.commons.dto.PageableResultWithMeta<T, M>", "PageableResultWithMeta<T, M>")
                 // Let typescript-generator handle DTOs - they will be generated as interfaces
         );
+    }
+
+    /**
+     * typescript-generator resolves every mapped class via ClassLoader — default mappings
+     * for optional libraries (e.g. the tsid variants) must be skipped when the class
+     * is not on the classpath, otherwise generation fails with ClassNotFoundException.
+     */
+    protected Map<String, String> filterAvailableTypeMappings(Map<String, String> mappings) {
+        Map<String, String> result = new HashMap<>();
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        for (Map.Entry<String, String> entry : mappings.entrySet()) {
+            String bareFqn = entry.getKey().replaceAll("<[^>]*>", "").trim();
+            try {
+                Class.forName(bareFqn, false, classLoader);
+                result.put(entry.getKey(), entry.getValue());
+            } catch (ClassNotFoundException e) {
+                log.debug("Skipping type mapping for {} - class not on classpath", bareFqn);
+            }
+        }
+        return result;
     }
 
     /**

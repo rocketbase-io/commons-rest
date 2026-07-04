@@ -7,11 +7,12 @@ import org.springdoc.webmvc.api.OpenApiWebMvcResource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
-import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
+import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,10 +20,12 @@ import java.util.List;
 @Configuration
 @AutoConfigureBefore(WebMvcAutoConfiguration.class)
 @RequiredArgsConstructor
-@EnableConfigurationProperties({SpringDataWebProperties.class, OpenApiGeneratorProperties.class})
+@EnableConfigurationProperties({DataWebProperties.class, OpenApiGeneratorProperties.class})
+// low-precedence defaults (e.g. springdoc.api-docs.version=openapi_3_0); overridable by the consuming app
+@PropertySource("classpath:commons-rest-openapi-defaults.properties")
 public class CommonsRestOpenApiAutoConfiguration {
 
-    private final SpringDataWebProperties springDataWebProperties;
+    private final DataWebProperties springDataWebProperties;
     private final OpenApiGeneratorProperties openApiGeneratorProperties;
 
     @Bean

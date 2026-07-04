@@ -40,7 +40,7 @@
 
         <dependency>
             <groupId>io.hypersistence</groupId>
-            <artifactId>hypersistence-utils-hibernate-62</artifactId>
+            <artifactId>hypersistence-utils-hibernate-73</artifactId>
             <version>${hibernate-utils.version}</version>
         </dependency>
     </dependencies>

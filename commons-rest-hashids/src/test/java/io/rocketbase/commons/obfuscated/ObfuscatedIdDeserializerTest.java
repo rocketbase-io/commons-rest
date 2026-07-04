@@ -1,6 +1,6 @@
 package io.rocketbase.commons.obfuscated;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import io.rocketbase.commons.BaseTest;
 import jakarta.annotation.Resource;
 import lombok.Data;
