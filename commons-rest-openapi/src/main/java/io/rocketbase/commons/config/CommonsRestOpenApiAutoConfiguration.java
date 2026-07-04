@@ -5,20 +5,18 @@ import io.rocketbase.commons.openapi.*;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.webmvc.api.OpenApiWebMvcResource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.HashMap;
 import java.util.List;
 
-@Configuration
-@AutoConfigureBefore(WebMvcAutoConfiguration.class)
+@AutoConfiguration(before = WebMvcAutoConfiguration.class)
 @RequiredArgsConstructor
 @EnableConfigurationProperties({DataWebProperties.class, OpenApiGeneratorProperties.class})
 // low-precedence defaults (e.g. springdoc.api-docs.version=openapi_3_0); overridable by the consuming app

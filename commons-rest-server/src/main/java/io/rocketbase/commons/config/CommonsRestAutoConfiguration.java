@@ -6,20 +6,18 @@ import io.rocketbase.commons.controller.exceptionhandler.BeanValidationException
 import io.rocketbase.commons.controller.exceptionhandler.InsufficientPrivilegesExceptionHandler;
 import io.rocketbase.commons.controller.exceptionhandler.NotFoundExceptionHandler;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.webmvc.autoconfigure.WebMvcAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 
 import java.util.List;
 import java.util.Locale;
 
-@Configuration
-@AutoConfigureBefore(WebMvcAutoConfiguration.class)
+@AutoConfiguration(before = WebMvcAutoConfiguration.class)
 public class CommonsRestAutoConfiguration {
 
     @Value("${locale.resolver.default:en}")
