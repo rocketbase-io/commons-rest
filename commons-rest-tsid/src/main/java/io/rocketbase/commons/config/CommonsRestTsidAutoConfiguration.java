@@ -60,7 +60,7 @@ public class CommonsRestTsidAutoConfiguration {
 
         public String getAsText() {
             if (this.getValue() instanceof TSID) {
-                return ((TSID) this.getValue()).toString();
+                return ((TSID) this.getValue()).toLowerCase();
             }
             return null;
         }
@@ -83,7 +83,7 @@ public class CommonsRestTsidAutoConfiguration {
 
         @Override
         public String print(TSID object, Locale locale) {
-            return object != null ? object.toString() : null;
+            return object != null ? object.toLowerCase() : null;
         }
     }
 

@@ -40,7 +40,7 @@ public class LocationResourceTest extends BaseIntegrationTest {
         LocationEntity location = locationRepository.save(createDefaultLocation());
 
         // when
-        String tsid = TSID.from(location.getId()).toString();
+        String tsid = TSID.from(location.getId()).toLowerCase();
         given()
                 .when()
                 .get("/api/location/{id}", tsid)
