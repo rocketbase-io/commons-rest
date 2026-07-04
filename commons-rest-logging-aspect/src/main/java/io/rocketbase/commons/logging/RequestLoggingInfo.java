@@ -2,7 +2,7 @@ package io.rocketbase.commons.logging;
 
 import io.rocketbase.commons.util.TimeUtil;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.beans.Transient;
 

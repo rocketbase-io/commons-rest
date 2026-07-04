@@ -73,7 +73,7 @@ public class GenerateClientTest {
         settings.customTypeMappings = Collections.singletonMap("java.util.Map<K, V>", "Map<K, V>");
         settings.mapDate = DateMapping.asString;
         settings.classLoader = Thread.currentThread().getContextClassLoader();
-        settings.optionalAnnotations = List.of(jakarta.annotation.Nullable.class, org.springframework.lang.Nullable.class);
+        settings.optionalAnnotations = List.of(jakarta.annotation.Nullable.class, org.jspecify.annotations.Nullable.class);
         settings.generateSpringApplicationClient = true;
 
 
