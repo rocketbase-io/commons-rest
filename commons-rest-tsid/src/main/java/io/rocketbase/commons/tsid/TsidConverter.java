@@ -2,7 +2,7 @@ package io.rocketbase.commons.tsid;
 
 import io.hypersistence.tsid.TSID;
 import org.springframework.core.convert.converter.Converter;
-import org.springframework.lang.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class TsidConverter implements Converter<String, TSID> {
 
