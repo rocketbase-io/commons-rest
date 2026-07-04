@@ -1,5 +1,8 @@
 package io.rocketbase.commons.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,13 +16,28 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * wrapped response in case of errors
+ * wrapped response in case of errors - follows RFC 9457 (problem details for http apis)
  */
 @Data
 @SuperBuilder
 @AllArgsConstructor
-@Schema(description = "wrapped response in case of errors")
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Schema(description = "problem details in case of errors (RFC 9457)")
 public class ErrorResponse {
+
+    /**
+     * URI reference that identifies the problem type - when not set clients should assume about:blank
+     */
+    @Nullable
+    @Schema(description = "URI reference that identifies the problem type", example = "urn:problem-type:form-error")
+    private String type;
+
+    /**
+     * short, human-readable summary of the problem type
+     */
+    @Nullable
+    @Schema(description = "short, human-readable summary of the problem type", example = "Bad Request")
+    private String title;
 
     /**
      * http status code
@@ -28,13 +46,22 @@ public class ErrorResponse {
     private Integer status;
 
     /**
-     * user readable error explanation
+     * human-readable explanation specific to this occurrence of the problem
      */
-    @Schema(description = "user readable error explanation", example = "bean validation exception")
-    private String message;
+    @JsonAlias("message")
+    @Schema(description = "human-readable explanation specific to this occurrence of the problem", example = "bean validation exception")
+    private String detail;
 
     /**
-     * in case of form validations details related to properties. key is the filed value list of related errors
+     * URI reference that identifies the specific occurrence of the problem
+     */
+    @Nullable
+    @Schema(description = "URI reference that identifies the specific occurrence of the problem", example = "/api/employee/4711")
+    private String instance;
+
+    /**
+     * in case of form validations details related to properties. key is the filed value list of related errors<br>
+     * extension member as allowed by RFC 9457
      */
     @Singular
     @Nullable
@@ -44,13 +71,34 @@ public class ErrorResponse {
     public ErrorResponse() {
     }
 
-    public ErrorResponse(String errorMessage) {
-        this.message = errorMessage;
+    public ErrorResponse(String detail) {
+        this.detail = detail;
     }
 
-    public ErrorResponse(Integer status, String message) {
+    public ErrorResponse(Integer status, String detail) {
         this.status = status;
-        this.message = message;
+        this.detail = detail;
+    }
+
+    /**
+     * bridge for the pre RFC 9457 format
+     *
+     * @deprecated use {@link #getDetail()}
+     */
+    @Deprecated
+    @JsonIgnore
+    public String getMessage() {
+        return detail;
+    }
+
+    /**
+     * bridge for the pre RFC 9457 format
+     *
+     * @deprecated use {@link #setDetail(String)}
+     */
+    @Deprecated
+    public void setMessage(String message) {
+        this.detail = message;
     }
 
     /**

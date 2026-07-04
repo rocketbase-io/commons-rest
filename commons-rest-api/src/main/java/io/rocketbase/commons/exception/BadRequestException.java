@@ -14,13 +14,13 @@ public class BadRequestException extends RuntimeException {
     }
 
     public BadRequestException(ErrorResponse errorResponse) {
-        super(errorResponse.getMessage());
+        super(errorResponse.getDetail());
         this.errorResponse = errorResponse;
     }
 
     public BadRequestException(String message) {
         super(message);
-        this.errorResponse = ErrorResponse.builder().message(message).build();
+        this.errorResponse = ErrorResponse.builder().detail(message).build();
     }
 
 }

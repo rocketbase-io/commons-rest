@@ -19,4 +19,11 @@ public enum ErrorCodes {
     public String getValue() {
         return value;
     }
+
+    /**
+     * problem type URI for the RFC 9457 type member
+     */
+    public String asProblemType() {
+        return "urn:problem-type:" + value;
+    }
 }
