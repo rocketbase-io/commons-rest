@@ -1,0 +1,168 @@
+---
+title: Request & Method Logging
+description: One dependency, every controller call logged with user, duration and result — plus @Loggable for arbitrary service methods.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+`commons-rest-logging-aspect` adds AOP-based logging around every Spring MVC controller
+handler — method, path, user, duration — with zero code. A second aspect logs any bean method
+you annotate with `@Loggable`.
+
+## Installation
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-logging-aspect</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-logging-aspect:4.0.0-M2")
+		```
+	</TabItem>
+</Tabs>
+
+Every controller mapping (`@GetMapping`, `@PostMapping`, …) is now logged:
+
+```
+GET /api/company ツ marten 🕓 61 ms ⮐ find({}) ⮑ PageableResult(totalElements=100, totalPages=4, page=0, pageSize=25, ...)
+```
+
+(` ツ ` user · ` 🕓 ` duration · ` ⮐ ` arguments · ` ⮑ ` result — args/result only when
+enabled.)
+
+## Logging service methods
+
+Annotate any Spring-proxied bean method with `@Loggable`:
+
+```java
+@Service
+public class ReportService {
+
+    @Loggable(args = true, result = true, logLevel = "INFO")
+    public Report build(ReportRequest request) {
+        ...
+    }
+}
+```
+
+```
+build(ReportRequest(year=2026)) ツ marten 🕓 2 sec 9 ms
+```
+
+Per-method attributes override the global defaults: `duration`, `audit`, `args` (default
+`true` here), `result`, `logLevel` (`DEBUG`), `errorLogLevel` (`WARN`, `NONE` disables),
+`trimLength` (`100`, `<= 0` disables trimming).
+
+<Aside type="caution" title="Proxy limitation">
+	Aspects only intercept calls that cross a Spring proxy. A call to
+	<code>this.build(...)</code> from within the same bean is <strong>not</strong> logged —
+	only calls from other beans are.
+</Aside>
+
+## Who is "ツ"?
+
+The user comes from a Spring Data `AuditorAware` bean — if you have one (e.g. for
+`@CreatedBy` auditing), logging picks it up automatically:
+
+```java
+@Bean
+AuditorAware<String> auditorAware() {
+    return () -> Optional.ofNullable(SecurityContextHolder.getContext().getAuthentication())
+            .map(Authentication::getName);
+}
+```
+
+## Hooking into request logs
+
+Implement `RequestLoggingInterceptor` to feed metrics or audit trails — it's called after
+every logged request:
+
+```java
+@Component
+public class MetricsLoggingInterceptor implements RequestLoggingInterceptor {
+
+    @Override
+    public void afterSuccess(RequestLoggingInfo info) {
+        timer.record(info.getDuration(), TimeUnit.MILLISECONDS);
+    }
+
+    @Override
+    public void afterFailure(RequestLoggingInfo info, Throwable error) {
+        errorCounter.increment();
+    }
+}
+```
+
+## Configuration
+
+Prefix `commons.logging`:
+
+| Property | Default | Explanation |
+|---|---|---|
+| `commons.logging.mvc.enabled` | `true` | disable to keep only the `@Loggable` aspect |
+| `commons.logging.logLevel` | `DEBUG` | level for successful calls |
+| `commons.logging.errorLogLevel` | `WARN` | level for failures (`NONE` disables) |
+| `commons.logging.duration` | `true` | track & log duration |
+| `commons.logging.audit` | `true` | log the current auditor |
+| `commons.logging.args` | `false` | log arguments (`toString`, trimmed) |
+| `commons.logging.result` | `false` | log result (`toString`, trimmed) |
+| `commons.logging.query` | `true` | include query parameters in the url |
+| `commons.logging.trim` | `true` | trim long values |
+| `commons.logging.trimLength` | `100` | max length before trimming |
+
+## WebFlux
+
+The MVC aspect would only measure until the `Mono` is returned. For WebFlux, build a small
+custom aspect on top of the provided `AbstractRequestLogger` that subscribes to the elapsed
+time:
+
+```java
+@Aspect
+public class FluxLogger extends AbstractRequestLogger {
+
+    public FluxLogger(AuditorAware auditorAware, LoggableConfig config) {
+        super(auditorAware, config);
+    }
+
+    @Around("execution(* *(..)) && @annotation(org.springframework.web.bind.annotation.RequestMapping)")
+    public Object wrapMethod(ProceedingJoinPoint point) throws Throwable {
+        Method method = ((MethodSignature) point.getSignature()).getMethod();
+        long start = System.currentTimeMillis();
+        Logger log = getLog(point);
+        try {
+            Optional<?> currentAuditor = getAuditorAware().getCurrentAuditor();
+
+            Object result = point.proceed();
+            if (result instanceof Mono<?> requestMono) {
+                Mono<? extends Tuple2<Long, ?>> elapsed = requestMono.elapsed();
+
+                if (isLogEnabled(log, getConfig().getLogLevel())) {
+                    elapsed.subscribe(o -> {
+                        Long elapsedTime = o.getT1();
+                        afterSuccess(log, point, method,
+                                System.currentTimeMillis() - elapsedTime, result, currentAuditor);
+                    });
+                }
+                if (isLogEnabled(log, getConfig().getErrorLogLevel())) {
+                    requestMono.toFuture()
+                            .exceptionally(throwable -> {
+                                logError(point, getConfig(), start, log, throwable);
+                                return null;
+                            });
+                }
+            }
+            return result;
+        } catch (Throwable ex) {
+            logError(point, getConfig(), start, log, ex);
+            throw ex;
+        }
+    }
+}
+```

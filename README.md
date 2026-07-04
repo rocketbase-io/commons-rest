@@ -5,206 +5,107 @@
 ![build](https://github.com/rocketbase-io/commons-rest/actions/workflows/ci.yml/badge.svg)
 [![Maven Central](https://badgen.net/maven/v/maven-central/io.rocketbase.commons/commons-rest)](https://mvnrepository.com/artifact/io.rocketbase.commons/commons-rest)
 
-Focus on tough problems and not on CRUD that the main focus of commons-rest.
-We [@rocketbase.io](https://www.rocketbase.io) develop many microservices and tried many tools and projects. All of them
-didn't matched our needs. By using for example [spring-data-rest](https://projects.spring.io/spring-data-rest/) you
-loose flexibility when you leave the basic path or by using [jHipster](http://www.jhipster.tech/) you have a full blown
-setup with many dependencies. Commons-rest focus on CRUD and leaves flexibility to you as developer. Additionally we've
-crafted a yeoman [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) in
-order to write less code :)
+### 📖 [Documentation](https://commons-rest.rocketbase.io/) — guides, examples & release notes
 
-The implementation bases on spring-boot: mainly on **spring-mvc** and **spring-data**
+Focus on tough problems and not on CRUD — that's the main focus of commons-rest.
+We [@rocketbase.io](https://www.rocketbase.io) develop many microservices and tried many tools
+and projects. All of them didn't match our needs: with [spring-data-rest](https://projects.spring.io/spring-data-rest/)
+you lose flexibility the moment you leave the basic path, full-blown generators bring a mountain
+of dependencies. commons-rest provides small, focused building blocks at the API boundary and
+leaves the architecture to you — plain Spring MVC controllers, full control.
 
-We believe in separation of Entity and DTO. We go one step forward and separate also the DTO into Read (response
-structure) and Write (create/update structure). This has many advantages for example separation of concern and allow
-edit by reference id and response with object. Furthermore it improves readability.
+We believe in the separation of Entity and DTO — and go one step further by splitting the DTO
+into **Read** (response) and **Write** (create/update) types. See
+[Concepts](https://commons-rest.rocketbase.io/concepts/) for the reasoning.
 
-Conversion between each object can be automatically generated with [mapstruct](http://mapstruct.org/) see sample-project
-for details.
+**This is v4, based on spring-boot 4 / spring-framework 7 / jackson 3.** For spring-boot 3 use
+the latest 3.5.x release — the docs website covers v4 only, migration details in the
+[migration guide](https://commons-rest.rocketbase.io/migration-v4/).
 
-**Features:**
+## features
 
-* basic DTOs as per example a missing PageableResult
-* custom RuntimeExceptions, ExceptionHandler and BeanValidationExceptions
-* abstract CRUD controller also for parent child situations
-* abstract CRUD resources to consume REST-Services
-* prodivded a [project and service generator](https://github.com/rocketbase-io/generator-spring-rest-commons) via yeoman
-* provided a jwt security module that is simply pluggable
-  name [commons-auth](https://github.com/rocketbase-io/commons-auth)
+- [RFC 9457 problem details](https://commons-rest.rocketbase.io/error-handling/) out of the box:
+  throw `NotFoundException` & co. anywhere, get `application/problem+json` — including a
+  per-field map for bean-validation errors
+- [`PageableResult`](https://commons-rest.rocketbase.io/pagination/): a serializable,
+  framework-neutral pagination DTO with a stable JSON shape
+- [TypeScript client generation](https://commons-rest.rocketbase.io/typescript-clients/):
+  axios clients, react-query hooks and zod schemas straight from your annotated controllers
+- ids that don't leak: [hashids-obfuscated](https://commons-rest.rocketbase.io/obfuscated-ids/)
+  or [TSID](https://commons-rest.rocketbase.io/tsid/) identifiers, decoded transparently in
+  path variables, params and JSON
+- [i18n translations](https://commons-rest.rocketbase.io/i18n/), [request/method logging](https://commons-rest.rocketbase.io/logging/),
+  [error pages](https://commons-rest.rocketbase.io/error-pages/) and a bag of
+  [utilities](https://commons-rest.rocketbase.io/utilities/)
+- everything auto-configured, everything optional: every bean is `@ConditionalOnMissingBean`,
+  every feature has an [off-switch property](https://commons-rest.rocketbase.io/configuration/)
 
-## documentation
+## modules
 
-Within the [wiki-pages](https://github.com/rocketbase-io/commons-rest/wiki) you can find some explanations to the
-different classes, helpers and dtos.
+| module | what it adds |
+|---|---|
+| `commons-rest-api` | DTOs, exceptions, converter interface, annotations — safe to share between services |
+| `commons-rest-server` | auto-configured exception handlers, locale resolver, enum converter |
+| `commons-rest-hashids` | hashids-obfuscated ids |
+| `commons-rest-tsid` | TSID (time-sorted id) support |
+| `commons-rest-openapi` | TypeScript client + react-query hook generation |
+| `commons-rest-logging-aspect` | request & method logging via AOP |
+| `commons-rest-errorpage` | styled static HTML error pages |
 
-## module overview
+## usage
 
-### commons-rest-api
-
-This module provides some useful runtime exceptions like NotFoundException and basic DTO classes. Mainly ErrorResponse
-for rending details to error and also field-validation exceptions (this is handled a BeanValidationExceptionHandler
-provided by rest-server) and PageableResult to provide results in a paged wrapper. Additionally, you can find abstract
-implements of resources to consume REST-Services within java-code by use of RestTemplate and Jackson.
-
-### commons-rest-server
-
-Containing ExceptionHandlers for common errors like BeanValidationExceptions or the custom NotFoundException. Abstract
-classes to implement CRUD SpringRestController. Also a parent child solution is provided.
-
-### commons-errorpage
-
-Simple designed error pages for 400, 401, 403, 404 and 500 error-codes.
-
-### commons-rest-openapi
-
-Library to build rest-clients + react-query hooks with custom annotations and converts.
-
-| property                                     | default                                    | explanation                                                |
-|----------------------------------------------|--------------------------------------------|------------------------------------------------------------|
-| commons.openapi.generator.base-url           | /api                                       | used as prefix for alle urls                               |
-| commons.openapi.generator.group-name         | ModuleApi                                  | client generator added all "methods" within one group      |
-| commons.openapi.generator.hook-folder        | hooks                                      | folder within zip                                          |
-| commons.openapi.generator.client-folder      | clients                                    | folder within zip                                          |
-| commons.openapi.generator.model-folder       | model                                      | folder within zip                                          |
-| commons.openapi.generator.model-create       | true                                       | should models get generated                                |
-| commons.openapi.generator.model-imports      | _                                          
- unset_                                       | list that will get added to model/index.ts |
-| commons.openapi.generator.default-stale-time | 2                                          | default value for infinite + query hook (when value is -1) |
-
-### commons-rest-hashids
-
-Implementation for obfuscatedId interface introduced within the api. Uses [hashids](https://hashids.org/java/) as
-library to obfuscate long ids.
-
-| property                | default                              | explanation                                                                                                                                                |
-|-------------------------|--------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| hashids.salt            |                                      | salt for hashIds                                                                                                                                           |
-| hashids.minHashLength   | 8                                    | min length of hasid                                                                                                                                        |
-| hashids.alphabet        | abcdefghijklmnopqrstuvwxyz1234567890 | alphabet of hashid (by default we've skipped uppercase)                                                                                                    |
-| hashids.handler.enabled | true                                 | enable/disable ExceptionHandler for ObfuscatedDecodeException                                                                                              |
-| hashids.invalid.allowed | false                                | ObfuscatedIdSupport will return NotFound in invalid case. When allowed invalid ObfuscatedId will get inject as Parameter text is available but id is null! |
-
-## commons-rest-logging-aspect
-
-Adds a RequestLoggingAspect that wraps around all RestController Mappings and loggs: method, path, parameter,
-duration...
-
+```xml
+<dependency>
+    <groupId>io.rocketbase.commons</groupId>
+    <artifactId>commons-rest-server</artifactId>
+    <version>4.0.0-M2</version>
+</dependency>
 ```
-GET /api/company ツ username 🕓 61 ms ⮐ find({}) ⮑ PageableResult(totalElements=100, totalPages=4, page=0, pageSize=25, content=[CompanyRead(id=5dc3...
-```
-
-Furthermore you can annotate a Service Method with @Loggable and get a duration tracking as well.
-**It's only working on Services that are wrappable by aspect**. So you can only use it on Services calls from other
-services - no internal calls within the same Service.
 
 ```java
+@RestController
+@RequestMapping("/api/employee")
+@RequiredArgsConstructor
+public class EmployeeController {
 
-@Service
-public class SampleService {
+    private final EmployeeRepository repository;
+    private final EmployeeConverter converter;
 
-    @SneakyThrows
-    @Loggable
-    public void exampleService(Instant startExecution) {
-        TimeUnit.SECONDS.sleep(2);
+    @GetMapping
+    public PageableResult<EmployeeRead> list(@PageableDefault(size = 25) Pageable pageable) {
+        return PageableResult.fromPage(repository.findAll(pageable), converter::fromEntity);
+    }
+
+    @GetMapping("/{id}")
+    public EmployeeRead getById(@PathVariable String id) {
+        return converter.fromEntity(repository.findById(id)
+                .orElseThrow(NotFoundException::new));
+    }
+
+    @PostMapping
+    public EmployeeRead create(@RequestBody @Valid EmployeeWrite write) {
+        return converter.fromEntity(repository.save(converter.newEntity(write)));
     }
 }
 ```
 
-```
-exampleService(2019-11-07T12:19:08.800Z) ツ username 🕓 2 sec 9 ms
-```
+A failing `@Valid` request answers without any code on your side:
 
-| property                      | default | explanation                                                                         |
-|-------------------------------|---------|-------------------------------------------------------------------------------------|
-| commons.logging.mvc.enabled   | true    | in case you only want to use Loggable Method aspect - disable RestController aspect |
-| commons.logging.trim          | true    | trim result                                                                         |
-| commons.logging.trimLength    | 100     | trim after string length                                                            |
-| commons.logging.duration      | true    | track duration                                                                      |
-| commons.logging.audit         | true    | when AuditorAware is present log value of                                           |
-| commons.logging.args          | false   | log each args.toString() with trimLength                                            |
-| commons.logging.result        | false   | log result.toString() with trimLength                                               |
-| commons.logging.query         | true    | add query parameter to url                                                          |
-| commons.logging.logLevel      | DEBUG   | level to log a normal hit                                                           |
-| commons.logging.errorLogLevel | WARN    | level to log an error hit                                                           |
-
-### how to work within spring-webflux
-
-Normally the RequestLoggerAspect would log only the time of returning a Mono. If you would like to get the time for
-processing the request you need to create your own Aspect that could look like this.
-
-```java
-
-@Aspect
-public class FluxLogger extends AbstractRequestLogger {
-
-
-    public FluxLogger(AuditorAware auditorAware, LoggableConfig config) {
-        super(auditorAware, config);
-    }
-
-    @Around("execution(* *(..)) && @annotation(org.springframework.web.bind.annotation.RequestMapping)")
-    public Object wrapMethod(ProceedingJoinPoint point) throws Throwable {
-        Method method = ((MethodSignature) point.getSignature())
-                .getMethod();
-
-        return this.wrap(point, method);
-    }
-
-    private Object wrap(ProceedingJoinPoint point, Method method) throws Throwable {
-        long start = System.currentTimeMillis();
-
-        Logger log = getLog(point);
-        try {
-            Optional<?> currentAuditor = getAuditorAware().getCurrentAuditor();
-
-            Object result = point.proceed();
-            if (result instanceof Mono) {
-                Mono<?> requestMono = (Mono<?>) result;
-                Mono<? extends Tuple2<Long, ?>> elapsed = requestMono.elapsed();
-
-                if (isLogEnabled(log, getConfig().getLogLevel())) {
-                    elapsed.subscribe(o -> {
-                        Long elapsedTime = o.getT1();
-                        afterSuccess(log, point, method, System.currentTimeMillis() - elapsedTime, result, currentAuditor);
-                    });
-                }
-                if (isLogEnabled(log, getConfig().getErrorLogLevel())) {
-                    requestMono.toFuture()
-                            .exceptionally(throwable -> {
-                                logError(point, getConfig(), start, log, throwable);
-                                return null;
-                            });
-                }
-            }
-            return result;
-        } catch (Throwable ex) {
-            logError(point, getConfig(), start, log, ex);
-            throw ex;
-        }
-    }
-
+```json
+{
+  "type": "urn:problem-type:form-error",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "invalid form",
+  "fields": {
+    "email": ["must not be empty"]
+  }
 }
 ```
 
-## commons-rest-sample
-
-Sample spring-boot application to demonstrate the use of the provided commons-rest libraries.
-
-## configuration
-
-This module uses the auto configuration feature of spring-boot-starter so that all necessary beans will get configured
-automatically.
-Nevertheless you can customize the configuration by the following properties
-
-| property                               | default | explanation                                                                                                   |
-|----------------------------------------|---------|---------------------------------------------------------------------------------------------------------------|
-| locale.resolver.enabled                | true    | enable/disable default configuration of the LocaleResolver                                                    |
-| locale.resolver.default                | en      |                                                                                                               |
-| locale.resolver.supported              |         | you can specify a comma separated list of locales                                                             |
-| handler.badRequest.enabled             | true    | enable/disable ExceptionHandler for BadRequestException                                                       |
-| handler.notFound.enabled               | true    | enable/disable ExceptionHandler for NotFoundException                                                         |
-| handler.beanValidation.enabled         | true    | enable/disable ExceptionHandler for MethodArgumentNotValidException (bean validation issues from spring-boot) |
-| handler.insufficientPrivileges.enabled | true    | enable/disable ExceptionHandler for InsufficientPrivilegesException                                           |
+Head over to [Getting Started](https://commons-rest.rocketbase.io/getting-started/) for the
+full tour, or explore the runnable [sample application](https://commons-rest.rocketbase.io/sample-application/)
+in [`sample/`](sample/).
 
 ### The MIT License (MIT)
 

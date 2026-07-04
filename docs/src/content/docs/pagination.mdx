@@ -1,0 +1,99 @@
+---
+title: Pagination
+description: PageableResult wraps Spring Data pages into a stable, serializable JSON shape — with factories, mapping and metadata support.
+---
+
+Spring Data's `Page` is great inside a service but awkward on the wire: it's an interface,
+its JSON shape shifted between versions and clients would need Spring types to deserialize
+it. `PageableResult<T>` (in `commons-rest-api`) is the wire-format replacement — a small,
+serializable DTO with a stable shape.
+
+## The JSON shape
+
+```json
+{
+  "content": [ { "id": "5dc3...", "name": "rocketbase" } ],
+  "page": 0,
+  "pageSize": 25,
+  "totalElements": 100,
+  "totalPages": 4
+}
+```
+
+`page` is 0-indexed. The shape never changes, no matter which Spring Data version the server
+runs — clients (including the [generated TypeScript clients](/typescript-clients/)) can rely
+on it.
+
+## Creating results
+
+```java
+// from a Spring Data page, converting each entity
+PageableResult<CompanyRead> result =
+        PageableResult.fromPage(page, converter::fromEntity);
+
+// content already converted, page for the numbers
+PageableResult<CompanyRead> result =
+        PageableResult.contentPage(converter.fromEntities(page.getContent()), page);
+
+// fixed lists & empty results
+PageableResult<String> single = PageableResult.of(List.of("a", "b"));
+PageableResult<String> none = PageableResult.empty();
+```
+
+## Working with results
+
+```java
+result.hasNextPage();
+result.hasPreviousPage();
+result.map(read -> new Summary(read));   // convert content, keep paging numbers
+result.toPage();                          // back to a Spring Data PageImpl
+for (CompanyRead read : result) { ... }   // Iterable
+```
+
+## A paged endpoint
+
+Use Spring's `Pageable` for the input side — `commons-rest` only standardizes the output:
+
+```java
+@GetMapping(path = "/company", produces = APPLICATION_JSON_VALUE)
+PageableResult<CompanyRead> find(
+        @ParameterObject
+        @SortDefault(sort = "id", direction = Sort.Direction.ASC)
+        Pageable pageable);
+```
+
+`@ParameterObject` (springdoc) flattens the `Pageable` into documented `page` / `size` /
+`sort` query parameters in your OpenAPI doc; `@SortDefault` gives deterministic ordering.
+
+## Attaching metadata
+
+`PageableResultWithMeta<T, M>` adds a typed `meta` member — handy for aggregations, summaries
+or GeoJSON bounds that belong to the result set as a whole:
+
+```java
+PageableResult<InvoiceRead> page = PageableResult.fromPage(invoices, converter::fromEntity);
+PageableResultWithMeta<InvoiceRead, InvoiceStats> result =
+        PageableResultWithMeta.withMeta(page, new InvoiceStats(openAmount, overdueCount));
+```
+
+```json
+{
+  "content": [ ... ],
+  "page": 0,
+  "pageSize": 25,
+  "totalElements": 13,
+  "totalPages": 1,
+  "meta": { "openAmount": 4211.50, "overdueCount": 3 }
+}
+```
+
+## On the TypeScript side
+
+The [`@rocketbase/commons-rest-client`](/typescript-clients/#the-runtime-package) runtime
+ships matching types plus helpers for infinite queries:
+
+```ts
+import { PageableResult, infiniteItems, infiniteTotalElements } from '@rocketbase/commons-rest-client';
+
+const page: PageableResult<CompanyRead> = await api.find({ page: 0, pageSize: 25 });
+```

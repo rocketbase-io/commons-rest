@@ -1,0 +1,114 @@
+---
+title: TSID Support
+description: Time-sorted unique identifiers as first-class citizens — Jackson serialization and Spring MVC binding for hypersistence TSID.
+---
+
+import { Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+[TSID](https://github.com/vladmihalcea/hypersistence-tsid) (Time-Sorted Unique Identifier)
+combines the best of auto-increment and UUID: 64-bit, roughly time-ordered (index friendly!),
+cluster-safe and rendered as a compact 13-character Crockford base-32 string like
+`0GWVCNQ9WM7ST`. `commons-rest-tsid` makes `TSID` a first-class citizen in your REST layer.
+
+## Installation
+
+<Tabs syncKey="buildtool">
+	<TabItem label="Maven">
+		```xml
+		<dependency>
+			<groupId>io.rocketbase.commons</groupId>
+			<artifactId>commons-rest-tsid</artifactId>
+			<version>4.0.0-M2</version>
+		</dependency>
+		<dependency>
+			<groupId>io.hypersistence</groupId>
+			<artifactId>hypersistence-tsid</artifactId>
+			<version>2.1.4</version>
+		</dependency>
+		```
+	</TabItem>
+	<TabItem label="Gradle">
+		```kotlin
+		implementation("io.rocketbase.commons:commons-rest-tsid:4.0.0-M2")
+		implementation("io.hypersistence:hypersistence-tsid:2.1.4")
+		```
+	</TabItem>
+</Tabs>
+
+<Aside type="note">
+	`hypersistence-tsid` is a <em>provided</em> dependency of the module — you declare it
+	yourself, keeping version control in your hands. The module doesn't generate TSIDs; it
+	integrates the type into Jackson and Spring MVC.
+</Aside>
+
+The auto-configuration registers a Jackson module (TSID ↔ string), a Spring MVC formatter for
+`TSID` parameters and an exception handler mapping invalid ids to `404`.
+
+## Usage
+
+```java
+TSID id = TSID.Factory.getTsid();   // generate
+String text = id.toString();        // "0GWVCNQ9WM7ST"
+long value = id.toLong();           // 64-bit representation for the database
+```
+
+DTO fields serialize to the canonical string automatically:
+
+```java
+public class LocationRead {
+    private TSID id;      // → "id": "0GWVCNQ9WM7ST"
+    private String name;
+}
+```
+
+Path variables bind directly — invalid input raises `TsidDecodeException` → `404`:
+
+```java
+@GetMapping("/api/location/{id}")
+public LocationRead getById(@PathVariable TSID id) {
+    return converter.fromEntity(repository.findById(id.toLong())
+            .orElseThrow(NotFoundException::new));
+}
+```
+
+## With JPA
+
+Pairs nicely with [hypersistence-utils](https://github.com/vladmihalcea/hypersistence-utils)'
+`@Tsid` generator — store a `Long`, expose a `TSID`:
+
+```java
+@Entity
+public class LocationEntity {
+    @Id @Tsid
+    private Long id;
+    private String name;
+}
+```
+
+```java
+// converter
+LocationRead.builder()
+        .id(TSID.from(entity.getId()))
+        .name(entity.getName())
+        .build();
+```
+
+## Configuration
+
+| Property | Default | Explanation |
+|---|---|---|
+| `tsid.handler.enabled` | `true` | toggle the 404 handler for `TsidDecodeException` |
+
+Node bits, custom epoch and generation tuning are configured through the hypersistence-tsid
+library itself (system properties / environment) — see its documentation.
+
+## TSID or ObfuscatedId?
+
+| | TSID | [ObfuscatedId](/obfuscated-ids/) |
+|---|---|---|
+| id source | generated (time-sorted) | existing numeric ids |
+| hides count/growth | ✔ (timestamp-based) | ✔ (hashed) |
+| sortable by creation | ✔ | ✘ |
+| works with auto-increment | ✘ (new id strategy) | ✔ (wraps existing `Long`) |
+
+Use TSID for new schemas; use hashids to retrofit privacy onto existing sequential ids.

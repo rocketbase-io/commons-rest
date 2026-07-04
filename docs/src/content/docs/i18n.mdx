@@ -1,0 +1,83 @@
+---
+title: i18n & Translations
+description: Locale resolution per request and the Translation type — store multi-language values, respond in the caller's language.
+---
+
+## Locale resolution
+
+`commons-rest-server` auto-configures an `AcceptHeaderLocaleResolver`, so every request
+carries a resolved locale (used e.g. for translating validation messages):
+
+```yaml
+locale:
+  resolver:
+    enabled: true        # default
+    default: en          # fallback locale
+    supported: de, en-US # optional whitelist
+```
+
+Inside your code the current locale is available as usual via
+`LocaleContextHolder.getLocale()`.
+
+## The Translation type
+
+`Translation` (in `commons-rest-api`) holds a value in multiple languages — a
+`Map<Locale, String>` with smart JSON behavior and fluent builders:
+
+```java
+Translation name = Translation.of(Locale.GERMAN, "Farbe")
+        .english("color")
+        .french("couleur");
+
+String current = name.getTranslated();               // resolved via LocaleContextHolder
+String german  = name.getTranslated(Locale.GERMAN);
+boolean has    = name.hasLocale(Locale.FRENCH);
+```
+
+Locale lookup is fuzzy: exact match first, then language-only (`de-AT` → `de`), then root —
+so a `de` translation answers a `de-CH` request.
+
+### JSON: full map or single string
+
+By default a `Translation` serializes as the full object:
+
+```json
+{ "name": { "de": "Farbe", "en": "color", "fr": "couleur" } }
+```
+
+Annotate the field with `@Translated` and the serializer flattens it to a single string in the
+request's locale — ideal for Read DTOs where the client only needs "their" language:
+
+```java
+public class ArticleRead {
+    @Translated
+    private Translation name;          // → "name": "Farbe"  (for a German caller)
+
+    @Translated("en")
+    private Translation slug;          // → always English
+}
+```
+
+Deserialization accepts both forms: a full `{languageTag: value}` object or a plain string
+(stored under the current locale).
+
+### Validating a default language
+
+The bean-validation constraint `@HasDefaultLocale` ensures a `Translation` in a Write DTO
+carries at least a value for the current locale or English:
+
+```java
+public class ArticleWrite {
+    @NotNull @HasDefaultLocale
+    private Translation name;
+}
+```
+
+## Closest-locale lookup for your own maps
+
+The same fuzzy matching used by `Translation` is available standalone via `LocaleFilter` —
+useful when you keep `Map<Locale, T>` structures yourself:
+
+```java
+T value = LocaleFilter.findClosest(LocaleContextHolder.getLocale(), configByLocale, fallback);
+```
