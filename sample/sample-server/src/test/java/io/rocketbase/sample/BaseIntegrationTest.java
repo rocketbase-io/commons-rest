@@ -30,7 +30,7 @@ public abstract class BaseIntegrationTest {
 
     @Container
     @ServiceConnection
-    protected static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:4"));
+    protected static final MongoDBContainer mongoDBContainer = new MongoDBContainer(DockerImageName.parse("mongo:8"));
 
     @BeforeEach
     public void setup() {

@@ -5,8 +5,10 @@ import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import io.rocketbase.commons.dto.ErrorResponse;
 import io.rocketbase.commons.exception.BadRequestException;
+import io.rocketbase.commons.exception.InsufficientPrivilegesException;
 import io.rocketbase.commons.exception.NotFoundException;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.DefaultResponseErrorHandler;
 
@@ -14,6 +16,7 @@ import java.io.IOException;
 import java.net.URI;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 public class BasicResponseErrorHandler extends DefaultResponseErrorHandler {
@@ -33,23 +36,21 @@ public class BasicResponseErrorHandler extends DefaultResponseErrorHandler {
     @Override
     public void handleError(URI url, HttpMethod method, ClientHttpResponse response) throws IOException {
         if (response.getStatusCode().equals(BAD_REQUEST)) {
-            ErrorResponse errorResponse = null;
-            try {
-                errorResponse = getObjectMapper().readValue(response.getBody(), ErrorResponse.class);
-            } catch (Exception e) {
-                errorResponse = new ErrorResponse(BAD_REQUEST.value(), BAD_REQUEST.getReasonPhrase());
-            }
-            throw new BadRequestException(errorResponse);
+            throw new BadRequestException(readErrorResponse(response, BAD_REQUEST));
         } else if (response.getStatusCode().equals(NOT_FOUND)) {
-            ErrorResponse errorResponse = null;
-            try {
-                errorResponse = getObjectMapper().readValue(response.getBody(), ErrorResponse.class);
-            } catch (Exception e) {
-                errorResponse = new ErrorResponse(NOT_FOUND.value(), NOT_FOUND.getReasonPhrase());
-            }
-            throw new NotFoundException(errorResponse);
+            throw new NotFoundException(readErrorResponse(response, NOT_FOUND));
+        } else if (response.getStatusCode().equals(FORBIDDEN)) {
+            throw new InsufficientPrivilegesException(readErrorResponse(response, FORBIDDEN));
         } else {
             super.handleError(url, method, response);
+        }
+    }
+
+    protected ErrorResponse readErrorResponse(ClientHttpResponse response, HttpStatus fallback) {
+        try {
+            return getObjectMapper().readValue(response.getBody(), ErrorResponse.class);
+        } catch (Exception e) {
+            return new ErrorResponse(fallback.value(), fallback.getReasonPhrase());
         }
     }
 
