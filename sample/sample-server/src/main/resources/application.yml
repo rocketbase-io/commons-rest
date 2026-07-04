@@ -1,5 +1,9 @@
 # database connection
 spring:
+  # let spring's own errors (unknown route, 405, malformed json) also render as RFC 9457 problem+json
+  mvc:
+    problemdetails:
+      enabled: true
   datasource:
     url: 'jdbc:h2:mem:testdb'
     username: 'sa'
