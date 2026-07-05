@@ -73,9 +73,60 @@ public interface PermissionApi {
 | `@ClientModule` | type | groups methods under a module name | `value`, `disable` |
 | `@ZodSchema` | type / field | controls Zod schema generation | `INCLUDE` / `IGNORE` / `ANY` |
 
-Cache-key layouts reference path variables and params as `${name}` — a `@RequestBody`
-parameter is always named `body` (`${body.objectId}`); mutation `invalidateKeys` can also
-reference the *response* with `@{...}`.
+### Cache-key & invalidation syntax
+
+Both `cacheKeys` and `invalidateKeys` use the same little layout language. A key is one
+string; **commas** split it into the elements of the react-query key array:
+
+```
+"tile,detail,${id}"   →   queryKey: ['tile', 'detail', id]
+```
+
+Each element is either a **literal** (`tile`, `detail`) or a placeholder:
+
+| Placeholder | Resolves against | Available in |
+|---|---|---|
+| `${name}` | the request *input* — path variables and request params by their **mapping name** (not the Java variable name); a `@RequestBody` is always named `body`, so nested access is `${body.objectId}` | `cacheKeys` + `invalidateKeys` |
+| `@{name}` | the mutation *response* — e.g. `@{id}` for the id the server returned after a create | `invalidateKeys` only |
+
+In the generated code `${...}` becomes a template literal over the hook's `filter` argument
+(queries) or the mutation `variables`, and `@{...}` over the mutation result `data`:
+
+```java
+@MutationHook(invalidateKeys = {"element,detail,${body.objectId}", "element,list", "activity,@{id}"})
+```
+
+```ts
+// generated onSuccess (v5):
+onSuccess: async (data, variables, ...) => {
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: ['element', 'detail', `${variables.body.objectId}`] }),
+    queryClient.invalidateQueries({ queryKey: ['element', 'list'] }),
+    queryClient.invalidateQueries({ queryKey: ['activity', `${data.id}`] }),
+  ]);
+  ...
+}
+```
+
+`invalidateKeys` takes an **array** — every entry is one `invalidateQueries` call. Since
+react-query matches keys by *prefix*, you control the blast radius via key length:
+
+- `"tile"` — nukes everything under `tile`: all lists **and** all details
+- `"tile,list"` — all list variations (every filter/query combination), details stay cached
+- `"tile,detail,${body.id}"` — exactly one detail entry
+
+That also means a good `cacheKeys` layout goes from coarse to fine (`entity, scope, id`) —
+it is what makes cheap, targeted invalidation possible later.
+
+<Aside type="note">
+	Query hooks additionally append their whole `filter` object as the last key element, so
+	two calls with different params never collide — you don't have to encode every param into
+	`cacheKeys` yourself.
+</Aside>
+
+If you pass your own `onSuccess` to a generated mutation hook it runs (and, when async, is
+awaited) **before** the invalidation — so optimistic updates or toasts settle before the
+refetch storm starts.
 
 Zod schemas are discovered automatically from every `@MutationHook` request body and its
 reachable object graph. Fine-tune with `@ZodSchema`:
@@ -139,39 +190,190 @@ package.json
 cd target/typescript-client && npm install && npm run build
 ```
 
-## Using the generated client
+## Wiring it into your app
 
-```tsx
-import { useQueryActivityFindById, useInfiniteActivityFindAll } from 'openapi-module';
+The generated folder is a complete npm package. In a monorepo the simplest setup is a
+workspace package (`packages/api-client`) that the generator writes into — apps depend on it
+like any other workspace dependency:
 
-function ActivityDetail({ id }: { id: string }) {
-  const { data, isLoading } = useQueryActivityFindById({ id });
-  // cacheKey: ['activity', 'detail', id] — staleTime from the annotation or the default
-  ...
+```json
+// packages/api-client/package.json (generated)
+{
+  "name": "openapi-module",
+  "dependencies": {
+    "@rocketbase/commons-rest-client": "^1.2.0",
+    "@tanstack/react-query": "^5.0.0",
+    "axios": "^1.0.0",
+    "zod": "^3.0.0"
+  },
+  "peerDependencies": { "react": ">=18" }
 }
 ```
 
-Mutations invalidate the configured keys automatically, so lists and details refresh after a
-write — the cache choreography is defined once, in Java, next to the endpoint.
-
-## The runtime package
-
-Generated code depends on the small runtime
+The only runtime dependency is the small
 [`@rocketbase/commons-rest-client`](https://www.npmjs.com/package/@rocketbase/commons-rest-client)
-(peer deps: `axios`, `react`):
+package. It ships the `PageableResult<T>` / `PageableResultWithMeta<T, M>` / `ErrorResponse`
+types matching the [server-side DTOs](/pagination/), the axios-backed `buildRequestorFactory`
+(abort-signal support included) and the auth context described below.
 
-- `PageableResult<T>` / `PageableResultWithMeta<T, M>` and `ErrorResponse` types matching the
-  [server-side DTOs](/pagination/)
-- `buildRequestorFactory` — axios-backed request functions with abort-signal support
-- `AuthProvider` / `useAuth` / `TokenService` — Bearer-token handling and (multi-)base-url
-  resolution via React context
-- `createPaginationOptions()`, `infiniteItems()`, `infiniteTotalElements()` — glue for
-  infinite queries over `PageableResult`
+Generated hooks don't take an axios instance or url — they resolve both from React context
+via an internal `useApi()` hook. So the whole wiring is two providers around your tree:
 
 ```tsx
-<AuthProvider baseUrl="https://api.example.com" tokenService={myTokenService}>
-  <App />
-</AuthProvider>
+import { AuthProvider, type TokenService } from '@rocketbase/commons-rest-client';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+const queryClient = new QueryClient();
+
+const tokenService: TokenService = {
+  getToken: () => localStorage.getItem('token'),   // sync or async — your choice
+};
+
+export function ApiProvider({ children }: { children: ReactNode }) {
+  return (
+    <AuthProvider baseUrl="https://api.example.com" tokenService={tokenService}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </AuthProvider>
+  );
+}
+```
+
+`AuthProvider` creates one shared axios instance with a Bearer interceptor wired to your
+`tokenService` — every generated client and hook below it uses that instance automatically.
+
+## Querying — the test api as example
+
+The module's own test sources contain a small REST api ([`TileApi`](https://github.com/rocketbase-io/commons-rest/blob/master/commons-rest-openapi/src/test/java/io/rocketbase/commons/openapi/sample/resource/TileApi.java)
+and friends) that exercises the whole feature set:
+
+```java
+@Tag(name = "tile")
+@RequestMapping(path = "/tile", produces = APPLICATION_JSON_VALUE)
+public interface TileApi {
+
+    @InfiniteHook(value = "findAll", cacheKeys = "tile,list")
+    @GetMapping
+    ResponseEntity<PageableResult<Tile>> loadTiles(@ParameterObject Pageable pageable,
+            @RequestParam(value = "query", required = false) Optional<String> query, ...);
+
+    @QueryHook(value = "findOne", cacheKeys = "tile,detail,${id}")
+    @GetMapping(path = "/tile/{id}")
+    Tile get(@PathVariable("id") TSID id);
+}
+```
+
+Everything a component needs is a one-liner per endpoint — url building, typing, cache keys,
+staleTime and request cancellation are already baked in:
+
+```tsx
+import {
+  useQueryTileFindOne,
+  useInfiniteTileFindAll,
+  useMutationPermissionSetPermission,
+} from 'openapi-module';
+import { infiniteItems, infiniteTotalElements } from '@rocketbase/commons-rest-client';
+
+function TileDetail({ id }: { id: string }) {
+  // GET /tile/{id} — cacheKey ['tile', 'detail', id], TSID binds as plain string
+  const { data: tile, isLoading } = useQueryTileFindOne({ id });
+  ...
+}
+
+function TileList({ query }: { query?: string }) {
+  // GET /tile?size=25&query=... — page param managed by react-query
+  const { data, fetchNextPage, hasNextPage } = useInfiniteTileFindAll({ size: 25, query });
+
+  const tiles = infiniteItems(data);            // flattened across loaded pages
+  const total = infiniteTotalElements(data);    // totalElements from the backend
+  ...
+}
+
+function PermissionForm() {
+  const mutation = useMutationPermissionSetPermission();
+  // on success the keys from @MutationHook(invalidateKeys = ...) are invalidated —
+  // affected lists and details refetch without any manual cache code
+  return <button onClick={() => mutation.mutate({ body: { objectId, permission } })} />;
+}
+```
+
+The cache choreography is defined once, in Java, next to the endpoint — the frontend can't
+drift from it.
+
+Besides the hooks, each endpoint also exports its `queryOptions` factory — handy for
+router loaders and prefetching:
+
+```tsx
+import { queryOptionTileFindOne, useApi } from 'openapi-module';
+
+// e.g. a TanStack Router loader
+loader: ({ params, context }) =>
+  context.queryClient.ensureQueryData(queryOptionTileFindOne(context.moduleApi, { id: params.id })),
+```
+
+And outside React (scripts, tests, node) the plain axios clients work standalone:
+
+```ts
+import { createModuleApi } from 'openapi-module';
+import axios from 'axios';
+
+const api = createModuleApi(axios.create(), { baseURL: 'https://api.example.com' });
+const tile = await api.tile.findOne({ id: '0gwvcnq9wm7st' });
+const page = await api.tile.findAll({ size: 25 });
+```
+
+## Pluggable auth layers
+
+The generated code never talks to your auth system directly — it only sees the axios
+instance from `AuthProvider`. Which auth layer sits between is entirely up to the app, via
+two seams:
+
+**1. `TokenService`** — the minimal contract the Bearer interceptor calls before every
+request. `getToken` may be sync or async and should handle refresh internally;
+`onUnauthorized` is the reactive backstop for responses that still come back `401`:
+
+```ts
+// Keycloak
+const tokenService: TokenService = { getToken: () => keycloak.token ?? null };
+
+// Better-Auth / session-based
+const tokenService: TokenService = {
+  getToken: async () => (await getSession())?.accessToken ?? null,
+};
+
+// custom refresh flow: proactively refresh short-lived JWTs, force one refresh on 401
+const tokenService: TokenService = {
+  getToken: () => authClient.ensureFreshToken(),
+  onUnauthorized: async () => { await authClient.refresh(); },
+};
+```
+
+Because `getToken` is awaited per request, patterns like "in-memory access token +
+refresh-cookie round-trip after a page reload" just work — the first query waits for a real
+token instead of firing with an expired one.
+
+**2. `axiosConfigure`** — full access to the shared axios instance for anything beyond
+Bearer tokens: api keys, cookie-based sessions (`withCredentials`), tracing headers or
+completely custom interceptors:
+
+```tsx
+<AuthProvider
+  baseUrl="https://api.example.com"
+  tokenService={tokenService}
+  axiosConfigure={(instance) => {
+    instance.defaults.withCredentials = true;
+    instance.interceptors.request.use((config) => {
+      config.headers['X-Tenant'] = currentTenant();
+      return config;
+    });
+  }}
+>
+```
+
+`baseUrl` also accepts a map when one frontend talks to several backends — generated
+clients resolve their url by key via `useAuth().baseUrl(key)`:
+
+```tsx
+<AuthProvider baseUrl={{ main: 'https://api.example.com', auth: 'https://auth.example.com' }} ... >
 ```
 
 ## Configuration
