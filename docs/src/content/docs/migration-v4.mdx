@@ -66,7 +66,7 @@ Framework 7 itself.
 | `BaseRestResource`, `BaseController` | plain `RestTemplate`/HTTP-interface clients + [`BasicResponseErrorHandler`](/error-handling/#client-side-resttemplate); shared [Api interfaces](/concepts/#shared-api-interfaces) |
 | `QueryParamBuilder`, `QueryParamParser`, `UrlParts` | Spring's `UriComponentsBuilder` |
 | `EntityWithKeyValue`, `HasKeyValue`, `HasFirstAndLastName` model helpers | model your own types |
-| `commons-rest-posthog` module | use the official [PostHog Java SDK](https://posthog.com/docs/libraries/java) directly |
+| `commons-rest-posthog` module + `@PostHogCapture`/`@PostHogProperty` annotations | use the official [PostHog Java SDK](https://posthog.com/docs/libraries/java) directly |
 
 The old v3 deprecation note on `BadRequestExceptionHandler` ("will get replaced by
 javax.ws.rs.BadRequestException") was dropped — JAX-RS never made sense in a Spring MVC app.
