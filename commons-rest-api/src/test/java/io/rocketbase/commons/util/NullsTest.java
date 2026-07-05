@@ -25,6 +25,53 @@ public class NullsTest {
     public static class SampleObject {
         private Long id;
         private String value;
+        private SampleObject nested;
+    }
+
+    @Test
+    public void notNullDoubleDefaultsToZero() {
+        assertThat(Nulls.notNull((Double) null), equalTo(0d));
+        assertThat(Nulls.notNull(Double.valueOf(1.5)), equalTo(1.5));
+    }
+
+    @Test
+    public void notNullCollectionDefaultsToEmpty() {
+        java.util.Collection<String> value = null;
+
+        java.util.Collection<String> result = Nulls.notNull(value);
+
+        assertThat(result, notNullValue());
+        assertThat(result.isEmpty(), equalTo(true));
+    }
+
+    @Test
+    public void notEmptyCollectionUsesFallbackOnNullOrEmpty() {
+        java.util.List<String> fallback = java.util.List.of("x");
+
+        assertThat(Nulls.notEmpty((java.util.List<String>) null, fallback), equalTo(fallback));
+        assertThat(Nulls.notEmpty(new java.util.ArrayList<String>(), fallback), equalTo(fallback));
+        assertThat(Nulls.notEmpty(java.util.List.of("a"), fallback), equalTo(java.util.List.of("a")));
+    }
+
+    @Test
+    public void notEmptyMapUsesFallbackOnNullOrEmpty() {
+        java.util.Map<String, String> fallback = java.util.Map.of("k", "v");
+
+        assertThat(Nulls.notEmpty((java.util.Map<String, String>) null, fallback), equalTo(fallback));
+        assertThat(Nulls.notEmpty(new java.util.HashMap<String, String>(), fallback), equalTo(fallback));
+        assertThat(Nulls.notEmpty(java.util.Map.of("a", "b"), fallback), equalTo(java.util.Map.of("a", "b")));
+    }
+
+    @Test
+    public void getTwoLevelsNavigatesNested() {
+        SampleObject inner = new SampleObject();
+        inner.setValue("deep");
+        SampleObject outer = new SampleObject();
+        outer.setNested(inner);
+
+        assertThat(Nulls.get(outer, SampleObject::getNested, SampleObject::getValue), equalTo("deep"));
+        assertThat(Nulls.get(new SampleObject(), SampleObject::getNested, SampleObject::getValue), equalTo(null));
+        assertThat(Nulls.get((SampleObject) null, SampleObject::getNested, SampleObject::getValue), equalTo(null));
     }
 
     @Test

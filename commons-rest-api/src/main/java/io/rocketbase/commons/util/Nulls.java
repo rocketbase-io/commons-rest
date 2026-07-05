@@ -58,6 +58,16 @@ public final class Nulls {
     }
 
     /**
+     * return 0 when value is null
+     */
+    public static Double notNull(Double value) {
+        if (value == null) {
+            return 0d;
+        }
+        return value;
+    }
+
+    /**
      * return BigDecimal.ZERO when value is null
      */
     public static BigDecimal notNull(BigDecimal value) {
@@ -93,6 +103,36 @@ public final class Nulls {
     public static <K, V> Map<K, V> notNull(Map<K, V> value) {
         if (value == null) {
             return new HashMap<>();
+        }
+        return value;
+    }
+
+    /**
+     * in case of null value return's new ArrayList
+     */
+    public static <T> Collection<T> notNull(Collection<T> value) {
+        if (value == null) {
+            return new ArrayList<>();
+        }
+        return value;
+    }
+
+    /**
+     * returns fallback when value is null or empty
+     */
+    public static <C extends Collection<?>> C notEmpty(C value, C fallback) {
+        if (value == null || value.isEmpty()) {
+            return fallback;
+        }
+        return value;
+    }
+
+    /**
+     * returns fallback when value is null or empty
+     */
+    public static <M extends Map<?, ?>> M notEmpty(M value, M fallback) {
+        if (value == null || value.isEmpty()) {
+            return fallback;
         }
         return value;
     }
@@ -150,7 +190,7 @@ public final class Nulls {
      * return's true if all values are not null<br>
      * false in case one is null
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SafeVarargs
     public static <T> boolean noneNullValue(T... values) {
         for (T v : values) {
             if (v == null) {
@@ -163,7 +203,7 @@ public final class Nulls {
     /**
      * return's true if at least one of the values it not null
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SafeVarargs
     public static <T> boolean anyNoneNullValue(T... values) {
         for (T v : values) {
             if (v != null) {
@@ -202,6 +242,18 @@ public final class Nulls {
             return null;
         }
         return provider.apply(value);
+    }
+
+    /**
+     * Two-level variant of {@link #get(Object, PropertyValueProvider)} for navigating nested
+     * objects: {@code Nulls.get(order, Order::customer, Customer::id)} instead of
+     * {@code Nulls.get(Nulls.get(order, Order::customer), Customer::id)}.
+     * Returns {@code null} as soon as any step resolves to {@code null}.
+     */
+    public static <TARGET, MIDDLE, SOURCE> TARGET get(SOURCE value,
+                                                      PropertyValueProvider<SOURCE, MIDDLE> first,
+                                                      PropertyValueProvider<MIDDLE, TARGET> second) {
+        return get(get(value, first), second);
     }
 
     /**
