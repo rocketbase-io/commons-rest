@@ -394,6 +394,22 @@ Prefix `commons.openapi.generator`:
 | `output-directory` | `typescript-client` | file-system output target |
 | `class-patterns` | *(empty)* | restrict scanned types, e.g. `io.rocketbase.**.dto.**` |
 | `custom-type-mappings` | *(empty)* | Java FQN → TypeScript type overrides |
+| `required-annotations` | *(empty)* | annotation FQNs marking fields as required; replaces the default list |
+| `zod-infer-type-export` | `false` | emit `export type X = z.infer<typeof XSchema>` next to each schema |
+| `zod-infer-type-suffix` | *(empty)* | suffix for the inferred type name (e.g. `Zod` → `UserCreateCmdZod`) |
+
+Fields render **optional by default** — only fields carrying one of the required-annotations
+become required (in `types.ts`) and non-nullish (in the Zod schemas). Out of the box that
+list covers the not-null implying jakarta.validation constraints (`@NotNull`, `@NotBlank`,
+`@NotEmpty`) plus the common non-null markers when on the classpath:
+`org.springframework.lang.NonNull`, `jakarta.annotation.Nonnull` and
+`org.jspecify.annotations.NonNull`. Set `required-annotations` to replace the list — e.g. to
+tighten back down to bean-validation-only during a migration.
+
+<Aside type="caution">
+	`lombok.NonNull` and JetBrains `@NotNull` have CLASS retention — they are invisible at
+	runtime and can never act as required-markers here.
+</Aside>
 
 <Aside type="note">
 	Custom types like <code>TSID</code> or <code>ObfuscatedId</code> map to
