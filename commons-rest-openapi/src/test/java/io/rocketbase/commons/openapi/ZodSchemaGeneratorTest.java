@@ -52,8 +52,11 @@ class ZodSchemaGeneratorTest {
         assertContains(content, "username: z.string().trim().min(1).min(3).max(50)");  // @NotBlank @Size
         assertContains(content, "email: z.email()");                     // @NotNull @Email — Zod v4 top-level
         assertContains(content, "role: z.enum([\"ADMIN\", \"USER\", \"GUEST\", \"MODERATOR\"])");   // @NotNull enum, rendered as Zod string-literal union
-        // @NotEmpty List<AddressDto> — nested DTO gets its own schema, referenced (not z.custom)
+        // @NotEmpty List<AddressDto> — nested DTO gets its own schema, referenced (not z.custom);
+        // @NotEmpty implies non-null, so the field is required (no .nullish())
         assertContains(content, "addresses: z.array(AddressDtoSchema).min(1)");
+        assertFalse(content.contains("addresses: z.array(AddressDtoSchema).min(1).nullish()"),
+                "@NotEmpty must make the field required");
         // The nested AddressDto schema is emitted too, with its own field validation
         assertContains(content, "export const AddressDtoSchema = z.object({");
         assertContains(content, "zipCode: z.string().trim().min(1).max(10)");
@@ -115,6 +118,29 @@ class ZodSchemaGeneratorTest {
         assertContains(content, "street: z.string().trim().min(1)");
         assertFalse(content.contains("z.custom<Types.AddressDto>()"),
                 "nested DTO must be a validated schema reference, not an unvalidated z.custom");
+    }
+
+    @Test
+    void testNonNullMarkerAnnotationsAreRequired() throws Exception {
+        // Given: command using spring/jakarta/jspecify non-null markers instead of jakarta.validation
+        OpenAPI openAPI = createOpenAPIWithCommand(MarkerAnnotatedCmd.class);
+        TypeScriptModelGenerator.TypeScriptGeneratorConfig config = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        ZodSchemaGenerator generator = new ZodSchemaGenerator(openAPI, config);
+
+        // When
+        Path outputFile = tempDir.resolve("zod-schemas-markers.ts");
+        generator.generateZodSchemas(outputFile);
+
+        // Then: all marker-annotated fields are required, unannotated stays optional
+        String content = Files.readString(outputFile);
+        assertContains(content, "springMarked: z.string()");
+        assertFalse(content.contains("springMarked: z.string().nullish()"), "spring @NonNull must be required");
+        assertContains(content, "jakartaMarked: z.string()");
+        assertFalse(content.contains("jakartaMarked: z.string().nullish()"), "jakarta @Nonnull must be required");
+        // jspecify @NonNull is TYPE_USE-only and resolved via the field's annotated type
+        assertContains(content, "jspecifyMarked: z.string()");
+        assertFalse(content.contains("jspecifyMarked: z.string().nullish()"), "jspecify @NonNull must be required");
+        assertContains(content, "plain: z.string().nullish()");
     }
 
     @Test
