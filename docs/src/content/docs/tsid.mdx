@@ -18,7 +18,7 @@ cluster-safe and rendered as a compact 13-character Crockford base-32 string lik
 		<dependency>
 			<groupId>io.rocketbase.commons</groupId>
 			<artifactId>commons-rest-tsid</artifactId>
-			<version>4.0.0-M2</version>
+			<version>4.0.0-M4</version>
 		</dependency>
 		<dependency>
 			<groupId>io.hypersistence</groupId>
@@ -29,7 +29,7 @@ cluster-safe and rendered as a compact 13-character Crockford base-32 string lik
 	</TabItem>
 	<TabItem label="Gradle">
 		```kotlin
-		implementation("io.rocketbase.commons:commons-rest-tsid:4.0.0-M2")
+		implementation("io.rocketbase.commons:commons-rest-tsid:4.0.0-M4")
 		implementation("io.hypersistence:hypersistence-tsid:2.1.4")
 		```
 	</TabItem>
@@ -99,6 +99,7 @@ LocationRead.builder()
 | Property | Default | Explanation |
 |---|---|---|
 | `tsid.handler.enabled` | `true` | toggle the 404 handler for `TsidDecodeException` |
+| `tsid.invalid.allowed` | `false` | strict by default: invalid ids in JSON bodies and conversions raise `TsidDecodeException` (→ `404`), same as path variables; set `true` to leniently map them to `null` instead |
 
 Node bits, custom epoch and generation tuning are configured through the hypersistence-tsid
 library itself (system properties / environment) — see its documentation.

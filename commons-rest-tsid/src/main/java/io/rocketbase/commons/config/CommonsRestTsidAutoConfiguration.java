@@ -8,6 +8,7 @@ import io.rocketbase.commons.tsid.TsidConverter;
 import io.rocketbase.commons.tsid.TsidModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -34,13 +35,13 @@ public class CommonsRestTsidAutoConfiguration {
     }
 
     @Bean
-    public JacksonModule tsidModule() {
-        return new TsidModule();
+    public JacksonModule tsidModule(@Value("${tsid.invalid.allowed:false}") boolean invalidAllowed) {
+        return new TsidModule(invalidAllowed);
     }
 
     @Bean
-    public Converter tsidConverter() {
-        return new TsidConverter();
+    public Converter tsidConverter(@Value("${tsid.invalid.allowed:false}") boolean invalidAllowed) {
+        return new TsidConverter(invalidAllowed);
     }
 
     @RestControllerAdvice

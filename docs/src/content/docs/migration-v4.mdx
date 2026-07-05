@@ -84,7 +84,7 @@ javax.ws.rs.BadRequestException") was dropped — JAX-RS never made sense in a S
 
 1. Upgrade to Spring Boot 4 first (with your app still on commons-rest 3.5.x it will fail —
    do both together).
-2. Bump `io.rocketbase.commons:*` to `4.0.0-M2`.
+2. Bump `io.rocketbase.commons:*` to `4.0.0-M4`.
 3. Replace `com.fasterxml.jackson.databind`/`core` imports with `tools.jackson.*`.
 4. Search for `getMessage()` calls on `ErrorResponse` — switch to `getDetail()`.
 5. Update API consumers/tests that assert on the old error JSON (`message` → `detail`).
