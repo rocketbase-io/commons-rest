@@ -113,6 +113,15 @@ public class OpenApiClientCreatorService {
         // STEP 1: Generate ALL TypeScript types using typescript-generator
         log.info("Step 1: Generating TypeScript types from OpenAPI schema");
         TypeScriptModelGenerator.TypeScriptGeneratorConfig tsConfig = new TypeScriptModelGenerator.TypeScriptGeneratorConfig();
+        if (!openApiGeneratorProperties.getRequiredAnnotations().isEmpty()) {
+            tsConfig.setRequiredAnnotations(TypeScriptModelGenerator.TypeScriptGeneratorConfig
+                    .resolveRequiredAnnotations(openApiGeneratorProperties.getRequiredAnnotations()));
+        }
+        if (!openApiGeneratorProperties.getCustomTypeMappings().isEmpty()) {
+            tsConfig.setAdditionalTypeMappings(openApiGeneratorProperties.getCustomTypeMappings());
+        }
+        tsConfig.setZodInferTypeExport(openApiGeneratorProperties.isZodInferTypeExport());
+        tsConfig.setZodInferTypeSuffix(openApiGeneratorProperties.getZodInferTypeSuffix());
         TypeScriptModelGenerator tsGenerator = new TypeScriptModelGenerator(tsConfig, typeScriptCustomizers);
         Path typesFile = outputDirectory.resolve("src/model/types.ts");
         this.tsGenerationResult = tsGenerator.generateFromOpenAPI(openAPI, typesFile);

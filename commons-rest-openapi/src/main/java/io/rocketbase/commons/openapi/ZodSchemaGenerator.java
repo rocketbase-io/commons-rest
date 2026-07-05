@@ -531,8 +531,11 @@ public class ZodSchemaGenerator {
         }
 
         String fieldName = field.getName();
+        // TYPE_USE-only annotations (e.g. jspecify @NonNull on "private @NonNull String x")
+        // live on the field's annotated type, not on the field declaration itself
         boolean isRequired = config.getRequiredAnnotations().stream()
-                .anyMatch(field::isAnnotationPresent);
+                .anyMatch(annotation -> field.isAnnotationPresent(annotation)
+                        || field.getAnnotatedType().isAnnotationPresent(annotation));
 
         // @ZodSchema(ANY) on a field — keep it but emit z.any(), skipping all type mapping
         // and validation. The escape hatch for shapes too complex/opaque to model in Zod.

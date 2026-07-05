@@ -357,12 +357,63 @@ public class TypeScriptModelGenerator {
         /**
          * Annotations that mark fields as required in TypeScript.
          * Only fields with these annotations will be required, all others will be optional.
-         * Default: @NotNull and @NotBlank
+         * Default: see {@link #defaultRequiredAnnotations()}
          */
-        protected List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations = List.of(
-                jakarta.validation.constraints.NotNull.class,
-                jakarta.validation.constraints.NotBlank.class
-        );
+        protected List<Class<? extends java.lang.annotation.Annotation>> requiredAnnotations = defaultRequiredAnnotations();
+
+        /**
+         * The not-null implying jakarta.validation constraints (@NotNull, @NotBlank, @NotEmpty)
+         * plus the common non-null marker annotations when present on the classpath:
+         * {@code org.springframework.lang.NonNull}, {@code jakarta.annotation.Nonnull},
+         * {@code org.jspecify.annotations.NonNull}.
+         * <p>
+         * {@code lombok.NonNull} and {@code org.jetbrains.annotations.NotNull} have CLASS
+         * retention and are invisible at runtime — they cannot be supported here.
+         */
+        public static List<Class<? extends java.lang.annotation.Annotation>> defaultRequiredAnnotations() {
+            List<Class<? extends java.lang.annotation.Annotation>> result = new ArrayList<>(List.of(
+                    jakarta.validation.constraints.NotNull.class,
+                    jakarta.validation.constraints.NotBlank.class,
+                    jakarta.validation.constraints.NotEmpty.class
+            ));
+            for (String fqn : List.of(
+                    "org.springframework.lang.NonNull",
+                    "jakarta.annotation.Nonnull",
+                    "org.jspecify.annotations.NonNull")) {
+                Class<? extends java.lang.annotation.Annotation> annotation = resolveAnnotation(fqn);
+                if (annotation != null) {
+                    result.add(annotation);
+                }
+            }
+            return result;
+        }
+
+        /**
+         * Resolves annotation class names (e.g. from the {@code commons.openapi.generator.required-annotations}
+         * property) to classes. Unknown or non-annotation entries are logged and skipped.
+         */
+        public static List<Class<? extends java.lang.annotation.Annotation>> resolveRequiredAnnotations(List<String> classNames) {
+            List<Class<? extends java.lang.annotation.Annotation>> result = new ArrayList<>();
+            for (String fqn : classNames) {
+                Class<? extends java.lang.annotation.Annotation> annotation = resolveAnnotation(fqn.trim());
+                if (annotation != null) {
+                    result.add(annotation);
+                } else {
+                    log.warn("required-annotation '{}' not found on classpath or not an annotation - skipped", fqn);
+                }
+            }
+            return result;
+        }
+
+        @SuppressWarnings("unchecked")
+        protected static Class<? extends java.lang.annotation.Annotation> resolveAnnotation(String fqn) {
+            try {
+                Class<?> clazz = Class.forName(fqn, false, Thread.currentThread().getContextClassLoader());
+                return clazz.isAnnotation() ? (Class<? extends java.lang.annotation.Annotation>) clazz : null;
+            } catch (ClassNotFoundException e) {
+                return null;
+            }
+        }
 
         protected Map<String, String> additionalTypeMappings = Map.of();
 
