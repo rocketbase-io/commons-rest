@@ -1,5 +1,11 @@
+import type { AxiosRequestConfig } from "axios";
+
 export interface PageableRequest {
   {{ springDataWebConfig.pageable.pageParameter -}}?: {% if reactQueryVersion.name equals "v5" %}unknown{% else %}number{% endif %};
   {{ springDataWebConfig.pageable.sizeParameter -}}?: number;
   {{ springDataWebConfig.sort.sortParameter -}}?: string | string[];
+  /**
+   * Optional axios request overrides (e.g., for signal/AbortController)
+   */
+  overrides?: AxiosRequestConfig;
 }

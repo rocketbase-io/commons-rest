@@ -13,6 +13,12 @@
     <name>Commons REST OpenAPI</name>
 
     <dependencies>
+        <!-- explicit: no longer pulled in transitively since springdoc-openapi 5.x -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.rocketbase.commons</groupId>
             <artifactId>commons-rest-api</artifactId>

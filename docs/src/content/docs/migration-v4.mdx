@@ -73,6 +73,44 @@ javax.ws.rs.BadRequestException") was dropped — JAX-RS never made sense in a S
 `BadRequestException` stays a first-class citizen for
 [checks bean validation can't express](/error-handling/#checks-bean-validation-cant-express).
 
+## Regenerate your TypeScript clients
+
+Clients generated before 4.0.0-M5 do not compile. The folder layout is unchanged —
+`src/clients`, `src/hooks` and `src/model` stay where they were — so there is nothing to
+restructure. Delete the generated output and generate it again.
+
+Both generation routes wrote **cross-folder imports one level too deep**: `../../model`
+instead of `../model`, which pointed outside `src/` and resolved to nothing. That default is
+corrected.
+
+The **zip download** was broken beyond that. It rendered the templates through its own code
+path, which never ran the model generator, so `src/model/types.ts` and
+`src/model/zod-schemas.ts` were missing from the archive even though `model/index.ts`
+re-exported them. With no generated types to map against, ordinary DTOs came out as Java
+names — `PageableResult<Activity>` was emitted as
+`io.rocketbase.commons.dto.PageableResult<io.rocketbase.commons.openapi.sample.dto.Activity>`.
+The endpoint now delegates to `generateClientToFileSystem` and zips its output, so both
+routes produce the same files. That also brings `useApi` into the zip's `clients/index.ts`,
+where the file-system route already had it.
+
+Clients built with `generateClientToFileSystem` (including `StandaloneClientGenerator`) were
+unaffected by that second defect — they always carried their models and resolved type names.
+
+One generated signature changed. React Query v5 infinite hooks for methods that take only
+paging parameters now accept the filter their `queryOptions` counterpart always expected:
+
+```ts
+// before
+useInfiniteActivityGetAll(options)
+// now
+useInfiniteActivityGetAll(filter, options)
+```
+
+This needs an endpoint annotated `@InfiniteHook` whose only parameter is a `Pageable` — add
+any query field of your own and you were already on the correct branch, as
+`useInfiniteActivityFindAll` was. A TypeScript error at the call site tells you which hooks,
+if any, are affected.
+
 <Aside type="note" title="swagger annotations">
 	v4 temporarily depends on the <code>io.github.vpelikh</code> fork of the swagger
 	annotations/springdoc starter — a Jackson-3-compatible build, until official Jackson 3
@@ -84,8 +122,9 @@ javax.ws.rs.BadRequestException") was dropped — JAX-RS never made sense in a S
 
 1. Upgrade to Spring Boot 4 first (with your app still on commons-rest 3.5.x it will fail —
    do both together).
-2. Bump `io.rocketbase.commons:*` to `4.0.0-M4`.
+2. Bump `io.rocketbase.commons:*` to `4.0.0-M5`.
 3. Replace `com.fasterxml.jackson.databind`/`core` imports with `tools.jackson.*`.
 4. Search for `getMessage()` calls on `ErrorResponse` — switch to `getDetail()`.
 5. Update API consumers/tests that assert on the old error JSON (`message` → `detail`).
 6. Enable `spring.mvc.problemdetails.enabled=true`.
+7. Regenerate every TypeScript client and adjust paging-only `useInfinite*` calls (see above).
