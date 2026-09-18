@@ -103,9 +103,9 @@ export const {{ method.queryOptionName -}} = <TData={{ method.shortReturnType }}
     {{  infiniteOptions( method ) }}
 });
 
-export function {{ method.hookName -}}<TData = InfiniteData<{{ method.shortReturnType }}>, {% block "terror" %}TError = {% if reactQueryVersion.name equals "v5" %}Error{% else %}unknown{% endif %}{% endblock %}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" | "initialPageParam"> = {}) {
+export function {{ method.hookName -}}<TData = InfiniteData<{{ method.shortReturnType }}>, {% block "terror" %}TError = {% if reactQueryVersion.name equals "v5" %}Error{% else %}unknown{% endif %}{% endblock %}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam" | "initialPageParam"> = {}) {
     const { {{ configuredGroupVar }} } = useApi();
-    return useInfiniteQuery<{{ method.shortReturnType }}, TError, TData>({{ method.queryOptionName -}}({{ configuredGroupVar }}, {% if method.hasRequiredFields or method.hasOptionalFields %}filter,{% endif %} options));
+    return useInfiniteQuery<{{ method.shortReturnType }}, TError, TData>({{ method.queryOptionName -}}({{ configuredGroupVar }}, {% if method.hasRequiredFields or method.hasOptionalFields or method.fieldsExtendsPaging %}filter,{% endif %} options));
 }
 {% else %}
 export function {{ method.hookName -}}<TData = {% if reactQueryVersion.number >= 4 %}InfiniteData<{{ method.shortReturnType }}>{% else %}{{ method.shortReturnType }}{% endif %}, {{ block("terror") }}>({% if method.hasRequiredFields or method.hasOptionalFields %}filter: {{ method.shortInputType }},{% elseif method.fieldsExtendsPaging %}filter: PageableRequest,{% endif %} options: Omit<UseInfiniteQueryOptions<{{ method.shortReturnType }}, TError, TData>, "queryFn" | "queryKey"  | "getPreviousPageParam" | "getNextPageParam"> = {}) {

@@ -21,7 +21,12 @@ public class OpenApiGeneratorProperties {
     private String hookFolder = "hooks";
     private String clientFolder = "clients";
     private String modelFolder = "model";
-    private String srcNavigation = "../../";
+    /**
+     * Relative prefix used by generated files to reach their sibling folders. The generator
+     * emits a flat layout (src/clients, src/hooks, src/model as siblings), so one level up is
+     * correct — "../../" escaped src/ entirely and made every cross-folder import unresolvable.
+     */
+    private String srcNavigation = "../";
     private String createPaginationOptions = "../util";
     private int defaultStaleTime = 2;
 
@@ -79,6 +84,7 @@ public class OpenApiGeneratorProperties {
 
     /**
      * Gets the full output path for generated client.
+     *
      * @param buildDirectory The Maven build directory (typically "target")
      */
     public Path getOutputPath(Path buildDirectory) {
@@ -87,6 +93,7 @@ public class OpenApiGeneratorProperties {
 
     /**
      * Gets the output path as string.
+     *
      * @param buildDirectory The Maven build directory path
      */
     public String getOutputPathString(String buildDirectory) {

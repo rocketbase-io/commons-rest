@@ -2,15 +2,18 @@ package io.rocketbase.commons.openapi;
 
 import io.rocketbase.commons.config.OpenApiGeneratorProperties;
 import io.rocketbase.commons.openapi.model.ReactQueryVersion;
+import io.swagger.v3.core.util.Json;
 import io.swagger.v3.oas.models.OpenAPI;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
@@ -21,14 +24,15 @@ import static org.junit.jupiter.api.Assertions.*;
  * Test that verifies the generated TypeScript code actually compiles.
  * This ensures we're generating valid TypeScript, not just syntactically correct strings.
  */
-@SpringBootTest(classes = io.rocketbase.commons.openapi.sample.SampleApplication.class)
+@SpringBootTest(classes = io.rocketbase.commons.openapi.sample.SampleApplication.class,
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TypeScriptCompilationTest {
+
+    @Value("http://localhost:${local.server.port}")
+    private String baseUrl;
 
     @Autowired
     private OpenApiClientCreatorService clientCreatorService;
-
-    @Autowired
-    private OpenAPI openAPI;
 
     @Autowired
     private OpenApiGeneratorProperties generatorProperties;
@@ -41,7 +45,14 @@ class TypeScriptCompilationTest {
 
     @Test
     void testGeneratedTypeScriptCompiles() throws Exception {
-        // Given: Generate TypeScript client
+        // Given: the OpenAPI document the application actually serves. The injected OpenAPI
+        // bean is empty until springdoc handles a request, so generating from it produced an
+        // empty src/ and this test passed without ever typechecking a real client.
+        OpenAPI openAPI;
+        try (java.io.InputStream apiDocs = new URL(baseUrl + "/v3/api-docs").openStream()) {
+            openAPI = Json.mapper().readValue(apiDocs, OpenAPI.class);
+        }
+
         Path outputDir = tempDir.resolve("typescript-client");
         clientCreatorService.generateClientToFileSystem(
             ReactQueryVersion.v5,
@@ -50,6 +61,13 @@ class TypeScriptCompilationTest {
             generatorProperties.getBaseUrl(),
             generatorProperties.getGroupName()
         );
+
+        // Guard: a client without controllers would make the compile check meaningless.
+        try (java.util.stream.Stream<Path> clients = Files.list(outputDir.resolve("src/clients"))) {
+            assertTrue(clients.anyMatch(f -> f.getFileName().toString().endsWith(".ts")
+                            && !f.getFileName().toString().equals("index.ts")),
+                    "expected at least one generated client to typecheck");
+        }
 
         // Create package.json with TypeScript and dependencies
         // Using published @rocketbase/commons-rest-client from npm
@@ -62,16 +80,16 @@ class TypeScriptCompilationTest {
                 "typecheck": "tsc --noEmit"
               },
               "dependencies": {
-                "@rocketbase/commons-rest-client": "^1.0.0",
+                "@rocketbase/commons-rest-client": "^1.3.0",
                 "@tanstack/react-query": "^5.0.0",
                 "axios": "^1.7.0",
-                "react": "^18.2.0"
+                "react": "^19.1.0"
               },
               "devDependencies": {
                 "typescript": "^5.3.0",
                 "@types/node": "^20.0.0",
-                "@types/react": "^18.2.0",
-                "zod": "^3.22.0"
+                "@types/react": "^19.1.0",
+                "zod": "^4.0.0"
               }
             }
             """;
@@ -92,7 +110,12 @@ class TypeScriptCompilationTest {
                 "resolveJsonModule": true,
                 "isolatedModules": true,
                 "noEmit": true,
-                "jsx": "react-jsx"
+                "jsx": "react-jsx",
+                "moduleDetection": "force",
+                "verbatimModuleSyntax": true,
+                "exactOptionalPropertyTypes": true,
+                "noUncheckedIndexedAccess": true,
+                "noUncheckedSideEffectImports": true
               },
               "include": ["src/**/*"],
               "exclude": ["node_modules"]

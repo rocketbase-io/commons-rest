@@ -22,13 +22,16 @@ import org.springdoc.webmvc.api.OpenApiWebMvcResource;
 import org.springframework.boot.data.autoconfigure.web.DataWebProperties;
 
 import java.beans.Introspector;
+import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -80,9 +83,16 @@ public class OpenApiClientCreatorService {
 
     @SneakyThrows
     public List<OpenApiController> getControllers(HttpServletRequest request) {
+        return getControllersFromOpenApi(readOpenApi(request));
+    }
+
+    /**
+     * Reads the OpenAPI document springdoc exposes for the current request.
+     */
+    @SneakyThrows
+    protected OpenAPI readOpenApi(HttpServletRequest request) {
         byte[] openapiJson = openApiWebMvcResource.openapiJson(request, Constants.DEFAULT_API_DOCS_URL, Locale.getDefault());
-        OpenAPI openAPI = Json.mapper().readValue(openapiJson, OpenAPI.class);
-        return getControllersFromOpenApi(openAPI);
+        return Json.mapper().readValue(openapiJson, OpenAPI.class);
     }
 
     /**
@@ -259,35 +269,73 @@ public class OpenApiClientCreatorService {
         return writer.toString();
     }
 
+    /**
+     * Streams a generated client as a zip.
+     * <p>
+     * Delegates to {@link #generateClientToFileSystem} in a temporary directory and zips its
+     * output, so the download contains exactly what the file-system generator produces —
+     * including {@code src/model/types.ts} and {@code src/model/zod-schemas.ts}. The previous
+     * implementation rendered the templates directly into the zip with the injected
+     * {@link #typeConverter}, whose {@code TypeScriptGenerationResult} is empty: no models were
+     * emitted at all and every unmapped type kept its fully qualified Java name
+     * (e.g. {@code RequestorBuilder<..., io.rocketbase.commons.dto.PageableResult<...>>}),
+     * which is not valid TypeScript.
+     */
     public void getTypescriptClients(ReactQueryVersion reactQueryVersion, HttpServletRequest request, HttpServletResponse response, String baseUrl, String groupName, String filename) {
 
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment;filename=" + filename);
         response.setStatus(HttpServletResponse.SC_OK);
 
-        List<OpenApiController> controllers = getControllers(request);
+        Path tempDirectory = null;
+        try {
+            OpenAPI openAPI = readOpenApi(request);
 
-        try (ZipOutputStream zippedOut = new ZipOutputStream(response.getOutputStream())) {
-            Map<String, Object> context = new HashMap<>();
-            context.put("controllers", controllers);
-            context.put("baseUrl", baseUrl);
-            context.put("groupName", groupName);
-            context.put("configuredGroupVar", Introspector.decapitalize(groupName));
-            context.put("timestamp", Instant.now());
-            context.put("generatorConfig", openApiGeneratorProperties);
-            context.put("springDataWebConfig", springDataWebProperties);
-            context.put("reactQueryVersion", reactQueryVersion);
+            tempDirectory = Files.createTempDirectory("commons-rest-client-");
+            generateClientToFileSystem(reactQueryVersion, tempDirectory, openAPI, baseUrl, groupName);
 
-            generateModels(zippedOut, context);
-            generateClients(controllers, zippedOut, context);
-            generateHooks(reactQueryVersion, controllers, zippedOut, context);
-            generateIndexAndPackageJson(zippedOut, context);
-
-
-            zippedOut.finish();
+            try (ZipOutputStream zippedOut = new ZipOutputStream(response.getOutputStream())) {
+                zipDirectory(tempDirectory, zippedOut);
+                zippedOut.finish();
+            }
         } catch (Exception e) {
             // Exception handling goes here
             log.error("write zip: {}", e.getMessage(), e);
+        } finally {
+            deleteRecursively(tempDirectory);
+        }
+    }
+
+    /**
+     * Adds every file below {@code root} to the zip, keeping the relative layout.
+     */
+    protected void zipDirectory(Path root, ZipOutputStream zippedOut) throws IOException {
+        List<Path> files;
+        try (Stream<Path> walk = Files.walk(root)) {
+            files = walk.filter(Files::isRegularFile).sorted().collect(Collectors.toList());
+        }
+        for (Path file : files) {
+            String entryName = root.relativize(file).toString().replace(File.separatorChar, '/');
+            zippedOut.putNextEntry(new ZipEntry(entryName));
+            Files.copy(file, zippedOut);
+            zippedOut.closeEntry();
+        }
+    }
+
+    protected void deleteRecursively(Path directory) {
+        if (directory == null) {
+            return;
+        }
+        try (Stream<Path> walk = Files.walk(directory)) {
+            walk.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException e) {
+                    log.debug("could not delete {}: {}", path, e.getMessage());
+                }
+            });
+        } catch (IOException e) {
+            log.debug("could not clean up {}: {}", directory, e.getMessage());
         }
     }
 
