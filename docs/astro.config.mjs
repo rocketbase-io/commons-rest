@@ -23,8 +23,7 @@ export default defineConfig({
 				},
 			],
 			editLink: {
-				// TODO: switch back to /edit/master/docs/ once v4-beta is merged
-				baseUrl: 'https://github.com/rocketbase-io/commons-rest/edit/v4-beta/docs/',
+				baseUrl: 'https://github.com/rocketbase-io/commons-rest/edit/master/docs/',
 			},
 			tableOfContents: false,
 			plugins: [

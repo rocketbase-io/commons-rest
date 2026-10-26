@@ -1,7 +1,7 @@
 name: docs
 on:
   push:
-    branches: [ master, v4-beta ]
+    branches: [ master ]
     paths: [ 'docs/**', '.github/workflows/docs.yml' ]
   release:
     types: [ published ]
