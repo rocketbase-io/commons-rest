@@ -43,6 +43,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ github.event.inputs.releaseversion }}
+          commit: ${{ github.sha }}
           name: ${{ github.event.inputs.releaseversion }}
           body: |
             New version ${{ github.event.inputs.releaseversion }} published
