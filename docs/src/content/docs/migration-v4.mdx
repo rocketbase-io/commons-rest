@@ -75,7 +75,7 @@ javax.ws.rs.BadRequestException") was dropped — JAX-RS never made sense in a S
 
 ## Regenerate your TypeScript clients
 
-Clients generated before 4.0.0-M5 do not compile. The folder layout is unchanged —
+Clients generated with a 4.0.0 milestone before M5 do not compile. The folder layout is unchanged —
 `src/clients`, `src/hooks` and `src/model` stay where they were — so there is nothing to
 restructure. Delete the generated output and generate it again.
 
@@ -122,7 +122,7 @@ if any, are affected.
 
 1. Upgrade to Spring Boot 4 first (with your app still on commons-rest 3.5.x it will fail —
    do both together).
-2. Bump `io.rocketbase.commons:*` to `4.0.0-M5`.
+2. Bump `io.rocketbase.commons:*` to `4.0.0`.
 3. Replace `com.fasterxml.jackson.databind`/`core` imports with `tools.jackson.*`.
 4. Search for `getMessage()` calls on `ErrorResponse` — switch to `getDetail()`.
 5. Update API consumers/tests that assert on the old error JSON (`message` → `detail`).

@@ -58,7 +58,7 @@ the latest 3.5.x release — the docs website covers v4 only, migration details 
 <dependency>
     <groupId>io.rocketbase.commons</groupId>
     <artifactId>commons-rest-server</artifactId>
-    <version>4.0.0-M5</version>
+    <version>4.0.0</version>
 </dependency>
 ```
 
